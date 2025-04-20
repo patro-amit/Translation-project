@@ -1,0 +1,32 @@
+# flask
+# flask-sqlalchemy
+# easyocr # Or pytesseract (requires Tesseract install)
+# openai-whisper # Requires ffmpeg install
+# transformers[torch] # Or [tensorflow] or [flax] depending on backend
+# torch # Or tensorflow or flax
+# Pillow
+# pydub # If needed for audio conversion
+# langdetect # Optional
+# sentencepiece # Often needed by transformer models
+# sacremoses # Often needed by transformer models
+# requests # EasyOCR might use this
+# numpy
+# gTTS
+
+flask
+flask-sqlalchemy
+easyocr
+openai-whisper
+gTTS
+google-cloud-texttospeech
+transformers
+langdetect
+soundfile
+torch==2.5.1
+TTS
+pillow
+# If you use pytesseract for OCR, uncomment the next line:
+# pytesseract
+# If you use numpy or scipy for audio processing, uncomment:
+# numpy
+# scipy
