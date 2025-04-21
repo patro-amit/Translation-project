@@ -9,8 +9,7 @@ from gtts import gTTS
 import io
 from google.cloud import texttospeech
 
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/Users/shyampatro/Translation projectt/models/facebook/nllb-200-distilled-600M/service_account.json"
-
+os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/Users/shyampatro/Translation Project/models/facebook/nllb-200-distilled-600M/service_account.json"
 
 # --- Configuration ---
 UPLOAD_FOLDER = 'uploads'
@@ -42,8 +41,7 @@ db.init_app(app)
 
 # --- Initialize Models (Load once at startup) ---
 with app.app_context():
-    utils.initialize_models()
-    db.create_all() # Create database tables if they don't exist
+    db.create_all()  # Create database tables if they don't exist
 
 # --- Helper Functions ---
 def allowed_file(filename, allowed_extensions):
