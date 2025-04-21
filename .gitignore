@@ -1,5 +1,7 @@
 venv/
-venv310/
+instance/
+static/
+uploads/
+templates/
 __pycache__/
 *.pyc
-venv310/
