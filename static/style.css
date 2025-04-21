@@ -1,0 +1,35 @@
+/* static/style.css */
+body {
+    padding-bottom: 50px; /* Add padding to bottom */
+}
+
+/* Add any custom styles here */
+.result-box {
+    border: 1px solid #dee2e6;
+    padding: 1rem;
+    margin-top: 0.5rem;
+    background-color: #f8f9fa;
+    border-radius: 0.25rem;
+    min-height: 100px;
+    white-space: pre-wrap; /* Preserve whitespace and wrap lines */
+    word-wrap: break-word; /* Break long words */
+}
+
+.log-entry {
+    font-size: 0.9em;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+}
+
+details summary {
+    cursor: pointer;
+    display: inline-block; /* Make it look more like a link/button */
+    color: #0d6efd; /* Bootstrap primary color */
+}
+
+details p {
+    margin-top: 5px;
+    margin-left: 15px; /* Indent details text */
+    color: #6c757d; /* Bootstrap secondary text color */
+}
