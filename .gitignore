@@ -1,7 +1,7 @@
-venv/
-instance/
-static/
-uploads/
-templates/
-__pycache__/
-*.pyc
+# venv/
+# instance/
+# static/
+# uploads/
+# templates/
+# __pycache__/
+# *.pyc
