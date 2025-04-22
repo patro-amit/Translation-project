@@ -1,9 +1,7 @@
-/* static/style.css */
 body {
-    padding-bottom: 50px; /* Add padding to bottom */
+    padding-bottom: 50px;
 }
 
-/* Add any custom styles here */
 .result-box {
     border: 1px solid #dee2e6;
     padding: 1rem;
@@ -11,8 +9,8 @@ body {
     background-color: #f8f9fa;
     border-radius: 0.25rem;
     min-height: 100px;
-    white-space: pre-wrap; /* Preserve whitespace and wrap lines */
-    word-wrap: break-word; /* Break long words */
+    white-space: pre-wrap;
+    word-wrap: break-word;
 }
 
 .log-entry {
@@ -24,12 +22,12 @@ body {
 
 details summary {
     cursor: pointer;
-    display: inline-block; /* Make it look more like a link/button */
-    color: #0d6efd; /* Bootstrap primary color */
+    display: inline-block;
+    color: #0d6efd;
 }
 
 details p {
     margin-top: 5px;
-    margin-left: 15px; /* Indent details text */
-    color: #6c757d; /* Bootstrap secondary text color */
+    margin-left: 15px;
+    color: #6c757d;
 }
