@@ -6,3 +6,4 @@
 # __pycache__/
 # *.pyc
 venv310/
+models/facebook/nllb-200-distilled-600M/pytorch_model.bin
