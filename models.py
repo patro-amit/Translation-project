@@ -2,8 +2,6 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
-# Make sure to import and initialize db only once in your project, typically in your app's __init__.py
-
 db = SQLAlchemy()
 
 class TranslationLog(db.Model):

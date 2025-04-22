@@ -7,7 +7,6 @@ from models import db, TranslationLog
 import sys
 from gtts import gTTS
 import io
-from google.cloud import texttospeech
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/Users/shyampatro/Translation Project/models/facebook/nllb-200-distilled-600M/service_account.json"
 
