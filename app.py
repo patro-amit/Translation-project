@@ -124,13 +124,12 @@ def index():
                 original_text = source_text # Display original text
                 detected_lang = source_lang # Display detected source lang
 
-                nllb_source_lang = utils.ISO_TO_NLLB.get(source_lang, 'eng_Latn')
-                if nllb_source_lang is None:
-                    flash(f"Detected language '{source_lang}' is not supported for translation.", "warning")
-                    # Handle gracefully
+                if source_lang not in utils.NLLB_SOURCE_LANG_CODES:
+                    error_msg = f"Detected language '{source_lang}' is not supported for translation. Please enter text in English or Hindi."
+                    flash(error_msg, "warning")
+                    error = error_msg
                 else:
-                    # Use nllb_source_lang for translation
-                    translation_result, error = utils.translate_text(source_text, nllb_source_lang, target_lang_name)
+                    translation_result, error = utils.translate_text(source_text, source_lang, target_lang_name)
 
                 if error:
                     log_entry.error_message = error

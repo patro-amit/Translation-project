@@ -44,15 +44,20 @@ ISO_TO_NLLB = {
     # Add more as needed
 }
 
-# Use all supported languages for OCR
-reader = easyocr.Reader(['en', 'hi', 'bn', 'gu', 'kn', 'ml', 'mr', 'pa', 'ta', 'te', 'ur', 'as', 'or'])
-
 def initialize_models():
     global OCR_READER, WHISPER_MODEL
     OCR_READER = easyocr.Reader(['en', 'hi'], gpu=False)
     WHISPER_MODEL = whisper.load_model("base")
 
-def perform_ocr(image_path):
+def get_easyocr_reader(lang_code):
+    # For Indian languages, only allow [lang_code, 'en']
+    if lang_code in ['ta', 'te', 'kn', 'ml', 'bn', 'hi', 'mr', 'as', 'ur']:
+        return easyocr.Reader([lang_code, 'en'])
+    else:
+        return easyocr.Reader(['en'])
+
+def perform_ocr(image_path, lang_code='en'):
+    reader = get_easyocr_reader(lang_code)
     result = reader.readtext(image_path, detail=0)
     text = " ".join(result)
     try:
@@ -130,5 +135,3 @@ def translate_text(text, source_lang, target_lang_name):
     except Exception as e:
         print(f"Error during translation ({source_lang} -> {target_lang_name}): {e}")
         return None, f"Translation failed: {e}"
-
-
