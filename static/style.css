@@ -1,33 +1,93 @@
+/* static/style.css */
+
 body {
-    padding-bottom: 50px;
+    background-color: #f8f9fa; /* Light grey background */
+    padding-top: 56px; /* Adjust if navbar height changes */
+    padding-bottom: 3rem; /* Add space before footer */
 }
 
+/* Customize navbar further if needed */
+
+.navbar-brand {
+    font-weight: bold;
+}
+
+/* Main Form Card Styling */
+.card.shadow-sm {
+    transition: box-shadow 0.3s ease-in-out;
+}
+
+.card.shadow-sm:hover {
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+}
+
+.form-select-lg {
+    font-size: 1.1rem; /* Slightly larger select dropdowns */
+}
+
+textarea.form-control {
+    resize: vertical; /* Allow vertical resize only */
+}
+
+/* Result Boxes Styling */
 .result-box {
-    border: 1px solid #dee2e6;
-    padding: 1rem;
-    margin-top: 0.5rem;
-    background-color: #f8f9fa;
+    background-color: #ffffff; /* White background for readability */
+    border: 1px solid #e9ecef; /* Softer border */
     border-radius: 0.25rem;
-    min-height: 100px;
-    white-space: pre-wrap;
-    word-wrap: break-word;
+    padding: 1rem;
+    min-height: 150px; /* Ensure a minimum height */
+    white-space: pre-wrap; /* Preserve whitespace and wrap lines */
+    word-wrap: break-word; /* Break long words */
+    overflow-y: auto; /* Add scroll if content overflows */
+    max-height: 400px; /* Prevent excessively tall boxes */
 }
 
-.log-entry {
+.card .card-header {
+    font-weight: 500; /* Slightly bolder headers */
+}
+
+/* TTS Button and Player */
+.card-footer {
+    border-top: 1px solid #e9ecef;
+}
+
+#ttsAudio {
+    max-width: 100%; /* Ensure audio player fits */
+}
+
+/* Activity Log Styling */
+.list-group-item {
+    border-color: #e9ecef; /* Match border colors */
+}
+.list-group-item h6 .badge {
+    vertical-align: middle;
+}
+
+.list-group-item p {
     font-size: 0.9em;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 5px;
-    margin-bottom: 5px;
+    color: #6c757d; /* Muted text color for details */
+}
+.list-group-item p .badge {
+    font-size: 0.8em; /* Smaller status badges */
 }
 
-details summary {
-    cursor: pointer;
-    display: inline-block;
-    color: #0d6efd;
+
+/* Footer Styling */
+footer {
+    border-top: 1px solid #e9ecef;
 }
 
-details p {
-    margin-top: 5px;
-    margin-left: 15px;
-    color: #6c757d;
+/* Helper class for slight fade effect on hover (optional) */
+.hover-fade {
+    transition: opacity 0.2s ease-in-out;
+}
+.hover-fade:hover {
+    opacity: 0.85;
+}
+
+/* Ensure results columns stack properly on small screens */
+@media (max-width: 767.98px) {
+    .result-box {
+        min-height: 120px; /* Slightly smaller min-height on mobile */
+    }
 }

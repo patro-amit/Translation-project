@@ -27,22 +27,39 @@ NLLB_SOURCE_LANG_CODES = {
     "hi": "hin_Deva"
 }
 
+ISO_TO_NLLB = {
+    'as': 'asm_Beng',
+    'bn': 'ben_Beng',
+    'gu': 'guj_Gujr',
+    'hi': 'hin_Deva',
+    'kn': 'kan_Knda',
+    'ml': 'mal_Mlym',
+    'mr': 'mar_Deva',
+    'or': 'ory_Orya',
+    'pa': 'pan_Guru',
+    'ta': 'tam_Taml',
+    'te': 'tel_Telu',
+    'ur': 'urd_Arab',
+    'en': 'eng_Latn',
+    # Add more as needed
+}
+
+# Use all supported languages for OCR
+reader = easyocr.Reader(['en', 'hi', 'bn', 'gu', 'kn', 'ml', 'mr', 'pa', 'ta', 'te', 'ur', 'as', 'or'])
+
 def initialize_models():
     global OCR_READER, WHISPER_MODEL
     OCR_READER = easyocr.Reader(['en', 'hi'], gpu=False)
     WHISPER_MODEL = whisper.load_model("base")
 
 def perform_ocr(image_path):
-    if OCR_READER is None:
-        raise Exception("OCR Reader not initialized.")
+    result = reader.readtext(image_path, detail=0)
+    text = " ".join(result)
     try:
-        result = OCR_READER.readtext(image_path, detail=0, paragraph=True)
-        text = " ".join(result)
-        lang = detect_language(text)
-        return text, lang
-    except Exception as e:
-        print(f"Error during OCR: {e}")
-        return None, None
+        detected_lang = detect(text)
+    except Exception:
+        detected_lang = 'en'
+    return text, detected_lang
 
 def perform_stt(audio_path):
     if WHISPER_MODEL is None:

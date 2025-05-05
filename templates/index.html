@@ -3,157 +3,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Indian Language Translator</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <title>LinguaLink - Indian Language Translator</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <!-- Bootstrap Icons (Optional, for icons) -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <style>
-        .result-box {
-            border: 1px solid #ccc;
-            padding: 15px;
-            margin-top: 20px;
-            background-color: #f9f9f9;
-            min-height: 100px;
-        }
-        .log-entry {
-            font-size: 0.9em;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 5px;
-            margin-bottom: 5px;
-        }
-    </style>
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
 </head>
 <body>
-    <div class="container mt-4">
-        <h1>Indian Language Translator</h1>
-        <p>Translate English/Hindi text, images (OCR), or audio (STT) into local Indian languages.</p>
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-translate"></i> LinguaLink Translator
+            </a>
+        </div>
+    </nav>
+
+    <div class="container mt-4 mb-5">
+
+        <!-- Introduction -->
+        <div class="text-center mb-4">
+            <h1>Indian Language Translator</h1>
+            <p class="lead text-muted">Translate English/Hindi text, images, or audio into various Indian languages.</p>
+        </div>
 
         <!-- Flash Messages -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-          {% if messages %}
-            {% for category, message in messages %}
-              <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-              </div>
-            {% endfor %}
-          {% endif %}
-        {% endwith %}
-
-        <form method="POST" enctype="multipart/form-data" class="mb-4">
-            <div class="mb-3">
-                <label for="input_type" class="form-label">Input Type:</label>
-                <select class="form-select" id="input_type" name="input_type" onchange="toggleInputFields()">
-                    <option value="text" selected>Text Input</option>
-                    <option value="image">Image Upload (OCR)</option>
-                    <option value="audio">Audio Upload (Speech-to-Text)</option>
-                </select>
-            </div>
-
-            <div id="text_input_div" class="mb-3">
-                <label for="text_input" class="form-label">Enter English or Hindi Text:</label>
-                <textarea class="form-control" id="text_input" name="text_input" rows="4"></textarea>
-            </div>
-
-            <div id="file_input_div" class="mb-3" style="display: none;">
-                <label for="file" class="form-label">Upload File:</label>
-                <input class="form-control" type="file" id="file" name="file">
-                <small id="fileHelp" class="form-text text-muted"></small>
-            </div>
-
-            <div class="mb-3">
-                <label for="target_language" class="form-label">Translate To:</label>
-                <select class="form-select" id="target_language" name="target_language">
-                    {% for lang_name in supported_languages %}
-                        <option value="{{ lang_name }}" {% if lang_name == selected_target_lang %}selected{% endif %}>{{ lang_name }}</option>
+        <div class="row justify-content-center">
+            <div class="col-md-10 col-lg-8">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                  {% if messages %}
+                    {% for category, message in messages %}
+                      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                      </div>
                     {% endfor %}
-                </select>
+                  {% endif %}
+                {% endwith %}
             </div>
+        </div>
 
-            <button type="submit" class="btn btn-primary">Translate</button>
-        </form>
+        <!-- Main Form Card -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-body p-4">
+                <h2 class="card-title text-center mb-4">Start Translating</h2>
+                <form method="POST" enctype="multipart/form-data">
+                    <div class="row g-3">
+                        <!-- Input Type -->
+                        <div class="col-md-6">
+                            <label for="input_type" class="form-label fw-medium">1. Choose Input Type:</label>
+                            <select class="form-select form-select-lg" id="input_type" name="input_type" onchange="toggleInputFields()">
+                                <option value="text" selected>✍️ Text Input</option>
+                                <option value="image">🖼️ Image Upload (OCR)</option>
+                                <option value="audio">🎤 Audio Upload (STT)</option>
+                            </select>
+                        </div>
+
+                        <!-- Target Language -->
+                        <div class="col-md-6">
+                             <label for="target_language" class="form-label fw-medium">3. Select Target Language:</label>
+                            <select class="form-select form-select-lg" id="target_language" name="target_language">
+                                {% for lang_name in supported_languages %}
+                                    <option value="{{ lang_name }}" {% if lang_name == selected_target_lang %}selected{% endif %}>{{ lang_name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        <!-- Text Input -->
+                        <div class="col-12" id="text_input_div">
+                            <label for="text_input" class="form-label fw-medium">2. Enter English or Hindi Text:</label>
+                            <textarea class="form-control" id="text_input" name="text_input" rows="5" placeholder="Type or paste text here...">{{ request.form['text_input'] if request.form['text_input'] }}</textarea> {# Retain text input after submit #}
+                        </div>
+
+                        <!-- File Input -->
+                        <div class="col-12" id="file_input_div" style="display: none;">
+                            <label for="file" class="form-label fw-medium">2. Upload File:</label>
+                            <input class="form-control" type="file" id="file" name="file">
+                            <small id="fileHelp" class="form-text text-muted"></small>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="col-12 text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="bi bi-arrow-repeat"></i> Translate Now
+                            </button>
+                        </div>
+                    </div>
+                </form>
+                 <!-- Loading Indicator Placeholder -->
+                <div id="loadingIndicator" class="text-center mt-3" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="text-muted mt-2">Processing, please wait...</p>
+                </div>
+            </div>
+        </div>
+
 
         <!-- Results Section -->
         {% if original_text or translation_result or error %}
-        <div class="mt-4">
-            <h2>Results</h2>
-            {% if original_text %}
-            <div class="mb-3">
-                <strong>Original Text {% if detected_lang %}(Detected: {{ detected_lang }}){% endif %}:</strong>
-                <div class="result-box">{{ original_text }}</div>
-            </div>
-            {% endif %}
+        <div class="mt-5">
+            <h2 class="text-center mb-4">Translation Results</h2>
+             <!-- Display Error if it's the primary message -->
+             {% if error and not original_text and not translation_result %}
+                <div class="row justify-content-center">
+                    <div class="col-md-10 col-lg-8">
+                        <div class="alert alert-danger">{{ error }}</div>
+                    </div>
+                </div>
+             {% endif %}
 
-            <div class="mb-3">
-                <strong>Translation ({{ selected_target_lang }}):</strong>
-                <div class="result-box">{{ translation_result }}</div>
-                {% if translation_result %}
-                {% if selected_target_lang in tts_supported_langs %}
-                <form id="ttsForm" method="post" action="{{ url_for('tts') }}" target="ttsFrame">
-                    <input type="hidden" name="text" value="{{ translation_result }}">
-                    <input type="hidden" name="lang" value="{{ tts_lang_codes[selected_target_lang]|default('en') }}">
-                    <button type="submit" class="btn btn-secondary btn-sm mt-2">🔊 Listen</button>
-                </form>
-                <audio id="ttsAudio" controls style="display:none; margin-top:10px;"></audio>
-                <iframe name="ttsFrame" style="display:none;"></iframe>
-                <script>
-                document.getElementById('ttsForm').onsubmit = function(e) {
-                    e.preventDefault();
-                    fetch(this.action, {
-                        method: 'POST',
-                        body: new FormData(this)
-                    })
-                    .then(response => response.blob())
-                    .then(blob => {
-                        const audio = document.getElementById('ttsAudio');
-                        audio.src = URL.createObjectURL(blob);
-                        audio.style.display = 'block';
-                        audio.play();
-                    });
-                };
-                </script>
-                {% elif selected_target_lang in tts_unsupported_langs %}
-                <div class="alert alert-warning mt-2">
-                  Text-to-speech is <b>not available</b> for <b>{{ selected_target_lang }}</b>.
+            <div class="row g-4 justify-content-center">
+                <!-- Original Text Box -->
+                {% if original_text %}
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-light">
+                           <strong>Original Text {% if detected_lang %}(Detected: {{ detected_lang|title }}){% endif %}</strong>
+                        </div>
+                        <div class="card-body result-box">
+                            {{ original_text }}
+                        </div>
+                    </div>
                 </div>
                 {% endif %}
+
+                <!-- Translation Result Box -->
+                {% if translation_result %}
+                 <div class="col-md-6">
+                    <div class="card h-100">
+                         <div class="card-header bg-light">
+                             <strong>Translation ({{ selected_target_lang }})</strong>
+                        </div>
+                        <div class="card-body result-box">
+                           {{ translation_result }}
+                        </div>
+                        <div class="card-footer bg-white text-center">
+                             {% if selected_target_lang in tts_supported_langs %}
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="playTTS()">
+                                    <i class="bi bi-volume-up"></i> Listen
+                                </button>
+                                <audio id="ttsAudio" controls class="mt-2 d-none" style="width: 100%;"></audio>
+                                <!-- Hidden form no longer strictly needed with fetch, but keep data accessible -->
+                                <form id="ttsFormData" class="d-none">
+                                     <input type="hidden" name="text" id="ttsText" value="{{ translation_result }}">
+                                     <input type="hidden" name="lang" id="ttsLang" value="{{ tts_lang_codes[selected_target_lang]|default('en') }}">
+                                </form>
+
+                             {% elif selected_target_lang in tts_unsupported_langs %}
+                                <small class="text-muted">
+                                  <i class="bi bi-speaker-fill"></i> Text-to-speech not available for {{ selected_target_lang }}.
+                                </small>
+                             {% endif %}
+                        </div>
+                    </div>
+                </div>
                 {% endif %}
             </div>
-            {% if error and not original_text %}
-            <div class="alert alert-danger">{{ error }}</div>
-            {% endif %}
         </div>
         {% endif %}
 
-        <!-- Recent Translations Log (Optional) -->
-        <div class="mt-5">
-            <h3>Recent Translations</h3>
+
+        <!-- Recent Translations Log -->
+        <div class="mt-5 pt-4 border-top">
+            <h3 class="text-center mb-4">Activity Log</h3>
             {% if recent_logs %}
-                {% for log in recent_logs %}
-                <div class="log-entry">
-                    <small>{{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }} | {{ log.input_type }} | {{ log.source_language }} -> {{ log.target_language }} | {{ "Success" if log.translated_text else "Failed: " + (log.error_message or "Unknown reason") }}</small>
-                    <details>
-                        <summary style="cursor: pointer;">View Text</summary>
-                        <p><strong>Original:</strong>
-                          {% if log.original_text %}
-                            {{ log.original_text[:200] }}{% if log.original_text|length > 200 %}...{% endif %}
-                          {% else %}
-                            <em>No original text</em>
-                          {% endif %}
+                <div class="list-group shadow-sm mx-auto" style="max-width: 800px;">
+                    {% for log in recent_logs %}
+                    <div class="list-group-item list-group-item-action flex-column align-items-start">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1">
+                                <span class="badge bg-secondary me-2">{{ log.input_type|title }}</span>
+                                {{ log.source_language|upper }} <i class="bi bi-arrow-right-short"></i> {{ log.target_language }} <!-- Use target_language code directly -->
+                            </h6>
+                            <small class="text-muted">{{ log.timestamp.strftime('%Y-%m-%d %H:%M') }}</small>
+                        </div>
+                        <p class="mb-1">
+                            {% if log.translated_text %}
+                                <span class="badge bg-success">Success</span>
+                                <small class="text-muted ms-2">Original: {{ log.original_text[:80] }}{% if log.original_text|length > 80 %}...{% endif %}</small> <br>
+                                <small class="text-muted ms-2">Translated: {{ log.translated_text[:80] }}{% if log.translated_text|length > 80 %}...{% endif %}</small>
+                            {% else %}
+                                 <span class="badge bg-danger">Failed</span>
+                                 <small class="text-danger ms-2">{{ (log.error_message or "Unknown reason")|truncate(100) }}</small><br>
+                                 {% if log.original_text %}
+                                    <small class="text-muted ms-2">Original: {{ log.original_text[:80] }}{% if log.original_text|length > 80 %}...{% endif %}</small>
+                                 {% endif %}
+                            {% endif %}
                         </p>
-                        {% if log.translated_text %}
-                        <p><strong>Translated:</strong> {{ log.translated_text[:200] }}{% if log.translated_text|length > 200 %}...{% endif %}</p>
-                        {% endif %}
-                    </details>
+                         <!-- Removed the <details> for a cleaner look in list-group -->
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
             {% else %}
-                <p>No recent translations logged.</p>
+                <p class="text-center text-muted">No recent translation activity logged.</p>
             {% endif %}
         </div>
 
-    </div>
+    </div> <!-- /container -->
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <footer class="bg-light text-center text-muted py-3 mt-5">
+        <div class="container">
+            <p class="mb-0">© {{ current_year }} LinguaLink Translator. Powered by Python & AI.</p>
+        </div>
+    </footer>
+
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+
+    <!-- Custom JS -->
     <script>
         function toggleInputFields() {
             const inputType = document.getElementById('input_type').value;
@@ -162,24 +227,103 @@
             const fileHelp = document.getElementById('fileHelp');
             const fileInput = document.getElementById('file');
 
+            // Hide all special inputs first
+            textDiv.style.display = 'none';
+            fileDiv.style.display = 'none';
+
             if (inputType === 'text') {
                 textDiv.style.display = 'block';
-                fileDiv.style.display = 'none';
                 fileInput.removeAttribute('accept');
                 fileHelp.textContent = '';
             } else {
-                textDiv.style.display = 'none';
                 fileDiv.style.display = 'block';
-                if (inputType === 'image') {
+                 if (inputType === 'image') {
                     fileInput.setAttribute('accept', 'image/png, image/jpeg, image/jpg, image/gif, image/bmp, image/webp');
-                    fileHelp.textContent = 'Allowed image types: PNG, JPG, JPEG, GIF, BMP, WEBP';
-                } else {
+                    fileHelp.textContent = 'Allowed image types: PNG, JPG, JPEG, GIF, BMP, WEBP (Max 16MB)';
+                } else { // audio
                     fileInput.setAttribute('accept', 'audio/mp3, audio/wav, audio/ogg, audio/flac, audio/m4a');
-                    fileHelp.textContent = 'Allowed audio types: MP3, WAV, OGG, FLAC, M4A';
+                    fileHelp.textContent = 'Allowed audio types: MP3, WAV, OGG, FLAC, M4A (Max 16MB)';
                 }
             }
         }
-        document.addEventListener('DOMContentLoaded', toggleInputFields);
+
+        // JS for TTS Playback using Fetch
+        function playTTS() {
+            const text = document.getElementById('ttsText').value;
+            const lang = document.getElementById('ttsLang').value;
+            const audioPlayer = document.getElementById('ttsAudio');
+            const ttsButton = document.querySelector('#ttsFormData + button'); // Find the button next to the hidden form data
+
+            if (!text || !lang) {
+                console.error("Missing text or language for TTS");
+                return;
+            }
+
+            // Show loading state on button (optional)
+            ttsButton.disabled = true;
+            ttsButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+
+            fetch("{{ url_for('tts') }}", { // Use Flask's url_for to get the correct endpoint
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded', // Standard form encoding
+                },
+                body: new URLSearchParams({ // Use URLSearchParams for simple key/value pairs
+                    'text': text,
+                    'lang': lang
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`TTS generation failed: ${response.statusText}`);
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                const audioUrl = URL.createObjectURL(blob);
+                audioPlayer.src = audioUrl;
+                audioPlayer.classList.remove('d-none'); // Show the player
+                audioPlayer.play();
+                // Optional: Revoke object URL when playback finishes to free memory
+                audioPlayer.onended = () => {
+                    URL.revokeObjectURL(audioUrl);
+                };
+            })
+            .catch(error => {
+                console.error('Error fetching TTS audio:', error);
+                alert(`Could not generate audio: ${error.message}`); // Inform user
+                audioPlayer.classList.add('d-none'); // Hide player on error
+            })
+            .finally(() => {
+                 // Reset button state
+                 ttsButton.disabled = false;
+                 ttsButton.innerHTML = '<i class="bi bi-volume-up"></i> Listen';
+            });
+        }
+
+         // Call toggleInputFields on page load to set initial state
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleInputFields();
+
+            // Optional: Show loading indicator on form submit
+            const form = document.querySelector('form'); // Get the main form
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            if(form && loadingIndicator) {
+                form.addEventListener('submit', function() {
+                    // Basic check if any input is provided
+                    const textInput = document.getElementById('text_input').value.trim();
+                    const fileInput = document.getElementById('file').files.length;
+                    if (textInput || fileInput) {
+                         loadingIndicator.style.display = 'block';
+                    } else {
+                        // Optionally prevent submit or show validation message if nothing is entered
+                        // For now, just don't show loader if empty
+                    }
+                });
+            }
+        });
+
     </script>
+
 </body>
 </html>

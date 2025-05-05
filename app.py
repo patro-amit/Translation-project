@@ -7,6 +7,7 @@ from models import db, TranslationLog
 import sys
 from gtts import gTTS
 import io
+from datetime import datetime
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/Users/shyampatro/Translation Project/models/facebook/nllb-200-distilled-600M/service_account.json"
 
@@ -75,8 +76,7 @@ def index():
                 if source_lang not in ['en', 'hi']:
                     # Try defaulting or give error - NLLB needs explicit source
                     flash(f"Detected language '{source_lang}' might not be directly supported as source. Assuming 'en' or 'hi' might be needed.", "warning")
-                    # For this example, let's try 'en' if detection fails/is unsupported
-                    source_lang = 'en' # Or try based on script? More complex.
+                    source_lang = 'en'
 
             elif input_type in ['image', 'audio']:
                 if 'file' not in request.files:
@@ -124,7 +124,13 @@ def index():
                 original_text = source_text # Display original text
                 detected_lang = source_lang # Display detected source lang
 
-                translation_result, error = utils.translate_text(source_text, source_lang, target_lang_name)
+                nllb_source_lang = utils.ISO_TO_NLLB.get(source_lang, 'eng_Latn')
+                if nllb_source_lang is None:
+                    flash(f"Detected language '{source_lang}' is not supported for translation.", "warning")
+                    # Handle gracefully
+                else:
+                    # Use nllb_source_lang for translation
+                    translation_result, error = utils.translate_text(source_text, nllb_source_lang, target_lang_name)
 
                 if error:
                     log_entry.error_message = error
@@ -208,45 +214,31 @@ def index():
     # For unsupported TTS languages, create a set
     TTS_UNSUPPORTED_LANGS = set(SUPPORTED_LANGUAGES.keys()) - TTS_SUPPORTED_LANGS
 
-    return render_template('index.html',
-                           supported_languages=utils.SUPPORTED_LANGUAGES.keys(),
-                           selected_target_lang=selected_target_lang,
-                           original_text=original_text,
-                           detected_lang=detected_lang,
-                           translation_result=translation_result,
-                           error=error,
-                           recent_logs=recent_logs,
-                           utils=utils,
-                           tts_lang_codes=TTS_LANG_CODES,
-                           tts_supported_langs=TTS_SUPPORTED_LANGS,
-                           tts_unsupported_langs=TTS_UNSUPPORTED_LANGS)
+    return render_template(
+        'index.html',
+        supported_languages=utils.SUPPORTED_LANGUAGES.keys(),
+        selected_target_lang=selected_target_lang,
+        original_text=original_text,
+        detected_lang=detected_lang,
+        translation_result=translation_result,
+        error=error,
+        recent_logs=recent_logs,
+        utils=utils,
+        tts_lang_codes=TTS_LANG_CODES,
+        tts_supported_langs=TTS_SUPPORTED_LANGS,
+        tts_unsupported_langs=TTS_UNSUPPORTED_LANGS,
+        current_year=datetime.now().year,
+    )
 
 @app.route('/tts', methods=['POST'])
 def tts():
     text = request.form.get('text')
-    lang = request.form.get('lang', 'en')
-    if not text:
-        return "No text provided", 400
-    try:
-        if lang == 'or':  # Odia with Coqui TTS
-            from TTS.api import TTS
-            import tempfile
-            tts_model = "tts_models/multilingual/multi-dataset/xtts_v2"
-            tts = TTS(tts_model)
-            with tempfile.NamedTemporaryFile(suffix=".wav", delete=True) as tmp_wav:
-                tts.tts_to_file(text=text, file_path=tmp_wav.name, language="or", speaker="random")
-                tmp_wav.seek(0)
-                return send_file(tmp_wav.name, mimetype='audio/wav', as_attachment=False, download_name='tts.wav')
-        else:
-            tts = gTTS(text, lang=lang)
-            fp = io.BytesIO()
-            tts.write_to_fp(fp)
-            fp.seek(0)
-            return send_file(fp, mimetype='audio/mpeg', as_attachment=False, download_name='tts.mp3')
-    except Exception as e:
-        import traceback
-        traceback.print_exc()
-        return f"TTS Error: {e}", 500
+    lang = request.form.get('lang', 'en')  # Should be 'hi' for Hindi
+    tts = gTTS(text, lang=lang)
+    fp = io.BytesIO()
+    tts.write_to_fp(fp)
+    fp.seek(0)
+    return send_file(fp, mimetype='audio/mpeg')
 
 if __name__ == '__main__':
     # Set debug=False for production
