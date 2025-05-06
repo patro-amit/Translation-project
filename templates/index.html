@@ -10,16 +10,22 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <!-- Favicons -->
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" sizes="any">
+    <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+    <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
+
+
 </head>
 <body>
 
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
         <div class="container">
-            <a class="navbar-brand" href="/">
-                <i class="bi bi-translate"></i> Language Translator
+            <a class="navbar-brand fw-bold" href="/">
+                <img src="{{ url_for('static', filename='favicon.svg') }}" alt="LinguaLink Logo" width="30" height="24" class="d-inline-block align-text-top me-2">
+                LinguaLink Translator
             </a>
         </div>
     </nav>
@@ -50,7 +56,7 @@
 
         <!-- Main Form Card -->
         <div class="card shadow-sm mb-4">
-            <div class="card-body p-4">
+            <div class="card-body p-lg-5 p-4">
                 <h2 class="card-title text-center mb-4">Start Translating</h2>
                 <form method="POST" enctype="multipart/form-data">
                     <div class="row g-3">
@@ -58,9 +64,9 @@
                         <div class="col-md-6">
                             <label for="input_type" class="form-label fw-medium">Choose Input Type:</label>
                             <select class="form-select form-select-lg" id="input_type" name="input_type" onchange="toggleInputFields()">
-                                <option value="text" selected>✍️ Text Input</option>
-                                <option value="image">🖼️ Image Upload (OCR)</option>
-                                <option value="audio">🎤 Audio Upload (STT)</option>
+                                <option value="text" {% if request.form.get('input_type', 'text') == 'text' %}selected{% endif %}>✍️ Text Input</option>
+                                <option value="image" {% if request.form.get('input_type') == 'image' %}selected{% endif %}>🖼️ Image Upload (OCR)</option>
+                                <option value="audio" {% if request.form.get('input_type') == 'audio' %}selected{% endif %}>🎤 Audio Upload (STT)</option>
                             </select>
                         </div>
 
@@ -68,8 +74,8 @@
                         <div class="col-md-6">
                              <label for="target_language" class="form-label fw-medium">Select Target Language:</label>
                             <select class="form-select form-select-lg" id="target_language" name="target_language">
-                                {% for lang_name in supported_languages %}
-                                    <option value="{{ lang_name }}" {% if lang_name == selected_target_lang %}selected{% endif %}>{{ lang_name }}</option>
+                                {% for lang_name_key, nllb_code_val in utils_supported_languages.items() %} {# Iterate over items for consistency #}
+                                    <option value="{{ lang_name_key }}" {% if lang_name_key == selected_target_lang %}selected{% endif %}>{{ lang_name_key }}</option>
                                 {% endfor %}
                             </select>
                         </div>
@@ -77,7 +83,7 @@
                         <!-- Text Input -->
                         <div class="col-12" id="text_input_div">
                             <label for="text_input" class="form-label fw-medium">Enter English or Hindi Text:</label>
-                            <textarea class="form-control" id="text_input" name="text_input" rows="5" placeholder="Type or paste text here...">{{ request.form['text_input'] if request.form['text_input'] }}</textarea> {# Retain text input after submit #}
+                            <textarea class="form-control" id="text_input" name="text_input" rows="5" placeholder="Type or paste text here...">{{ request.form['text_input'] if 'text_input' in request.form else original_text }}</textarea>
                         </div>
 
                         <!-- File Input -->
@@ -89,7 +95,7 @@
 
                         <!-- Submit Button -->
                         <div class="col-12 text-center mt-4">
-                            <button type="submit" class="btn btn-primary btn-lg">
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
                                 <i class="bi bi-arrow-repeat"></i> Translate Now
                             </button>
                         </div>
@@ -107,7 +113,7 @@
 
 
         <!-- Results Section -->
-        {% if original_text or translation_result or error %}
+        {% if original_text or translation_result or (error and not original_text and not translation_result) %}
         <div class="mt-5">
             <h2 class="text-center mb-4">Translation Results</h2>
              <!-- Display Error if it's the primary message -->
@@ -122,8 +128,8 @@
             <div class="row g-4 justify-content-center">
                 <!-- Original Text Box -->
                 {% if original_text %}
-                <div class="col-md-6">
-                    <div class="card h-100">
+                <div class="col-lg-6">
+                    <div class="card h-100 shadow-sm">
                         <div class="card-header bg-light">
                            <strong>Original Text {% if detected_lang %}(Detected: {{ detected_lang|title }}){% endif %}</strong>
                         </div>
@@ -136,8 +142,8 @@
 
                 <!-- Translation Result Box -->
                 {% if translation_result %}
-                 <div class="col-md-6">
-                    <div class="card h-100">
+                 <div class="col-lg-6">
+                    <div class="card h-100 shadow-sm">
                          <div class="card-header bg-light">
                              <strong>Translation ({{ selected_target_lang }})</strong>
                         </div>
@@ -145,21 +151,22 @@
                            {{ translation_result }}
                         </div>
                         <div class="card-footer bg-white text-center">
-                             {% if selected_target_lang in tts_supported_langs %}
+                             {% if main_result_tts_supported %}
                                 <button type="button" class="btn btn-secondary btn-sm" id="ttsListenBtn" onclick="playTTS()">
                                     <i class="bi bi-volume-up"></i> Listen
                                 </button>
                                 <audio id="ttsAudio" controls class="mt-2 d-none" style="width: 100%;"></audio>
-                                <!-- Hidden form no longer strictly needed with fetch, but keep data accessible -->
+                                <!-- Hidden form data for main TTS -->
                                 <form id="ttsFormData" class="d-none">
                                      <input type="hidden" name="text" id="ttsText" value="{{ translation_result }}">
-                                     <input type="hidden" name="lang" id="ttsLang" value="{{ tts_lang_codes[selected_target_lang]|default('en') }}">
+                                     <input type="hidden" name="lang" id="ttsLang" value="{{ main_result_tts_code }}">
                                 </form>
-
-                             {% elif selected_target_lang in tts_unsupported_langs %}
+                             {% else %}
+                                 {% if translation_result %} {# Only show "not available" if there is a translation result #}
                                 <small class="text-muted">
                                   <i class="bi bi-speaker-fill"></i> Text-to-speech not available for {{ selected_target_lang }}.
                                 </small>
+                                {% endif %}
                              {% endif %}
                         </div>
                     </div>
@@ -177,36 +184,38 @@
                 <div class="accordion shadow-sm mx-auto" id="activityLogAccordion" style="max-width: 800px;">
                     {% for log in recent_logs %}
                     <div class="accordion-item">
-                        <h2 class="accordion-header" id="heading{{ log.id }}">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ log.id }}" aria-expanded="false" aria-controls="collapse{{ log.id }}">
-                                <span class="badge bg-secondary me-2">{{ log.input_type|title }}</span>
-                                {{ log.source_language|upper }} <i class="bi bi-arrow-right-short"></i> {{ log.target_language }}
-                                <span class="ms-2 text-muted small">{{ log.timestamp.strftime('%Y-%m-%d %H:%M') }}</span>
+                        <h2 class="accordion-header" id="heading{{ loop.index }}"> {# Use loop.index for unique ID part #}
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" aria-expanded="false" aria-controls="collapse{{ loop.index }}">
+                                <span class="badge {{ 'bg-success' if log.translated_text else 'bg-danger' }} me-2">{{ 'Success' if log.translated_text else 'Failed' }}</span>
+                                <span class="fw-normal me-1">{{ log.input_type|title }}</span>
+                                <span class="text-primary">{{ NLLB_TO_FRIENDLY_NAME.get(log.source_language, log.source_language)|upper }}</span>
+                                <i class="bi bi-arrow-right-short mx-1"></i>
+                                <span class="text-primary">{{ NLLB_TO_FRIENDLY_NAME.get(log.target_language, log.target_language) }}</span>
+                                <span class="ms-auto text-muted small">{{ log.timestamp.strftime('%b %d, %H:%M') }}</span>
                             </button>
                         </h2>
-                        <div id="collapse{{ log.id }}" class="accordion-collapse collapse" aria-labelledby="heading{{ log.id }}" data-bs-parent="#activityLogAccordion">
+                        <div id="collapse{{ loop.index }}" class="accordion-collapse collapse" aria-labelledby="heading{{ loop.index }}" data-bs-parent="#activityLogAccordion">
                             <div class="accordion-body">
-                                <ul class="list-unstyled mb-2">
-                                    <li><strong>Input Type:</strong> {{ log.input_type }}</li>
-                                    <li><strong>Source Language:</strong> {{ log.source_language }}</li>
-                                    <li><strong>Target Language:</strong> {{ log.target_language }}</li>
+                                <ul class="list-unstyled mb-3 small">
                                     <li><strong>Timestamp:</strong> {{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</li>
                                 </ul>
                                 <div class="mb-2">
                                     <strong>Original Text:</strong>
-                                    <div class="bg-light border rounded p-2 small">{{ log.original_text or 'N/A' }}</div>
+                                    <div class="bg-light border rounded p-2 small text-muted result-box-small">{{ log.original_text or 'N/A' }}</div>
                                 </div>
                                 <div class="mb-2">
-                                    <strong>Translated Text:</strong>
-                                    <div class="bg-light border rounded p-2 small">{{ log.translated_text or 'N/A' }}</div>
-                                    {% set tts_lang_code = tts_lang_codes[log.target_language]|default('en') %}
-                                    {% if log.translated_text and log.target_language in tts_supported_langs %}
-                                        <button type="button" class="btn btn-secondary btn-sm mt-2" onclick="playTTSLog(`{{ log.translated_text|escapejs }}`, '{{ tts_lang_code }}', 'ttsAudioLog{{ log.id }}', this)">
+                                    <strong>Translated Text ({{ NLLB_TO_FRIENDLY_NAME.get(log.target_language, log.target_language) }}):</strong>
+                                    <div class="bg-light border rounded p-2 small result-box-small">{{ log.translated_text or 'N/A' }}</div>
+                                    {# TTS for Log Entry #}
+                                    {% set log_nllb_code = log.target_language %}
+                                    {% set log_tts_code = MASTER_TTS_CONFIG.get(log_nllb_code) %}
+                                    {% if log.translated_text and log_tts_code %}
+                                        <button type="button" class="btn btn-outline-secondary btn-sm mt-2" onclick='playTTSLog({{ log.translated_text|tojson }}, "{{ log_tts_code }}", "ttsAudioLog{{ loop.index }}", this)'>
                                             <i class="bi bi-volume-up"></i> Listen
                                         </button>
-                                        <audio id="ttsAudioLog{{ log.id }}" controls class="mt-2 d-none" style="width: 100%;"></audio>
-                                    {% elif log.translated_text and log.target_language in tts_unsupported_langs %}
-                                        <small class="text-muted ms-2">
+                                        <audio id="ttsAudioLog{{ loop.index }}" controls class="mt-2 d-none" style="width: 100%;"></audio>
+                                    {% elif log.translated_text %}
+                                        <small class="d-block text-muted mt-2">
                                             <i class="bi bi-speaker-fill"></i> TTS not available for this language.
                                         </small>
                                     {% endif %}
@@ -214,7 +223,7 @@
                                 {% if log.error_message %}
                                 <div class="mb-2">
                                     <strong class="text-danger">Error:</strong>
-                                    <div class="bg-light border rounded p-2 small text-danger">{{ log.error_message }}</div>
+                                    <div class="bg-danger-subtle border border-danger-subtle text-danger-emphasis rounded p-2 small">{{ log.error_message }}</div>
                                 </div>
                                 {% endif %}
                             </div>
@@ -229,9 +238,9 @@
 
     </div> <!-- /container -->
 
-    <footer class="bg-light text-center text-muted py-3 mt-5">
+    <footer class="bg-light text-center text-muted py-3 mt-5 border-top">
         <div class="container">
-            <p class="mb-0">© {{ current_year }} LinguaLink Translator. Powered by Python & AI.</p>
+            <p class="mb-0">© {{ current_year }} LinguaLink Translator. Powered by the Translator Team.</p>
         </div>
     </footer>
 
@@ -248,16 +257,17 @@
             const fileHelp = document.getElementById('fileHelp');
             const fileInput = document.getElementById('file');
 
-            // Hide all special inputs first
             textDiv.style.display = 'none';
             fileDiv.style.display = 'none';
 
             if (inputType === 'text') {
                 textDiv.style.display = 'block';
+                fileInput.value = ''; // Clear file input if switching to text
                 fileInput.removeAttribute('accept');
                 fileHelp.textContent = '';
             } else {
                 fileDiv.style.display = 'block';
+                document.getElementById('text_input').value = ''; // Clear text input if switching to file
                  if (inputType === 'image') {
                     fileInput.setAttribute('accept', 'image/png, image/jpeg, image/jpg, image/gif, image/bmp, image/webp');
                     fileHelp.textContent = 'Allowed image types: PNG, JPG, JPEG, GIF, BMP, WEBP (Max 16MB)';
@@ -268,36 +278,28 @@
             }
         }
 
-        // JS for TTS Playback using Fetch
+        // JS for Main TTS Playback
         function playTTS() {
             const text = document.getElementById('ttsText').value;
             const lang = document.getElementById('ttsLang').value;
             const audioPlayer = document.getElementById('ttsAudio');
-            const ttsButton = document.getElementById('ttsListenBtn'); // Use the button's id
+            const ttsButton = document.getElementById('ttsListenBtn');
 
             if (!text || !lang) {
-                console.error("Missing text or language for TTS");
+                console.error("Missing text or language for main TTS");
                 return;
             }
 
-            // Show loading state on button (optional)
             ttsButton.disabled = true;
             ttsButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
 
-            fetch("{{ url_for('tts') }}", {
+            fetch("{{ url_for('tts_route') }}", { // Ensure this matches the route name in app.py
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams({
-                    'text': text,
-                    'lang': lang
-                })
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: new URLSearchParams({'text': text, 'lang': lang })
             })
             .then(response => {
-                if (!response.ok) {
-                    throw new Error(`TTS generation failed: ${response.statusText}`);
-                }
+                if (!response.ok) throw new Error(`TTS generation failed: ${response.statusText} (${response.status})`);
                 return response.blob();
             })
             .then(blob => {
@@ -305,12 +307,10 @@
                 audioPlayer.src = audioUrl;
                 audioPlayer.classList.remove('d-none');
                 audioPlayer.play();
-                audioPlayer.onended = () => {
-                    URL.revokeObjectURL(audioUrl);
-                };
+                audioPlayer.onended = () => URL.revokeObjectURL(audioUrl);
             })
             .catch(error => {
-                console.error('Error fetching TTS audio:', error);
+                console.error('Error fetching main TTS audio:', error);
                 alert(`Could not generate audio: ${error.message}`);
                 audioPlayer.classList.add('d-none');
             })
@@ -320,28 +320,23 @@
             });
         }
 
+        // JS for Log Entry TTS Playback
         function playTTSLog(text, lang, audioId, btn) {
             const audioPlayer = document.getElementById(audioId);
-            if (!text || !lang) {
-                console.error("Missing text or language for TTS");
+            if (!text || !lang || !audioPlayer) {
+                console.error("Missing text, language, or audio player for log TTS", {text, lang, audioId});
                 return;
             }
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
-            fetch("{{ url_for('tts') }}", {
+
+            fetch("{{ url_for('tts_route') }}", { // Ensure this matches the route name in app.py
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams({
-                    'text': text,
-                    'lang': lang
-                })
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: new URLSearchParams({'text': text, 'lang': lang})
             })
             .then(response => {
-                if (!response.ok) {
-                    throw new Error(`TTS generation failed: ${response.statusText}`);
-                }
+                if (!response.ok) throw new Error(`TTS generation failed: ${response.statusText} (${response.status})`);
                 return response.blob();
             })
             .then(blob => {
@@ -349,13 +344,11 @@
                 audioPlayer.src = audioUrl;
                 audioPlayer.classList.remove('d-none');
                 audioPlayer.play();
-                audioPlayer.onended = () => {
-                    URL.revokeObjectURL(audioUrl);
-                };
+                audioPlayer.onended = () => URL.revokeObjectURL(audioUrl);
             })
             .catch(error => {
-                console.error('Error fetching TTS audio:', error);
-                alert(`Could not generate audio: ${error.message}`);
+                console.error('Error fetching log TTS audio:', error);
+                alert(`Could not generate audio for log entry: ${error.message}`);
                 audioPlayer.classList.add('d-none');
             })
             .finally(() => {
@@ -364,29 +357,37 @@
             });
         }
 
-         // Call toggleInputFields on page load to set initial state
         document.addEventListener('DOMContentLoaded', function() {
-            toggleInputFields();
+            toggleInputFields(); // Set initial state for input fields
 
-            // Optional: Show loading indicator on form submit
-            const form = document.querySelector('form'); // Get the main form
+            const form = document.querySelector('form'); // Gets the first form, which is our main translation form
             const loadingIndicator = document.getElementById('loadingIndicator');
-            if(form && loadingIndicator) {
-                form.addEventListener('submit', function() {
-                    // Basic check if any input is provided
-                    const textInput = document.getElementById('text_input').value.trim();
-                    const fileInput = document.getElementById('file').files.length;
-                    if (textInput || fileInput) {
+            if (form && loadingIndicator) {
+                form.addEventListener('submit', function(event) {
+                    const textInputVal = document.getElementById('text_input').value.trim();
+                    const fileInputFiles = document.getElementById('file').files; // Get FileList object
+
+                    // Check current input type
+                    const inputType = document.getElementById('input_type').value;
+                    let hasInput = false;
+
+                    if (inputType === 'text' && textInputVal) {
+                        hasInput = true;
+                    } else if ((inputType === 'image' || inputType === 'audio') && fileInputFiles.length > 0) {
+                        hasInput = true;
+                    }
+
+                    if (hasInput) {
                          loadingIndicator.style.display = 'block';
                     } else {
-                        // Optionally prevent submit or show validation message if nothing is entered
-                        // For now, just don't show loader if empty
+                        event.preventDefault(); // Stop form submission
+                        alert("Please provide text or upload a file to translate.");
+                        // Hide loading indicator if it was somehow shown
+                        loadingIndicator.style.display = 'none';
                     }
                 });
             }
         });
-
     </script>
-
 </body>
 </html>
