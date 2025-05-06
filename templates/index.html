@@ -174,30 +174,51 @@
         <div class="mt-5 pt-4 border-top">
             <h3 class="text-center mb-4">Activity Log</h3>
             {% if recent_logs %}
-                <div class="list-group shadow-sm mx-auto" style="max-width: 800px;">
+                <div class="accordion shadow-sm mx-auto" id="activityLogAccordion" style="max-width: 800px;">
                     {% for log in recent_logs %}
-                    <div class="list-group-item list-group-item-action flex-column align-items-start">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h6 class="mb-1">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading{{ log.id }}">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ log.id }}" aria-expanded="false" aria-controls="collapse{{ log.id }}">
                                 <span class="badge bg-secondary me-2">{{ log.input_type|title }}</span>
-                                {{ log.source_language|upper }} <i class="bi bi-arrow-right-short"></i> {{ log.target_language }} <!-- Use target_language code directly -->
-                            </h6>
-                            <small class="text-muted">{{ log.timestamp.strftime('%Y-%m-%d %H:%M') }}</small>
+                                {{ log.source_language|upper }} <i class="bi bi-arrow-right-short"></i> {{ log.target_language }}
+                                <span class="ms-2 text-muted small">{{ log.timestamp.strftime('%Y-%m-%d %H:%M') }}</span>
+                            </button>
+                        </h2>
+                        <div id="collapse{{ log.id }}" class="accordion-collapse collapse" aria-labelledby="heading{{ log.id }}" data-bs-parent="#activityLogAccordion">
+                            <div class="accordion-body">
+                                <ul class="list-unstyled mb-2">
+                                    <li><strong>Input Type:</strong> {{ log.input_type }}</li>
+                                    <li><strong>Source Language:</strong> {{ log.source_language }}</li>
+                                    <li><strong>Target Language:</strong> {{ log.target_language }}</li>
+                                    <li><strong>Timestamp:</strong> {{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</li>
+                                </ul>
+                                <div class="mb-2">
+                                    <strong>Original Text:</strong>
+                                    <div class="bg-light border rounded p-2 small">{{ log.original_text or 'N/A' }}</div>
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Translated Text:</strong>
+                                    <div class="bg-light border rounded p-2 small">{{ log.translated_text or 'N/A' }}</div>
+                                    {% set tts_lang_code = tts_lang_codes[log.target_language]|default('en') %}
+                                    {% if log.translated_text and log.target_language in tts_supported_langs %}
+                                        <button type="button" class="btn btn-secondary btn-sm mt-2" onclick="playTTSLog(`{{ log.translated_text|escapejs }}`, '{{ tts_lang_code }}', 'ttsAudioLog{{ log.id }}', this)">
+                                            <i class="bi bi-volume-up"></i> Listen
+                                        </button>
+                                        <audio id="ttsAudioLog{{ log.id }}" controls class="mt-2 d-none" style="width: 100%;"></audio>
+                                    {% elif log.translated_text and log.target_language in tts_unsupported_langs %}
+                                        <small class="text-muted ms-2">
+                                            <i class="bi bi-speaker-fill"></i> TTS not available for this language.
+                                        </small>
+                                    {% endif %}
+                                </div>
+                                {% if log.error_message %}
+                                <div class="mb-2">
+                                    <strong class="text-danger">Error:</strong>
+                                    <div class="bg-light border rounded p-2 small text-danger">{{ log.error_message }}</div>
+                                </div>
+                                {% endif %}
+                            </div>
                         </div>
-                        <p class="mb-1">
-                            {% if log.translated_text %}
-                                <span class="badge bg-success">Success</span>
-                                <small class="text-muted ms-2">Original: {{ log.original_text[:80] }}{% if log.original_text|length > 80 %}...{% endif %}</small> <br>
-                                <small class="text-muted ms-2">Translated: {{ log.translated_text[:80] }}{% if log.translated_text|length > 80 %}...{% endif %}</small>
-                            {% else %}
-                                 <span class="badge bg-danger">Failed</span>
-                                 <small class="text-danger ms-2">{{ (log.error_message or "Unknown reason")|truncate(100) }}</small><br>
-                                 {% if log.original_text %}
-                                    <small class="text-muted ms-2">Original: {{ log.original_text[:80] }}{% if log.original_text|length > 80 %}...{% endif %}</small>
-                                 {% endif %}
-                            {% endif %}
-                        </p>
-                         <!-- Removed the <details> for a cleaner look in list-group -->
                     </div>
                     {% endfor %}
                 </div>
@@ -296,6 +317,50 @@
             .finally(() => {
                 ttsButton.disabled = false;
                 ttsButton.innerHTML = '<i class="bi bi-volume-up"></i> Listen';
+            });
+        }
+
+        function playTTSLog(text, lang, audioId, btn) {
+            const audioPlayer = document.getElementById(audioId);
+            if (!text || !lang) {
+                console.error("Missing text or language for TTS");
+                return;
+            }
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+            fetch("{{ url_for('tts') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    'text': text,
+                    'lang': lang
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`TTS generation failed: ${response.statusText}`);
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                const audioUrl = URL.createObjectURL(blob);
+                audioPlayer.src = audioUrl;
+                audioPlayer.classList.remove('d-none');
+                audioPlayer.play();
+                audioPlayer.onended = () => {
+                    URL.revokeObjectURL(audioUrl);
+                };
+            })
+            .catch(error => {
+                console.error('Error fetching TTS audio:', error);
+                alert(`Could not generate audio: ${error.message}`);
+                audioPlayer.classList.add('d-none');
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="bi bi-volume-up"></i> Listen';
             });
         }
 
