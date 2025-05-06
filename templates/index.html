@@ -12,25 +12,33 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <!-- Favicons -->
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" sizes="any">
-    <link rel="icon" href="{{ url_for('static', filename='favicon.svg') }}" type="image/svg+xml">
+    <link rel="icon" href="{{ url_for('static', filename='bi-chat-dots.svg') }}" type="image/svg+xml"> {# Using Bootstrap Chat Dots Icon as favicon #}
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
     <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
 
+    <link rel="stylesheet" href="{{ url_for('static', filename='additional-styles.css') }}"> <!-- Adding additional styles -->
 
+    {# MODIFICATION 1: Add inline style for body padding-top #}
+    <style>
+        body {
+            padding-top: 56px; /* Adjust this value if your navbar height changes */
+        }
+    </style>
 </head>
 <body>
 
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
+    {# MODIFICATION 2: Add 'fixed-top' class to the nav element #}
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm fixed-top">
         <div class="container">
             <a class="navbar-brand fw-bold" href="/">
-                <img src="{{ url_for('static', filename='favicon.svg') }}" alt="LinguaLink Logo" width="30" height="24" class="d-inline-block align-text-top me-2">
-                LinguaLink Translator
+                <img src="{{ url_for('static', filename='bi-chat-dots.svg') }}" alt="Chat Icon" width="28" height="28" class="d-inline-block align-text-top me-2" style="filter: invert(1) brightness(1.5);"> {# Using Bootstrap Chat Dots Icon #}
+                Language Translator
             </a>
         </div>
     </nav>
 
-    <div class="container mt-4 mb-5">
+    <div class="container mt-4 mb-5"> {# This mt-4 might now be redundant or need adjustment due to body padding #}
 
         <!-- Introduction -->
         <div class="text-center mb-4">
@@ -65,7 +73,7 @@
                             <label for="input_type" class="form-label fw-medium">Choose Input Type:</label>
                             <select class="form-select form-select-lg" id="input_type" name="input_type" onchange="toggleInputFields()">
                                 <option value="text" {% if request.form.get('input_type', 'text') == 'text' %}selected{% endif %}>✍️ Text Input</option>
-                                <option value="image" {% if request.form.get('input_type') == 'image' %}selected{% endif %}>🖼️ Image Upload (OCR)</option>
+                                <option value="image" {% if request.form.get('input_type', 'text') == 'image' %}selected{% endif %}>🖼️ Image Upload (OCR)</option>
                                 <option value="audio" {% if request.form.get('input_type') == 'audio' %}selected{% endif %}>🎤 Audio Upload (STT)</option>
                             </select>
                         </div>
@@ -74,7 +82,7 @@
                         <div class="col-md-6">
                              <label for="target_language" class="form-label fw-medium">Select Target Language:</label>
                             <select class="form-select form-select-lg" id="target_language" name="target_language">
-                                {% for lang_name_key, nllb_code_val in utils_supported_languages.items() %} {# Iterate over items for consistency #}
+                                {% for lang_name_key, nllb_code_val in utils_supported_languages.items() %}
                                     <option value="{{ lang_name_key }}" {% if lang_name_key == selected_target_lang %}selected{% endif %}>{{ lang_name_key }}</option>
                                 {% endfor %}
                             </select>
@@ -162,7 +170,8 @@
                                      <input type="hidden" name="lang" id="ttsLang" value="{{ main_result_tts_code }}">
                                 </form>
                              {% else %}
-                                 {% if translation_result %} {# Only show "not available" if there is a translation result #}
+                                 {% if translation_result %}
+                                <!-- Only show "not available" if there is a translation result -->
                                 <small class="text-muted">
                                   <i class="bi bi-speaker-fill"></i> Text-to-speech not available for {{ selected_target_lang }}.
                                 </small>
@@ -184,7 +193,7 @@
                 <div class="accordion shadow-sm mx-auto" id="activityLogAccordion" style="max-width: 800px;">
                     {% for log in recent_logs %}
                     <div class="accordion-item">
-                        <h2 class="accordion-header" id="heading{{ loop.index }}"> {# Use loop.index for unique ID part #}
+                        <h2 class="accordion-header" id="heading{{ loop.index }}">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" aria-expanded="false" aria-controls="collapse{{ loop.index }}">
                                 <span class="badge {{ 'bg-success' if log.translated_text else 'bg-danger' }} me-2">{{ 'Success' if log.translated_text else 'Failed' }}</span>
                                 <span class="fw-normal me-1">{{ log.input_type|title }}</span>
@@ -210,7 +219,8 @@
                                     {% set log_nllb_code = log.target_language %}
                                     {% set log_tts_code = MASTER_TTS_CONFIG.get(log_nllb_code) %}
                                     {% if log.translated_text and log_tts_code %}
-                                        <button type="button" class="btn btn-outline-secondary btn-sm mt-2" onclick='playTTSLog({{ log.translated_text|tojson }}, "{{ log_tts_code }}", "ttsAudioLog{{ loop.index }}", this)'>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm mt-2"
+                                                onclick='playTTSLog({{ log.translated_text|tojson }}, "{{ log_tts_code }}", "ttsAudioLog{{ loop.index }}", this)'>
                                             <i class="bi bi-volume-up"></i> Listen
                                         </button>
                                         <audio id="ttsAudioLog{{ loop.index }}" controls class="mt-2 d-none" style="width: 100%;"></audio>
@@ -240,7 +250,7 @@
 
     <footer class="bg-light text-center text-muted py-3 mt-5 border-top">
         <div class="container">
-            <p class="mb-0">© {{ current_year }} LinguaLink Translator. Powered by the Translator Team.</p>
+            <p class="mb-0">© {{ current_year }} Language Translator. Powered by the Translator Team.</p>
         </div>
     </footer>
 
@@ -280,94 +290,177 @@
 
         // JS for Main TTS Playback
         function playTTS() {
+            console.log("--- playTTS CALLED ---");
             const text = document.getElementById('ttsText').value;
             const lang = document.getElementById('ttsLang').value;
             const audioPlayer = document.getElementById('ttsAudio');
             const ttsButton = document.getElementById('ttsListenBtn');
 
-            if (!text || !lang) {
-                console.error("Missing text or language for main TTS");
+            console.log("Main TTS - Text:", typeof text, text);
+            console.log("Main TTS - Lang:", typeof lang, lang);
+
+            if (!text || text.trim() === "") {
+                console.error("Main TTS Error: Text is invalid or empty.");
+                alert("Cannot play audio: No valid text provided for main result.");
+                return;
+            }
+            if (!lang || lang.trim() === "") {
+                console.error("Main TTS Error: Language code is invalid or missing.");
+                alert("Cannot play audio: Language not specified correctly for main result.");
+                return;
+            }
+            if (!ttsButton || !audioPlayer) {
+                console.error("Main TTS Error: Button or audio player element not found.");
                 return;
             }
 
             ttsButton.disabled = true;
             ttsButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+            console.log("Main TTS: Fetching audio from:", "{{ url_for('tts_route') }}");
 
-            fetch("{{ url_for('tts_route') }}", { // Ensure this matches the route name in app.py
+
+            fetch("{{ url_for('tts_route') }}", {
                 method: 'POST',
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                 body: new URLSearchParams({'text': text, 'lang': lang })
             })
             .then(response => {
-                if (!response.ok) throw new Error(`TTS generation failed: ${response.statusText} (${response.status})`);
+                console.log("Main TTS Fetch Response Status:", response.status, response.statusText);
+                if (!response.ok) {
+                    return response.text().then(errorText => {
+                        throw new Error(`TTS generation failed: ${response.statusText} (${response.status}). Server says: ${errorText}`);
+                    });
+                }
                 return response.blob();
             })
             .then(blob => {
+                console.log("Main TTS Blob received. Type:", blob.type, "Size:", blob.size);
+                 if (blob.size === 0 || !blob.type.startsWith('audio/')) {
+                    console.error("Main TTS Error: Received empty or non-audio blob.");
+                    throw new Error("Received invalid audio data from server for main result.");
+                }
                 const audioUrl = URL.createObjectURL(blob);
                 audioPlayer.src = audioUrl;
                 audioPlayer.classList.remove('d-none');
-                audioPlayer.play();
-                audioPlayer.onended = () => URL.revokeObjectURL(audioUrl);
+                console.log("Main TTS: Attempting to play audio.");
+                audioPlayer.play().catch(playError => {
+                    console.error("Main TTS Error during play():", playError);
+                    alert("Error playing main audio: " + playError.message);
+                });
+                audioPlayer.onended = () => {
+                    console.log("Main TTS: Audio finished playing, revoking URL.");
+                    URL.revokeObjectURL(audioUrl);
+                };
             })
             .catch(error => {
-                console.error('Error fetching main TTS audio:', error);
-                alert(`Could not generate audio: ${error.message}`);
-                audioPlayer.classList.add('d-none');
+                console.error('Main TTS - Error during fetch/processing:', error);
+                alert(`Could not generate or play main audio: ${error.message}`);
+                if (audioPlayer) audioPlayer.classList.add('d-none');
             })
             .finally(() => {
-                ttsButton.disabled = false;
-                ttsButton.innerHTML = '<i class="bi bi-volume-up"></i> Listen';
+                if (ttsButton) {
+                    ttsButton.disabled = false;
+                    ttsButton.innerHTML = '<i class="bi bi-volume-up"></i> Listen';
+                }
             });
         }
 
         // JS for Log Entry TTS Playback
         function playTTSLog(text, lang, audioId, btn) {
+            console.log("--- playTTSLog CALLED ---");
+            console.log("Log TTS - Received Text (Type, Value):", typeof text, text);
+            console.log("Log TTS - Received Lang (Type, Value):", typeof lang, lang);
+            console.log("Log TTS - Received Audio ID (Type, Value):", typeof audioId, audioId);
+            console.log("Log TTS - Received Button Element:", btn);
+
             const audioPlayer = document.getElementById(audioId);
-            if (!text || !lang || !audioPlayer) {
-                console.error("Missing text, language, or audio player for log TTS", {text, lang, audioId});
+
+            // Validate inputs
+            if (typeof text !== 'string' || text.trim() === "") {
+                console.error("Log TTS Error: Text is invalid or empty. Received (Type, Value):", typeof text, text);
+                alert("Cannot play audio: No valid text provided for this log entry.");
+                if (btn && typeof btn.removeAttribute === 'function') { btn.disabled = false; btn.innerHTML = '<i class="bi bi-volume-up"></i> Listen'; }
                 return;
             }
+            if (typeof lang !== 'string' || lang.trim() === "") {
+                console.error("Log TTS Error: Language code is invalid or missing. Received (Type, Value):", typeof lang, lang);
+                alert("Cannot play audio: Language not specified correctly for this log entry.");
+                if (btn && typeof btn.removeAttribute === 'function') { btn.disabled = false; btn.innerHTML = '<i class="bi bi-volume-up"></i> Listen'; }
+                return;
+            }
+            if (!audioPlayer) {
+                console.error("Log TTS Error: Audio player element not found with ID:", audioId);
+                alert("Cannot play audio: Internal error (audio player not found for ID: " + audioId + ").");
+                return;
+            }
+            if (!btn || typeof btn.removeAttribute !== 'function') { // More robust check for DOM element
+                console.error("Log TTS Error: Button element is invalid or not a DOM element. Button object:", btn);
+                // alert("Internal error: TTS button reference is broken."); // Optional: alert user
+                return;
+            }
+
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
+            console.log("Log TTS: Fetching audio from URL:", "{{ url_for('tts_route') }}", "with params text (first 50):", text.substring(0,50), "lang:", lang);
 
-            fetch("{{ url_for('tts_route') }}", { // Ensure this matches the route name in app.py
+
+            fetch("{{ url_for('tts_route') }}", {
                 method: 'POST',
                 headers: {'Content-Type': 'application/x-www-form-urlencoded'},
                 body: new URLSearchParams({'text': text, 'lang': lang})
             })
             .then(response => {
-                if (!response.ok) throw new Error(`TTS generation failed: ${response.statusText} (${response.status})`);
+                console.log("Log TTS Fetch Response Status:", response.status, response.statusText);
+                if (!response.ok) {
+                    return response.text().then(errorText => {
+                        console.error("Log TTS Server Error Response Text:", errorText);
+                        throw new Error(`TTS generation failed: ${response.statusText} (${response.status}). Server says: ${errorText}`);
+                    });
+                }
                 return response.blob();
             })
             .then(blob => {
+                console.log("Log TTS Blob received. Type:", blob.type, "Size:", blob.size);
+                 if (blob.size === 0 || !blob.type.startsWith('audio/')) {
+                    console.error("Log TTS Error: Received empty or non-audio blob from server.");
+                    throw new Error("Received invalid audio data from server for log entry.");
+                }
                 const audioUrl = URL.createObjectURL(blob);
                 audioPlayer.src = audioUrl;
                 audioPlayer.classList.remove('d-none');
-                audioPlayer.play();
-                audioPlayer.onended = () => URL.revokeObjectURL(audioUrl);
+                console.log("Log TTS: Attempting to play audio from URL:", audioUrl);
+                audioPlayer.play().catch(playError => {
+                    console.error("Log TTS Error during audioPlayer.play():", playError);
+                    alert("Error playing audio for log entry: " + playError.message);
+                });
+                audioPlayer.onended = () => {
+                    console.log("Log TTS: Audio finished playing, revoking URL:", audioUrl);
+                    URL.revokeObjectURL(audioUrl);
+                };
             })
             .catch(error => {
-                console.error('Error fetching log TTS audio:', error);
-                alert(`Could not generate audio for log entry: ${error.message}`);
-                audioPlayer.classList.add('d-none');
+                console.error('Log TTS - Error during fetch/processing pipeline:', error);
+                alert(`Could not generate or play audio for log entry: ${error.message}`);
+                if (audioPlayer) audioPlayer.classList.add('d-none');
             })
             .finally(() => {
-                btn.disabled = false;
-                btn.innerHTML = '<i class="bi bi-volume-up"></i> Listen';
+                if (btn && typeof btn.removeAttribute === 'function') {
+                    btn.disabled = false;
+                    btn.innerHTML = '<i class="bi bi-volume-up"></i> Listen';
+                }
             });
         }
 
         document.addEventListener('DOMContentLoaded', function() {
             toggleInputFields(); // Set initial state for input fields
 
-            const form = document.querySelector('form'); // Gets the first form, which is our main translation form
+            const form = document.querySelector('form');
             const loadingIndicator = document.getElementById('loadingIndicator');
             if (form && loadingIndicator) {
                 form.addEventListener('submit', function(event) {
                     const textInputVal = document.getElementById('text_input').value.trim();
-                    const fileInputFiles = document.getElementById('file').files; // Get FileList object
+                    const fileInputFiles = document.getElementById('file').files;
 
-                    // Check current input type
                     const inputType = document.getElementById('input_type').value;
                     let hasInput = false;
 
@@ -380,9 +473,8 @@
                     if (hasInput) {
                          loadingIndicator.style.display = 'block';
                     } else {
-                        event.preventDefault(); // Stop form submission
+                        event.preventDefault();
                         alert("Please provide text or upload a file to translate.");
-                        // Hide loading indicator if it was somehow shown
                         loadingIndicator.style.display = 'none';
                     }
                 });
