@@ -56,7 +56,7 @@
                     <div class="row g-3">
                         <!-- Input Type -->
                         <div class="col-md-6">
-                            <label for="input_type" class="form-label fw-medium">1. Choose Input Type:</label>
+                            <label for="input_type" class="form-label fw-medium">Choose Input Type:</label>
                             <select class="form-select form-select-lg" id="input_type" name="input_type" onchange="toggleInputFields()">
                                 <option value="text" selected>✍️ Text Input</option>
                                 <option value="image">🖼️ Image Upload (OCR)</option>
@@ -66,7 +66,7 @@
 
                         <!-- Target Language -->
                         <div class="col-md-6">
-                             <label for="target_language" class="form-label fw-medium">3. Select Target Language:</label>
+                             <label for="target_language" class="form-label fw-medium">Select Target Language:</label>
                             <select class="form-select form-select-lg" id="target_language" name="target_language">
                                 {% for lang_name in supported_languages %}
                                     <option value="{{ lang_name }}" {% if lang_name == selected_target_lang %}selected{% endif %}>{{ lang_name }}</option>
@@ -76,7 +76,7 @@
 
                         <!-- Text Input -->
                         <div class="col-12" id="text_input_div">
-                            <label for="text_input" class="form-label fw-medium">2. Enter English or Hindi Text:</label>
+                            <label for="text_input" class="form-label fw-medium">Enter English or Hindi Text:</label>
                             <textarea class="form-control" id="text_input" name="text_input" rows="5" placeholder="Type or paste text here...">{{ request.form['text_input'] if request.form['text_input'] }}</textarea> {# Retain text input after submit #}
                         </div>
 
@@ -146,7 +146,7 @@
                         </div>
                         <div class="card-footer bg-white text-center">
                              {% if selected_target_lang in tts_supported_langs %}
-                                <button type="button" class="btn btn-secondary btn-sm" onclick="playTTS()">
+                                <button type="button" class="btn btn-secondary btn-sm" id="ttsListenBtn" onclick="playTTS()">
                                     <i class="bi bi-volume-up"></i> Listen
                                 </button>
                                 <audio id="ttsAudio" controls class="mt-2 d-none" style="width: 100%;"></audio>
@@ -252,7 +252,7 @@
             const text = document.getElementById('ttsText').value;
             const lang = document.getElementById('ttsLang').value;
             const audioPlayer = document.getElementById('ttsAudio');
-            const ttsButton = document.querySelector('#ttsFormData + button'); // Find the button next to the hidden form data
+            const ttsButton = document.getElementById('ttsListenBtn'); // Use the button's id
 
             if (!text || !lang) {
                 console.error("Missing text or language for TTS");
@@ -263,12 +263,12 @@
             ttsButton.disabled = true;
             ttsButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
 
-            fetch("{{ url_for('tts') }}", { // Use Flask's url_for to get the correct endpoint
+            fetch("{{ url_for('tts') }}", {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded', // Standard form encoding
+                    'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: new URLSearchParams({ // Use URLSearchParams for simple key/value pairs
+                body: new URLSearchParams({
                     'text': text,
                     'lang': lang
                 })
@@ -282,22 +282,20 @@
             .then(blob => {
                 const audioUrl = URL.createObjectURL(blob);
                 audioPlayer.src = audioUrl;
-                audioPlayer.classList.remove('d-none'); // Show the player
+                audioPlayer.classList.remove('d-none');
                 audioPlayer.play();
-                // Optional: Revoke object URL when playback finishes to free memory
                 audioPlayer.onended = () => {
                     URL.revokeObjectURL(audioUrl);
                 };
             })
             .catch(error => {
                 console.error('Error fetching TTS audio:', error);
-                alert(`Could not generate audio: ${error.message}`); // Inform user
-                audioPlayer.classList.add('d-none'); // Hide player on error
+                alert(`Could not generate audio: ${error.message}`);
+                audioPlayer.classList.add('d-none');
             })
             .finally(() => {
-                 // Reset button state
-                 ttsButton.disabled = false;
-                 ttsButton.innerHTML = '<i class="bi bi-volume-up"></i> Listen';
+                ttsButton.disabled = false;
+                ttsButton.innerHTML = '<i class="bi bi-volume-up"></i> Listen';
             });
         }
 

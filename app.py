@@ -8,6 +8,12 @@ import sys
 from gtts import gTTS
 import io
 from datetime import datetime
+import boto3
+from botocore.exceptions import BotoCoreError, ClientError
+from TTS.api import TTS
+
+# Initialize models at startup
+utils.initialize_models()
 
 os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "/Users/shyampatro/Translation Project/models/facebook/nllb-200-distilled-600M/service_account.json"
 
@@ -47,6 +53,32 @@ with app.app_context():
 def allowed_file(filename, allowed_extensions):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in allowed_extensions
+
+# Preload the model (do this once at startup)
+coqui_tts_model = TTS(model_name="tts_models/multilingual/multi-dataset/your_tts", progress_bar=False, gpu=False)
+
+# Print available speakers
+speakers = coqui_tts_model.speakers
+print(speakers)
+
+# Map your language codes to Coqui TTS language tags
+COQUI_LANG_MAP = {
+    'en': 'en',
+    'hi': 'hi',
+    'bn': 'bn',
+    'gu': 'gu',
+    'kn': 'kn',
+    'ml': 'ml',
+    'mr': 'mr',
+    'pa': 'pa',
+    'ta': 'ta',
+    'te': 'te',
+    'ur': 'ur',
+    # Add more as supported
+}
+
+# Pick a default speaker (you can make this dynamic if you want)
+DEFAULT_SPEAKER = coqui_tts_model.speakers[0]  # e.g., 'female-en-5'
 
 # --- Routes ---
 @app.route('/', methods=['GET', 'POST'])
@@ -232,12 +264,46 @@ def index():
 @app.route('/tts', methods=['POST'])
 def tts():
     text = request.form.get('text')
-    lang = request.form.get('lang', 'en')  # Should be 'hi' for Hindi
-    tts = gTTS(text, lang=lang)
-    fp = io.BytesIO()
-    tts.write_to_fp(fp)
-    fp.seek(0)
-    return send_file(fp, mimetype='audio/mpeg')
+    lang = request.form.get('lang', 'en')
+    if not text or not lang:
+        return "Missing text or language for TTS", 400
+    # List of gTTS supported Indian languages
+    gtts_supported_langs = {'en', 'hi', 'bn', 'gu', 'kn', 'ml', 'mr', 'pa', 'ta', 'te', 'ur'}
+    if lang not in gtts_supported_langs:
+        return f"TTS not supported for language code: {lang}", 400
+    try:
+        tts = gTTS(text, lang=lang)
+        fp = io.BytesIO()
+        tts.write_to_fp(fp)
+        fp.seek(0)
+        return send_file(fp, mimetype='audio/mpeg')
+    except Exception as e:
+        import traceback
+        print("gTTS generation failed:", e)
+        traceback.print_exc()
+        return f"TTS generation failed: {e}", 500
+
+@app.route('/polly', methods=['POST'])
+def polly_tts():
+    text = request.form.get('text')
+    lang = request.form.get('lang', 'hi-IN')
+    voice_id = request.form.get('voice_id', 'Aditi')  # Default to Aditi
+    if not text or not lang:
+        return "Missing text or language for Polly TTS", 400
+    try:
+        polly = boto3.client('polly')
+        response = polly.synthesize_speech(
+            Text=text,
+            OutputFormat="mp3",
+            VoiceId=voice_id,
+            LanguageCode=lang
+        )
+        fp = io.BytesIO()
+        fp.write(response['AudioStream'].read())
+        fp.seek(0)
+        return send_file(fp, mimetype='audio/mpeg')
+    except Exception as e:
+        return f"Polly TTS generation failed: {e}", 500
 
 if __name__ == '__main__':
     # Set debug=False for production
