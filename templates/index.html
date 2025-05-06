@@ -219,21 +219,14 @@
                                     <div class="bg-light border rounded p-2 small result-box-small">{{ log.translated_text or 'N/A' }}</div>
                                     {# TTS for Log Entry #}
                                     {% set log_nllb_code = log.target_language %}
-                                    {% set log_tts_code_val = MASTER_TTS_CONFIG.get(log_nllb_code) %} {# Get the value first #}
-                                
-                                    {% if log.translated_text and log_tts_code_val %} {# Check log_tts_code_val explicitly for truthiness #}
+                                    {% set log_tts_code = MASTER_TTS_CONFIG.get(log_nllb_code) %}
+                                    {% if log.translated_text and log_tts_code %}
                                         <button type="button" class="btn btn-outline-secondary btn-sm mt-2"
-                                                {# No need for the 'if is not none else "null"' here if we already checked log_tts_code_val above #}
-                                                onclick="playTTSLog(
-                                                    {{ log.translated_text|tojson }},
-                                                    {{ log_tts_code_val|tojson }},
-                                                    {{ ('ttsAudioLog' ~ loop.index)|tojson }},
-                                                    this
-                                                )">
+                                                onclick='playTTSLog({{ log.translated_text|tojson }}, "{{ log_tts_code }}", "ttsAudioLog{{ loop.index }}", this)'>
                                             <i class="bi bi-volume-up"></i> Listen
                                         </button>
                                         <audio id="ttsAudioLog{{ loop.index }}" controls class="mt-2 d-none" style="width: 100%;"></audio>
-                                    {% elif log.translated_text %} {# If translated_text exists but no valid TTS code (log_tts_code_val was None or empty) #}
+                                    {% elif log.translated_text %}
                                         <small class="d-block text-muted mt-2">
                                             <i class="bi bi-speaker-fill"></i> TTS not available for this language.
                                         </small>
