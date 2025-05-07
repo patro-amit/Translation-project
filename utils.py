@@ -1,6 +1,6 @@
 import easyocr
 import whisper
-from transformers import pipeline
+from transformers import pipeline, AutoModelForSeq2SeqLM
 import os
 from langdetect import detect
 
@@ -98,6 +98,7 @@ def get_translation_pipeline(source_lang_code, target_lang_code):
                     model_name = local_model_dir
                 else:
                     model_name = "facebook/nllb-200-distilled-600M"
+                model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
                 translator = pipeline(
                     'translation',
                     model=model_name,
