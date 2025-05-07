@@ -8,6 +8,10 @@ import sys
 from gtts import gTTS
 import io
 from datetime import datetime
+try:
+    from zoneinfo import ZoneInfo  # Python 3.9+
+except ImportError:
+    from backports.zoneinfo import ZoneInfo  # For older Python, if installed
 # import boto3 # Commented out if not immediately using Polly
 # from botocore.exceptions import BotoCoreError, ClientError # Commented out
 # from TTS.api import TTS # Commented out if not immediately using Coqui in /tts
@@ -229,6 +233,14 @@ def index_route(): # Ensure the function name matches here
 
     # This part runs for both GET and POST requests to prepare common template variables
     recent_logs = TranslationLog.query.order_by(TranslationLog.timestamp.desc()).limit(10).all()
+
+    # Convert timestamps to IST for display
+    IST = ZoneInfo('Asia/Kolkata')
+    for log in recent_logs:
+        if log.timestamp:
+            log.timestamp_ist = log.timestamp.replace(tzinfo=ZoneInfo('UTC')).astimezone(IST)
+        else:
+            log.timestamp_ist = None
 
     selected_nllb_for_main_result = utils.SUPPORTED_LANGUAGES.get(selected_target_friendly_name)
     if selected_nllb_for_main_result: # Check if mapping exists
