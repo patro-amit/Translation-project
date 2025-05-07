@@ -202,13 +202,13 @@
                                 <span class="text-primary">{{ NLLB_TO_FRIENDLY_NAME.get(log.source_language, log.source_language)|upper }}</span>
                                 <i class="bi bi-arrow-right-short mx-1"></i>
                                 <span class="text-primary">{{ NLLB_TO_FRIENDLY_NAME.get(log.target_language, log.target_language) }}</span>
-                                <span class="ms-auto text-muted small">{{ log.timestamp.strftime('%b %d, %H:%M') }}</span>
+                                <span class="ms-auto text-muted small">{{ log.timestamp_ist.strftime('%b %d, %H:%M') if log.timestamp_ist else '' }}</span>
                             </button>
                         </h2>
                         <div id="collapse{{ loop.index }}" class="accordion-collapse collapse" aria-labelledby="heading{{ loop.index }}" data-bs-parent="#activityLogAccordion">
                             <div class="accordion-body">
                                 <ul class="list-unstyled mb-3 small">
-                                    <li><strong>Timestamp:</strong> {{ log.timestamp.strftime('%Y-%m-%d %H:%M:%S') }}</li>
+                                    <li><strong>Timestamp:</strong> {{ log.timestamp_ist.strftime('%Y-%m-%d %H:%M:%S') if log.timestamp_ist else '' }}</li>
                                 </ul>
                                 <div class="mb-2">
                                     <strong>Original Text:</strong>
@@ -252,7 +252,7 @@
 
     <footer class="bg-light text-center text-muted py-3 mt-5 border-top">
         <div class="container">
-            <p class="mb-0">© {{ current_year }} Language Translator. Powered by the Translator Team.</p>
+            <p class="mb-0">© {{ current_year }} Language Translator. Powered by Translator Team.</p>
         </div>
     </footer>
 
