@@ -6,39 +6,118 @@
     <title>LinguaLink - Indian Language Translator</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <!-- Bootstrap Icons (Optional, for icons) -->
+    <!-- Bootstrap Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <!-- Favicons -->
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" sizes="any">
-    <link rel="icon" href="{{ url_for('static', filename='bi-chat-dots.svg') }}" type="image/svg+xml"> {# Using Bootstrap Chat Dots Icon as favicon #}
+    <link rel="icon" href="{{ url_for('static', filename='bi-chat-dots.svg') }}" type="image/svg+xml">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
     <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='additional-styles.css') }}"> <!-- Adding additional styles -->
-
-    {# MODIFICATION 1: Add inline style for body padding-top #}
+    {# <link rel="stylesheet" href="{{ url_for('static', filename='additional-styles.css') }}"> #}
+    <!-- Inline styles are used here for brevity, move to style.css for production -->
     <style>
         body {
-            padding-top: 56px; /* Adjust this value if your navbar height changes */
+            padding-top: 56px; /* For fixed-top navbar */
+        }
+        /* Custom audio bar styles from previous response */
+        .custom-audio-controls-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 0.5em;
+            margin-top: 0.5rem;
+            width: 100%;
+            flex-wrap: nowrap;
+            justify-content: center;
+        }
+        .custom-audio-controls-wrapper audio {
+            flex-grow: 1;
+            min-width: 120px;
+            max-width: 300px;
+            margin-left: 0.5em;
+            margin-right: 0.5em;
+            background: transparent;
+            border-radius: 25px;
+        }
+        .custom-audio-controls-wrapper audio::-webkit-media-controls-panel {
+            background-color: #f8f9fa;
+            border-radius: 20px;
+            padding: 5px;
+        }
+        .player-skip-btn {
+            background-color: #f0f0f0;
+            border: 1px solid #d7d7d7;
+            color: #333;
+            font-size: 1em;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            line-height: 1;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease;
+            text-decoration: none;
+        }
+        .player-skip-btn:hover { background-color: #e0e0e0; }
+        .player-skip-btn:active { background-color: #d0d0d0; }
+        .player-skip-btn .skip-interval-label-adjacent {
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-right: 2px;
+            color: #555;
+        }
+        .player-skip-btn .bi {
+            font-size: 1.3em;
+            vertical-align: middle;
+        }
+        .custom-audio-controls-wrapper .dropdown .player-skip-btn .bi-three-dots-vertical {
+             font-size: 1.3em;
+        }
+        .custom-audio-controls-wrapper .dropdown-menu {
+            min-width: 120px;
+            font-size: 0.9em;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15);
+            border-radius: 0.3rem;
+        }
+        .custom-audio-controls-wrapper .dropdown-item {
+            padding: 0.35rem 1rem;
+        }
+        .custom-audio-controls-wrapper .dropdown-item:active {
+            background-color: #0d6efd;
+            color: white;
+        }
+         @media (max-width: 767.98px) {
+            .custom-audio-controls-wrapper {
+                flex-wrap: wrap;
+            }
+            .custom-audio-controls-wrapper audio {
+                min-width: 100%;
+                margin-left: 0; margin-right: 0; margin-top: 0.5em; margin-bottom: 0.5em;
+                order: 0; 
+            }
+            .player-skip-btn { margin-bottom: 0.25em; }
+            .custom-audio-controls-wrapper .dropdown { margin-left: 0; }
         }
     </style>
 </head>
 <body>
 
     <!-- Navbar -->
-    {# MODIFICATION 2: Add 'fixed-top' class to the nav element #}
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm fixed-top">
         <div class="container">
             <a class="navbar-brand fw-bold" href="/">
-                <img src="{{ url_for('static', filename='bi-chat-dots.svg') }}" alt="Chat Icon" width="28" height="28" class="d-inline-block align-text-top me-2" style="filter: invert(1) brightness(1.5);"> {# Using Bootstrap Chat Dots Icon #}
+                <img src="{{ url_for('static', filename='bi-chat-dots.svg') }}" alt="Chat Icon" width="28" height="28" class="d-inline-block align-text-top me-2" style="filter: invert(1) brightness(1.5);">
                 Language Translator
             </a>
         </div>
     </nav>
 
-    <div class="container mt-4 mb-5"> {# This mt-4 might now be redundant or need adjustment due to body padding #}
+    <div class="container mt-4 mb-5">
 
         <!-- Introduction -->
         <div class="text-center mb-4">
@@ -72,11 +151,11 @@
                         <div class="col-md-6">
                             <label for="input_type" class="form-label fw-medium">Choose Input Type:</label>
                             <!-- prettier-ignore-start -->
-                                <select class="form-select form-select-lg" id="input_type" name="input_type" onchange="toggleInputFields()">
-                                    <option value="text" {% if request.form.get('input_type', 'text') == 'text' %}selected{% endif %}>✍️ Text Input</option>
-                                    <option value="image" {% if request.form.get('input_type') == 'image' %}selected{% endif %}>🖼️ Image Upload (OCR)</option>
-                                    <option value="audio" {% if request.form.get('input_type') == 'audio' %}selected{% endif %}>🎤 Audio Upload (STT)</option>
-                                </select>
+                            <select class="form-select form-select-lg" id="input_type" name="input_type" onchange="toggleInputFields()">
+                                <option value="text" {% if request.form.get('input_type', 'text') == 'text' %}selected{% endif %}>✍️ Text Input</option>
+                                <option value="image" {% if request.form.get('input_type') == 'image' %}selected{% endif %}>🖼️ Image Upload (OCR)</option>
+                                <option value="audio" {% if request.form.get('input_type') == 'audio' %}selected{% endif %}>🎤 Audio Upload (STT)</option>
+                            </select>
                             <!-- prettier-ignore-end -->
                         </div>
 
@@ -126,7 +205,6 @@
         {% if original_text or translation_result or (error and not original_text and not translation_result) %}
         <div class="mt-5">
             <h2 class="text-center mb-4">Translation Results</h2>
-             <!-- Display Error if it's the primary message -->
              {% if error and not original_text and not translation_result %}
                 <div class="row justify-content-center">
                     <div class="col-md-10 col-lg-8">
@@ -162,18 +240,36 @@
                         </div>
                         <div class="card-footer bg-white text-center">
                              {% if main_result_tts_supported %}
-                                <button type="button" class="btn btn-secondary btn-sm" id="ttsListenBtn" onclick="playTTS()">
-                                    <i class="bi bi-volume-up"></i> Listen
-                                </button>
-                                <audio id="ttsAudio" controls class="mt-2 d-none" style="width: 100%;"></audio>
-                                <!-- Hidden form data for main TTS -->
-                                <form id="ttsFormData" class="d-none">
-                                     <input type="hidden" name="text" id="ttsText" value="{{ translation_result }}">
-                                     <input type="hidden" name="lang" id="ttsLang" value="{{ main_result_tts_code }}">
+                                <div class="d-flex flex-column align-items-center">
+                                    <button type="button" class="btn btn-secondary btn-sm mb-2" id="ttsListenBtnMain" onclick="playTTSMain()">
+                                        <i class="bi bi-volume-up"></i> Listen
+                                    </button>
+                                    <div id="customAudioControlsWrapperMain" class="custom-audio-controls-wrapper d-none">
+                                        <button type="button" class="player-skip-btn" onclick="skipAudio('ttsAudioMain', -window.ttsSkipInterval)" title="Skip Backward">
+                                            <span class="skip-interval-label-adjacent">5</span><i class="bi bi-arrow-counterclockwise"></i>
+                                        </button>
+                                        <audio id="ttsAudioMain" controls></audio>
+                                        <button type="button" class="player-skip-btn" onclick="skipAudio('ttsAudioMain', window.ttsSkipInterval)" title="Skip Forward">
+                                            <span class="skip-interval-label-adjacent">5</span><i class="bi bi-arrow-clockwise"></i>
+                                        </button>
+                                        <div class="dropdown">
+                                            <button class="btn dropdown-toggle player-skip-btn" type="button" id="skipIntervalDropdownMain" data-bs-toggle="dropdown" aria-expanded="false" title="Skip Interval Settings">
+                                                <i class="bi bi-three-dots-vertical"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="skipIntervalDropdownMain">
+                                                <li><a class="dropdown-item" href="#" onclick="setSkipInterval(5, 'Main'); return false;">Skip 5s</a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="setSkipInterval(10, 'Main'); return false;">Skip 10s</a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="setSkipInterval(15, 'Main'); return false;">Skip 15s</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <form id="ttsFormDataMain" class="d-none">
+                                     <input type="hidden" name="text" id="ttsTextMain" value="{{ translation_result }}">
+                                     <input type="hidden" name="lang" id="ttsLangMain" value="{{ main_result_tts_code }}">
                                 </form>
                              {% else %}
                                  {% if translation_result %}
-                                <!-- Only show "not available" if there is a translation result -->
                                 <small class="text-muted">
                                   <i class="bi bi-speaker-fill"></i> Text-to-speech not available for {{ selected_target_lang }}.
                                 </small>
@@ -193,49 +289,71 @@
             <h3 class="text-center mb-4">Activity Log</h3>
             {% if recent_logs %}
                 <div class="accordion shadow-sm mx-auto" id="activityLogAccordion" style="max-width: 800px;">
-                    {% for log in recent_logs %}
+                    {% for log_item in recent_logs %}
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="heading{{ loop.index }}">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" aria-expanded="false" aria-controls="collapse{{ loop.index }}">
-                                <span class="badge {{ 'bg-success' if log.translated_text else 'bg-danger' }} me-2">{{ 'Success' if log.translated_text else 'Failed' }}</span>
-                                <span class="fw-normal me-1">{{ log.input_type|title }}</span>
-                                <span class="text-primary">{{ NLLB_TO_FRIENDLY_NAME.get(log.source_language, log.source_language)|upper }}</span>
+                                <span class="badge {{ 'bg-success' if log_item.translated_text else 'bg-danger' }} me-2">{{ 'Success' if log_item.translated_text else 'Failed' }}</span>
+                                <span class="fw-normal me-1">{{ log_item.input_type|title }}</span>
+                                <span class="text-primary">{{ NLLB_TO_FRIENDLY_NAME.get(log_item.source_language, log_item.source_language)|upper }}</span>
                                 <i class="bi bi-arrow-right-short mx-1"></i>
-                                <span class="text-primary">{{ NLLB_TO_FRIENDLY_NAME.get(log.target_language, log.target_language) }}</span>
-                                <span class="ms-auto text-muted small">{{ log.timestamp_ist.strftime('%b %d, %H:%M') if log.timestamp_ist else '' }}</span>
+                                <span class="text-primary">{{ NLLB_TO_FRIENDLY_NAME.get(log_item.target_language, log_item.target_language) }}</span>
+                                <span class="ms-auto text-muted small">{{ log_item.timestamp_ist.strftime('%b %d, %H:%M') if log_item.timestamp_ist else (log_item.timestamp.strftime('%b %d, %H:%M UTC') if log_item.timestamp else '') }}</span>
                             </button>
                         </h2>
                         <div id="collapse{{ loop.index }}" class="accordion-collapse collapse" aria-labelledby="heading{{ loop.index }}" data-bs-parent="#activityLogAccordion">
                             <div class="accordion-body">
                                 <ul class="list-unstyled mb-3 small">
-                                    <li><strong>Timestamp:</strong> {{ log.timestamp_ist.strftime('%Y-%m-%d %H:%M:%S') if log.timestamp_ist else '' }}</li>
+                                    <li><strong>Timestamp:</strong> {{ log_item.timestamp_ist.strftime('%Y-%m-%d %H:%M:%S %Z') if log_item.timestamp_ist else (log_item.timestamp.strftime('%Y-%m-%d %H:%M:%S UTC') if log_item.timestamp else 'N/A') }}</li>
                                 </ul>
                                 <div class="mb-2">
                                     <strong>Original Text:</strong>
-                                    <div class="bg-light border rounded p-2 small text-muted result-box-small">{{ log.original_text or 'N/A' }}</div>
+                                    <div class="bg-light border rounded p-2 small text-muted result-box-small">{{ log_item.original_text or 'N/A' }}</div>
                                 </div>
                                 <div class="mb-2">
-                                    <strong>Translated Text ({{ NLLB_TO_FRIENDLY_NAME.get(log.target_language, log.target_language) }}):</strong>
-                                    <div class="bg-light border rounded p-2 small result-box-small">{{ log.translated_text or 'N/A' }}</div>
-                                    {# TTS for Log Entry #}
-                                    {% set log_nllb_code = log.target_language %}
-                                    {% set log_tts_code = MASTER_TTS_CONFIG.get(log_nllb_code) %}
-                                    {% if log.translated_text and log_tts_code %}
-                                        <button type="button" class="btn btn-outline-secondary btn-sm mt-2"
-                                                onclick='playTTSLog({{ log.translated_text|tojson }}, "{{ log_tts_code }}", "ttsAudioLog{{ loop.index }}", this)'>
-                                            <i class="bi bi-volume-up"></i> Listen
-                                        </button>
-                                        <audio id="ttsAudioLog{{ loop.index }}" controls class="mt-2 d-none" style="width: 100%;"></audio>
-                                    {% elif log.translated_text %}
-                                        <small class="d-block text-muted mt-2">
+                                    <strong>Translated Text ({{ NLLB_TO_FRIENDLY_NAME.get(log_item.target_language, log_item.target_language) }}):</strong>
+                                    <div class="bg-light border rounded p-2 small result-box-small">{{ log_item.translated_text or 'N/A' }}</div>
+                                    {% set log_nllb_code = log_item.target_language %}
+                                    {% set log_tts_code_val = MASTER_TTS_CONFIG.get(log_nllb_code) %}
+                                    {% if log_item.translated_text and log_tts_code_val %}
+                                        <div class="d-flex flex-column align-items-center mt-2">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm mb-2" id="ttsListenBtnLog{{ loop.index }}" onclick="playTTSLogEntry({{ loop.index }})">
+                                                <i class="bi bi-volume-up"></i> Listen
+                                            </button>
+                                            <div id="customAudioControlsWrapperLog{{ loop.index }}" class="custom-audio-controls-wrapper d-none">
+                                                <button type="button" class="player-skip-btn" onclick="skipAudio('ttsAudioLog{{ loop.index }}', -window.ttsSkipInterval)" title="Skip Backward">
+                                                   <span class="skip-interval-label-adjacent">5</span><i class="bi bi-arrow-counterclockwise"></i>
+                                                </button>
+                                                <audio id="ttsAudioLog{{ loop.index }}" controls></audio>
+                                                <button type="button" class="player-skip-btn" onclick="skipAudio('ttsAudioLog{{ loop.index }}', window.ttsSkipInterval)" title="Skip Forward">
+                                                    <span class="skip-interval-label-adjacent">5</span><i class="bi bi-arrow-clockwise"></i>
+                                                </button>
+                                                <div class="dropdown">
+                                                    <button class="btn dropdown-toggle player-skip-btn" type="button" id="skipIntervalDropdownLog{{ loop.index }}" data-bs-toggle="dropdown" aria-expanded="false" title="Skip Interval Settings">
+                                                        <i class="bi bi-three-dots-vertical"></i>
+                                                    </button>
+                                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="skipIntervalDropdownLog{{ loop.index }}">
+                                                        <li><a class="dropdown-item" href="#" onclick="setSkipInterval(5, 'Log{{loop.index}}'); return false;">Skip 5s</a></li>
+                                                        <li><a class="dropdown-item" href="#" onclick="setSkipInterval(10, 'Log{{loop.index}}'); return false;">Skip 10s</a></li>
+                                                        <li><a class="dropdown-item" href="#" onclick="setSkipInterval(15, 'Log{{loop.index}}'); return false;">Skip 15s</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <form id="ttsFormDataLog{{ loop.index }}" class="d-none">
+                                            <input type="hidden" id="ttsTextLog{{ loop.index }}" value="{{ log_item.translated_text if log_item.translated_text is not none else '' }}">
+                                            <input type="hidden" id="ttsLangLog{{ loop.index }}" value="{{ log_tts_code_val }}">
+                                        </form>
+                                    {% elif log_item.translated_text %}
+                                        <small class="d-block text-muted mt-2 text-center">
                                             <i class="bi bi-speaker-fill"></i> TTS not available for this language.
                                         </small>
                                     {% endif %}
                                 </div>
-                                {% if log.error_message %}
+                                {% if log_item.error_message %}
                                 <div class="mb-2">
                                     <strong class="text-danger">Error:</strong>
-                                    <div class="bg-danger-subtle border border-danger-subtle text-danger-emphasis rounded p-2 small">{{ log.error_message }}</div>
+                                    <div class="bg-danger-subtle border border-danger-subtle text-danger-emphasis rounded p-2 small">{{ log_item.error_message }}</div>
                                 </div>
                                 {% endif %}
                             </div>
@@ -262,6 +380,9 @@
 
     <!-- Custom JS -->
     <script>
+        // Global skip interval, default to 5 seconds
+        window.ttsSkipInterval = 5;
+
         function toggleInputFields() {
             const inputType = document.getElementById('input_type').value;
             const textDiv = document.getElementById('text_input_div');
@@ -274,12 +395,12 @@
 
             if (inputType === 'text') {
                 textDiv.style.display = 'block';
-                fileInput.value = ''; // Clear file input if switching to text
+                fileInput.value = '';
                 fileInput.removeAttribute('accept');
                 fileHelp.textContent = '';
             } else {
                 fileDiv.style.display = 'block';
-                document.getElementById('text_input').value = ''; // Clear text input if switching to file
+                document.getElementById('text_input').value = '';
                  if (inputType === 'image') {
                     fileInput.setAttribute('accept', 'image/png, image/jpeg, image/jpg, image/gif, image/bmp, image/webp');
                     fileHelp.textContent = 'Allowed image types: PNG, JPG, JPEG, GIF, BMP, WEBP (Max 16MB)';
@@ -290,195 +411,111 @@
             }
         }
 
-        // JS for Main TTS Playback
-        function playTTS() {
-            console.log("--- playTTS CALLED ---");
-            const text = document.getElementById('ttsText').value;
-            const lang = document.getElementById('ttsLang').value;
-            const audioPlayer = document.getElementById('ttsAudio');
-            const ttsButton = document.getElementById('ttsListenBtn');
+        function setSkipInterval(seconds, playerContext) {
+            window.ttsSkipInterval = parseInt(seconds, 10);
+            document.querySelectorAll('.skip-interval-label-adjacent').forEach(label => {
+                label.textContent = window.ttsSkipInterval;
+            });
+            console.log(`Skip interval set to: ${window.ttsSkipInterval}s for context: ${playerContext}`);
+        }
 
-            console.log("Main TTS - Text:", typeof text, text);
-            console.log("Main TTS - Lang:", typeof lang, lang);
 
-            if (!text || text.trim() === "") {
-                console.error("Main TTS Error: Text is invalid or empty.");
-                alert("Cannot play audio: No valid text provided for main result.");
-                return;
+        function skipAudio(audioPlayerId, seconds) {
+            const audioPlayer = document.getElementById(audioPlayerId);
+            if (audioPlayer && audioPlayer.src && (audioPlayer.duration > 0 && !audioPlayer.paused || audioPlayer.currentTime > 0)) {
+                const newTime = audioPlayer.currentTime + seconds;
+                audioPlayer.currentTime = Math.max(0, Math.min(audioPlayer.duration, newTime));
+                console.log(`Skipped audio for ${audioPlayerId} by ${seconds}s. New time: ${audioPlayer.currentTime}`);
+            } else {
+                console.log(`Cannot skip audio for ${audioPlayerId}: Audio not loaded/playing or player not found.`);
             }
-            if (!lang || lang.trim() === "") {
-                console.error("Main TTS Error: Language code is invalid or missing.");
-                alert("Cannot play audio: Language not specified correctly for main result.");
-                return;
+        }
+
+
+        function playTTSGeneric(text, lang, audioPlayerId, listenButtonId, customControlsWrapperId) {
+            console.log(`--- playTTSGeneric CALLED for ${audioPlayerId} ---`);
+            const audioPlayer = document.getElementById(audioPlayerId);
+            const listenButton = document.getElementById(listenButtonId);
+            const customControlsWrapper = document.getElementById(customControlsWrapperId);
+
+            if (text === null || typeof text === 'undefined' || (typeof text === 'string' && text.trim() === "")) {
+                 console.error(`TTS Error (${audioPlayerId}): Text is null, undefined, or empty string.`);
+                 alert("Cannot play: No valid text provided.");
+                 return;
             }
-            if (!ttsButton || !audioPlayer) {
-                console.error("Main TTS Error: Button or audio player element not found.");
-                return;
+            if (typeof lang !== 'string' || lang.trim() === "") { console.error(`TTS Error (${audioPlayerId}): Lang invalid.`); alert("Cannot play: No lang."); return; }
+            if (!audioPlayer) { console.error(`TTS Error (${audioPlayerId}): Audio player not found.`); alert("Player error."); return; }
+            if (!customControlsWrapper) { console.error(`TTS Error (${audioPlayerId}): Controls wrapper not found.`); alert("Controls error."); return; }
+            
+            if(listenButton) {
+                listenButton.disabled = true;
+                listenButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Loading...';
             }
+            console.log(`Fetching TTS for ${audioPlayerId}: Text='${text.substring(0,50)}', Lang='${lang}'`);
 
-            ttsButton.disabled = true;
-            ttsButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
-            console.log("Main TTS: Fetching audio from:", "{{ url_for('tts_route') }}");
-
-
-            fetch("{{ url_for('tts_route') }}", {
-                method: 'POST',
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: new URLSearchParams({'text': text, 'lang': lang })
-            })
+            fetch("{{ url_for('tts_route') }}", { method: 'POST', headers: {'Content-Type': 'application/x-www-form-urlencoded'}, body: new URLSearchParams({'text': text, 'lang': lang })})
             .then(response => {
-                console.log("Main TTS Fetch Response Status:", response.status, response.statusText);
-                if (!response.ok) {
-                    return response.text().then(errorText => {
-                        throw new Error(`TTS generation failed: ${response.statusText} (${response.status}). Server says: ${errorText}`);
-                    });
-                }
+                console.log(`Fetch Status (${audioPlayerId}):`, response.status);
+                if (!response.ok) { return response.text().then(errTxt => { throw new Error(`TTS fail: ${response.statusText}. Server: ${errTxt}`);});}
                 return response.blob();
             })
             .then(blob => {
-                console.log("Main TTS Blob received. Type:", blob.type, "Size:", blob.size);
-                 if (blob.size === 0 || !blob.type.startsWith('audio/')) {
-                    console.error("Main TTS Error: Received empty or non-audio blob.");
-                    throw new Error("Received invalid audio data from server for main result.");
-                }
+                console.log(`Blob (${audioPlayerId}):`, blob.type, blob.size);
+                if (blob.size === 0 || !blob.type.startsWith('audio/')) { throw new Error("Invalid audio data.");}
                 const audioUrl = URL.createObjectURL(blob);
                 audioPlayer.src = audioUrl;
-                audioPlayer.classList.remove('d-none');
-                console.log("Main TTS: Attempting to play audio.");
-                audioPlayer.play().catch(playError => {
-                    console.error("Main TTS Error during play():", playError);
-                    alert("Error playing main audio: " + playError.message);
-                });
+                customControlsWrapper.classList.remove('d-none');
+                if(listenButton) listenButton.classList.add('d-none');
+                
+                audioPlayer.play().catch(e => {console.error(`play() error (${audioPlayerId}):`, e); alert("Error playing: " + e.message);});
                 audioPlayer.onended = () => {
-                    console.log("Main TTS: Audio finished playing, revoking URL.");
+                    console.log(`Audio ended (${audioPlayerId}), revoking URL.`);
                     URL.revokeObjectURL(audioUrl);
+                    customControlsWrapper.classList.add('d-none');
+                    if(listenButton) listenButton.classList.remove('d-none');
                 };
             })
             .catch(error => {
-                console.error('Main TTS - Error during fetch/processing:', error);
-                alert(`Could not generate or play main audio: ${error.message}`);
-                if (audioPlayer) audioPlayer.classList.add('d-none');
+                console.error(`TTS Error (${audioPlayerId}):`, error);
+                alert(`TTS failed for ${audioPlayerId}: ${error.message}`);
+                customControlsWrapper.classList.add('d-none');
+                if(listenButton) listenButton.classList.remove('d-none');
             })
             .finally(() => {
-                if (ttsButton) {
-                    ttsButton.disabled = false;
-                    ttsButton.innerHTML = '<i class="bi bi-volume-up"></i> Listen';
+                if (listenButton) {
+                    listenButton.disabled = false;
+                    listenButton.innerHTML = '<i class="bi bi-volume-up"></i> Listen';
                 }
             });
         }
 
-        // JS for Log Entry TTS Playback
-        function playTTSLog(text, lang, audioId, btn) {
-            console.log("--- playTTSLog CALLED ---");
-            console.log("Log TTS - Received Text (Type, Value):", typeof text, text);
-            console.log("Log TTS - Received Lang (Type, Value):", typeof lang, lang);
-            console.log("Log TTS - Received Audio ID (Type, Value):", typeof audioId, audioId);
-            console.log("Log TTS - Received Button Element:", btn);
-
-            const audioPlayer = document.getElementById(audioId);
-
-            // Validate inputs
-            if (typeof text !== 'string' || text.trim() === "") {
-                console.error("Log TTS Error: Text is invalid or empty. Received (Type, Value):", typeof text, text);
-                alert("Cannot play audio: No valid text provided for this log entry.");
-                if (btn && typeof btn.removeAttribute === 'function') { btn.disabled = false; btn.innerHTML = '<i class="bi bi-volume-up"></i> Listen'; }
-                return;
-            }
-            if (typeof lang !== 'string' || lang.trim() === "") {
-                console.error("Log TTS Error: Language code is invalid or missing. Received (Type, Value):", typeof lang, lang);
-                alert("Cannot play audio: Language not specified correctly for this log entry.");
-                if (btn && typeof btn.removeAttribute === 'function') { btn.disabled = false; btn.innerHTML = '<i class="bi bi-volume-up"></i> Listen'; }
-                return;
-            }
-            if (!audioPlayer) {
-                console.error("Log TTS Error: Audio player element not found with ID:", audioId);
-                alert("Cannot play audio: Internal error (audio player not found for ID: " + audioId + ").");
-                return;
-            }
-            if (!btn || typeof btn.removeAttribute !== 'function') { // More robust check for DOM element
-                console.error("Log TTS Error: Button element is invalid or not a DOM element. Button object:", btn);
-                // alert("Internal error: TTS button reference is broken."); // Optional: alert user
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Loading...';
-            console.log("Log TTS: Fetching audio from URL:", "{{ url_for('tts_route') }}", "with params text (first 50):", text.substring(0,50), "lang:", lang);
-
-
-            fetch("{{ url_for('tts_route') }}", {
-                method: 'POST',
-                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-                body: new URLSearchParams({'text': text, 'lang': lang})
-            })
-            .then(response => {
-                console.log("Log TTS Fetch Response Status:", response.status, response.statusText);
-                if (!response.ok) {
-                    return response.text().then(errorText => {
-                        console.error("Log TTS Server Error Response Text:", errorText);
-                        throw new Error(`TTS generation failed: ${response.statusText} (${response.status}). Server says: ${errorText}`);
-                    });
-                }
-                return response.blob();
-            })
-            .then(blob => {
-                console.log("Log TTS Blob received. Type:", blob.type, "Size:", blob.size);
-                 if (blob.size === 0 || !blob.type.startsWith('audio/')) {
-                    console.error("Log TTS Error: Received empty or non-audio blob from server.");
-                    throw new Error("Received invalid audio data from server for log entry.");
-                }
-                const audioUrl = URL.createObjectURL(blob);
-                audioPlayer.src = audioUrl;
-                audioPlayer.classList.remove('d-none');
-                console.log("Log TTS: Attempting to play audio from URL:", audioUrl);
-                audioPlayer.play().catch(playError => {
-                    console.error("Log TTS Error during audioPlayer.play():", playError);
-                    alert("Error playing audio for log entry: " + playError.message);
-                });
-                audioPlayer.onended = () => {
-                    console.log("Log TTS: Audio finished playing, revoking URL:", audioUrl);
-                    URL.revokeObjectURL(audioUrl);
-                };
-            })
-            .catch(error => {
-                console.error('Log TTS - Error during fetch/processing pipeline:', error);
-                alert(`Could not generate or play audio for log entry: ${error.message}`);
-                if (audioPlayer) audioPlayer.classList.add('d-none');
-            })
-            .finally(() => {
-                if (btn && typeof btn.removeAttribute === 'function') {
-                    btn.disabled = false;
-                    btn.innerHTML = '<i class="bi bi-volume-up"></i> Listen';
-                }
-            });
+        function playTTSMain() {
+            const text = document.getElementById('ttsTextMain').value;
+            const lang = document.getElementById('ttsLangMain').value;
+            playTTSGeneric(text, lang, 'ttsAudioMain', 'ttsListenBtnMain', 'customAudioControlsWrapperMain');
         }
+
+        function playTTSLogEntry(loopIndex) {
+            const text = document.getElementById(`ttsTextLog${loopIndex}`).value;
+            const lang = document.getElementById(`ttsLangLog${loopIndex}`).value;
+            playTTSGeneric(text, lang, `ttsAudioLog${loopIndex}`, `ttsListenBtnLog${loopIndex}`, `customAudioControlsWrapperLog${loopIndex}`);
+        }
+
 
         document.addEventListener('DOMContentLoaded', function() {
-            toggleInputFields(); // Set initial state for input fields
-
+            toggleInputFields();
             const form = document.querySelector('form');
             const loadingIndicator = document.getElementById('loadingIndicator');
             if (form && loadingIndicator) {
                 form.addEventListener('submit', function(event) {
                     const textInputVal = document.getElementById('text_input').value.trim();
                     const fileInputFiles = document.getElementById('file').files;
-
                     const inputType = document.getElementById('input_type').value;
                     let hasInput = false;
-
-                    if (inputType === 'text' && textInputVal) {
-                        hasInput = true;
-                    } else if ((inputType === 'image' || inputType === 'audio') && fileInputFiles.length > 0) {
-                        hasInput = true;
-                    }
-
-                    if (hasInput) {
-                         loadingIndicator.style.display = 'block';
-                    } else {
-                        event.preventDefault();
-                        alert("Please provide text or upload a file to translate.");
-                        loadingIndicator.style.display = 'none';
-                    }
+                    if (inputType === 'text' && textInputVal) { hasInput = true; }
+                    else if ((inputType === 'image' || inputType === 'audio') && fileInputFiles.length > 0) { hasInput = true;}
+                    if (hasInput) { loadingIndicator.style.display = 'block'; }
+                    else { event.preventDefault(); alert("Please provide text or upload a file to translate."); loadingIndicator.style.display = 'none'; }
                 });
             }
         });
