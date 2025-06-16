@@ -41,10 +41,19 @@ textarea.form-control {
     overflow-y: auto; /* Add scroll if content overflows */
     max-height: 400px; /* Prevent excessively tall boxes */
 }
+
+
 .result-box-small { /* For smaller text boxes in accordion */
-    min-height: 60px;
-    max-height: 150px;
-    font-size: 0.9em; /* Match accordion body font size */
+    min-height: 60px;    /* Optional: ensure a minimum space even for short text */
+    max-height: 150px;   /* <<< Crucial: Set a maximum height for the box */
+    overflow-y: auto;  /* <<< Crucial: Add vertical scrollbar if content overflows */
+    font-size: 0.9em;    /* Existing: Match accordion body font size */
+    padding: 0.5rem;     /* Optional: Add some padding inside the scrollable box */
+    border: 1px solid #e9ecef; /* Optional: Add a light border like other result boxes */
+    border-radius: 0.25rem; /* Optional: Rounded corners */
+    background-color: #f8f9fa; /* Optional: Light background for the text area */
+    white-space: pre-wrap; /* Ensures text wraps and newlines are preserved */
+    word-wrap: break-word; /* Breaks long words to prevent horizontal overflow */
 }
 
 
