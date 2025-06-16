@@ -2,7 +2,7 @@
 
 body {
     background-color: #f8f9fa; /* Light grey background */
-    padding-top: 56px; /* Adjust if navbar height changes */
+    padding-top: 56px; /* Adjust if navbar height changes - THIS IS IMPORTANT FOR FIXED NAVBAR */
     padding-bottom: 3rem; /* Add space before footer */
 }
 
@@ -41,34 +41,44 @@ textarea.form-control {
     overflow-y: auto; /* Add scroll if content overflows */
     max-height: 400px; /* Prevent excessively tall boxes */
 }
+.result-box-small { /* For smaller text boxes in accordion */
+    min-height: 60px;
+    max-height: 150px;
+    font-size: 0.9em; /* Match accordion body font size */
+}
+
 
 .card .card-header {
     font-weight: 500; /* Slightly bolder headers */
 }
 
-/* TTS Button and Player */
+/* TTS Button and Player (General) */
 .card-footer {
     border-top: 1px solid #e9ecef;
 }
 
-#ttsAudio {
-    max-width: 100%; /* Ensure audio player fits */
-}
+/* #ttsAudio { */ /* This ID is too specific, audio players have unique IDs now */
+    /* max-width: 100%; */ /* Ensure audio player fits - better to style the wrapper or audio tag directly */
+/* } */
 
 /* Activity Log Styling */
-.list-group-item {
-    border-color: #e9ecef; /* Match border colors */
-}
-.list-group-item h6 .badge {
+/* .list-group-item {  This was for an older log style, accordion is used now
+    border-color: #e9ecef;
+    Match border colors
+} */
+/* .list-group-item h6 .badge {
     vertical-align: middle;
-}
+} */
 
-.list-group-item p {
+/* .list-group-item p {
     font-size: 0.9em;
-    color: #6c757d; /* Muted text color for details */
-}
-.list-group-item p .badge {
-    font-size: 0.8em; /* Smaller status badges */
+    color: #6c757d; 
+} */
+/* Removed empty ruleset for .list-group-item p .badge */
+
+/* Accordion body text if needed */
+.accordion-body .small {
+    font-size: 0.9em; /* Ensure consistent small text */
 }
 
 
@@ -90,4 +100,114 @@ footer {
     .result-box {
         min-height: 120px; /* Slightly smaller min-height on mobile */
     }
+    .custom-audio-controls-wrapper {
+        flex-wrap: wrap; /* Allow controls to wrap on very small screens */
+        justify-content: center; /* Center them when wrapped */
+    }
+    .custom-audio-controls-wrapper audio {
+        min-width: 100%; /* Make audio take full width when wrapped */
+        margin-left: 0;
+        margin-right: 0;
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+        order: 0; /* Ensure audio is visually between buttons or as desired */
+    }
+    .player-skip-btn {
+        margin-bottom: 0.25em; /* Add some space if buttons wrap */
+    }
+    .custom-audio-controls-wrapper .dropdown {
+        margin-left: 0; /* Reset margin for wrapped state */
+    }
+}
+
+/* --- NEW/MODIFIED STYLES FOR CUSTOM AUDIO CONTROLS --- */
+.custom-audio-controls-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.5em; /* Space between elements */
+    margin-top: 0.5rem; /* Space above the control bar */
+    width: 100%; /* Take full available width */
+    flex-wrap: nowrap; /* Default to no wrap */
+    justify-content: center; /* Center the items if they don't fill the width */
+}
+
+.custom-audio-controls-wrapper audio {
+    flex-grow: 1; /* Allows the audio element to take up most of the space */
+    min-width: 120px;
+    max-width: 300px; /* Max width for the audio player itself */
+    margin-left: 0.5em;
+    margin-right: 0.5em;
+    background: transparent; /* Try to make native player less obtrusive */
+    /* Attempt to style default controls - very browser dependent */
+    border-radius: 25px; /* For the audio element itself, if visible */
+    /* box-shadow: 0 2px 5px rgba(0,0,0,0.1); */
+}
+
+/* Attempt to style WebKit (Chrome, Safari, Edge) native controls */
+.custom-audio-controls-wrapper audio::-webkit-media-controls-panel {
+    background-color: #f8f9fa; /* Light background for the panel */
+    border-radius: 20px; /* Rounded corners for the panel */
+    padding: 5px;
+    /* box-shadow: inset 0 0 5px rgba(0,0,0,0.05); */
+}
+/* Removed empty ruleset for WebKit media controls selectors */
+
+
+.player-skip-btn {
+    background-color: #f0f0f0; /* Lighter grey for a softer look */
+    border: 1px solid #d7d7d7; /* Slightly softer border */
+    color: #333;
+    font-size: 1em;
+    width: 42px;    /* Slightly larger for touch */
+    height: 42px;
+    border-radius: 50%; /* Circle */
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    line-height: 1;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    text-decoration: none;
+    /* box-shadow: 0 1px 3px rgba(0,0,0,0.1); */
+}
+
+.player-skip-btn:hover {
+    background-color: #e0e0e0;
+    /* box-shadow: 0 2px 5px rgba(0,0,0,0.15); */
+}
+.player-skip-btn:active {
+    background-color: #d0d0d0;
+    /* box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); */
+}
+
+/* For the number + icon combination */
+.player-skip-btn .skip-interval-label-adjacent {
+    font-size: 0.85em; /* Smaller, distinct number */
+    font-weight: 600; /* Semi-bold */
+    margin-right: 2px; /* Tiny space if needed */
+    color: #555;
+}
+.player-skip-btn .bi { /* Bootstrap Icon within the button */
+    font-size: 1.3em; /* Adjust icon size relative to button */
+    vertical-align: middle; /* Helps with alignment */
+}
+
+/* Styling for the 3-dot menu button if it uses player-skip-btn class */
+.custom-audio-controls-wrapper .dropdown .player-skip-btn .bi-three-dots-vertical {
+     font-size: 1.3em; /* Ensure icon size consistency */
+}
+
+.custom-audio-controls-wrapper .dropdown-menu {
+    min-width: 120px; /* Ensure dropdown has enough width for items */
+    font-size: 0.9em;
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15); /* Add shadow to dropdown */
+    border-radius: 0.3rem;
+}
+.custom-audio-controls-wrapper .dropdown-item {
+    padding: 0.35rem 1rem; /* Adjust padding for dropdown items */
+}
+.custom-audio-controls-wrapper .dropdown-item:active {
+    background-color: #0d6efd; /* Bootstrap primary for active item */
+    color: white;
 }
