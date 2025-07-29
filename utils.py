@@ -120,31 +120,30 @@ def perform_ocr(image_path, lang_code='en'):
     return text, detected_lang
 
 # --- STT Function ---
-def perform_stt(audio_path):
+def perform_stt(audio_path, lang_code_hint=None):
     # Added debugging prints and fp16=False flag
     global WHISPER_MODEL # Ensure we are using the globally loaded model
     if WHISPER_MODEL is None:
         print("[utils.py ERROR] Whisper model is None in perform_stt!")
-        # Attempt to load it here as a fallback? Or rely on initialize_models()
-        # For now, raise exception as per original logic
         raise Exception("Whisper model not initialized.")
     try:
         print(f"[utils.py DEBUG] Starting Whisper transcription for: {audio_path}")
-        # Use fp16=False if running on CPU or having GPU compatibility issues
-        result = WHISPER_MODEL.transcribe(audio_path, fp16=False)
+        # If a language hint is provided, use it; else let Whisper auto-detect
+        if lang_code_hint:
+            print(f"[utils.py DEBUG] Forcing Whisper language: {lang_code_hint}")
+            result = WHISPER_MODEL.transcribe(audio_path, fp16=False, language=lang_code_hint)
+        else:
+            result = WHISPER_MODEL.transcribe(audio_path, fp16=False)
         text = result['text']
-        # Whisper returns short language codes like 'en', 'hi'
         lang_short = result['language']
         print(f"[utils.py DEBUG] Whisper transcription successful. Lang='{lang_short}', Text='{text[:100]}...'")
-        # Return tuple (text, lang_short)
         return text, lang_short
     except Exception as e:
         print(f"[utils.py ERROR] Error during STT transcription: {e}")
         import traceback
         traceback.print_exc()
-        # Return None, None as expected by app.py on failure
         return None, None
-
+    
 # --- Language Detection Function ---
 def detect_language(text):
     if not text:
