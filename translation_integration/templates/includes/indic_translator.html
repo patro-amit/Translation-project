@@ -1,0 +1,155 @@
+
+<!-- Indian Language Translator UI Component -->
+<div class="translator-container">
+  <div class="translator-header">
+    <h2>🇮🇳 Indian Language Translator</h2>
+    <p>Translate English to various Indian languages</p>
+  </div>
+
+  <div class="translator-body">
+    <!-- Source language input -->
+    <div class="translator-input">
+      <div class="language-selector">
+        <label for="source-language">Source:</label>
+        <select id="source-language" disabled>
+          <option value="en">English</option>
+        </select>
+      </div>
+      <textarea id="source-text" placeholder="Enter text to translate..."></textarea>
+    </div>
+
+    <!-- Translation button -->
+    <div class="translator-controls">
+      <button id="translate-btn" class="translate-button">
+        <span class="translate-icon">→</span>
+        <span class="translate-text">Translate</span>
+      </button>
+    </div>
+
+    <!-- Target language output -->
+    <div class="translator-output">
+      <div class="language-selector">
+        <label for="target-language">Target:</label>
+        <select id="target-language">
+          <!-- Languages will be populated via JavaScript -->
+        </select>
+      </div>
+      <textarea id="target-text" placeholder="Translation will appear here..." readonly></textarea>
+    </div>
+  </div>
+
+  <div class="translator-footer">
+    <div class="status-indicator">
+      <span id="translation-status">Ready</span>
+    </div>
+  </div>
+</div>
+
+<!-- JavaScript for the translator component -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const sourceText = document.getElementById('source-text');
+  const targetText = document.getElementById('target-text');
+  const targetLanguage = document.getElementById('target-language');
+  const translateBtn = document.getElementById('translate-btn');
+  const translationStatus = document.getElementById('translation-status');
+
+  // Fetch available languages
+  async function fetchLanguages() {
+    try {
+      translationStatus.textContent = 'Loading languages...';
+      const response = await fetch('/api/languages');
+      const data = await response.json();
+
+      if (data.success) {
+        // Populate language dropdown
+        targetLanguage.innerHTML = '';
+        data.languages.forEach(lang => {
+          const option = document.createElement('option');
+          option.value = lang.code;
+          option.textContent = lang.name;
+          targetLanguage.appendChild(option);
+        });
+
+        checkModelStatus();
+      } else {
+        translationStatus.textContent = 'Failed to load languages';
+      }
+    } catch (error) {
+      console.error('Error fetching languages:', error);
+      translationStatus.textContent = 'Error loading languages';
+    }
+  }
+
+  // Check which models are available
+  async function checkModelStatus() {
+    try {
+      const response = await fetch('/api/model-status');
+      const data = await response.json();
+
+      if (data.success) {
+        Array.from(targetLanguage.options).forEach(option => {
+          const langCode = option.value;
+          if (!data.models[langCode]?.available) {
+            option.textContent += ' (Model not available)';
+            option.disabled = true;
+          }
+        });
+
+        translationStatus.textContent = 'Ready';
+      }
+    } catch (error) {
+      console.error('Error checking model status:', error);
+    }
+  }
+
+  // Translate text
+  async function translateText() {
+    const text = sourceText.value.trim();
+    const lang = targetLanguage.value;
+
+    if (!text) {
+      alert('Please enter text to translate');
+      return;
+    }
+
+    try {
+      translationStatus.textContent = 'Translating...';
+      translateBtn.disabled = true;
+
+      const response = await fetch('/api/translate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          text: text,
+          target_lang: lang
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        targetText.value = data.translation;
+        translationStatus.textContent = 'Translation complete';
+      } else {
+        targetText.value = '';
+        translationStatus.textContent = `Error: ${data.error}`;
+        alert(`Translation failed: ${data.error}`);
+      }
+    } catch (error) {
+      console.error('Translation error:', error);
+      translationStatus.textContent = 'Translation failed';
+    } finally {
+      translateBtn.disabled = false;
+    }
+  }
+
+  // Event listeners
+  translateBtn.addEventListener('click', translateText);
+
+  // Initialize
+  fetchLanguages();
+});
+</script>
