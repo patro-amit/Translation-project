@@ -1,0 +1,48 @@
+
+<!-- Indian Language Translator UI Component -->
+<div class="translator-container">
+  <div class="translator-header">
+    <h2>🇮🇳 Indian Language Translator</h2>
+    <p>Translate English to various Indian languages</p>
+  </div>
+
+  <div class="translator-body">
+    <!-- Source language input -->
+    <div class="translator-input">
+      <div class="language-selector">
+        <label for="source-language">Source:</label>
+        <select id="source-language" disabled>
+          <option value="en">English</option>
+        </select>
+      </div>
+      <textarea id="source-text" placeholder="Enter text to translate..."></textarea>
+    </div>
+
+    <!-- Translation button -->
+    <div class="translator-controls">
+      <button id="translate-btn" class="translate-button">
+        <span class="translate-icon">→</span>
+        <span class="translate-text">Translate</span>
+      </button>
+    </div>
+
+    <!-- Target language output -->
+    <div class="translator-output">
+      <div class="language-selector">
+        <label for="target-language">Target:</label>
+        <select id="target-language">
+          <!-- Languages will be populated via JavaScript -->
+        </select>
+      </div>
+      <textarea id="target-text" placeholder="Translation will appear here..." readonly></textarea>
+    </div>
+  </div>
+
+  <div class="translator-footer">
+    <div class="status-indicator">
+      <span id="translation-status">Ready</span>
+    </div>
+  </div>
+
+</div>
+

@@ -1,4 +1,3 @@
-
 {% extends 'base.html' %}
 
 {% block title %}Translation Project - Home{% endblock %}
@@ -14,6 +13,11 @@
                 <a href="/translate" class="btn btn-primary btn-lg">Try Our Translator</a>
             </div>
         </div>
+    </div>
+
+    <!-- Translator UI with toast notifications -->
+    <div class="mt-5">
+        {% include 'includes/indic_translator.html' %}
     </div>
 </div>
 {% endblock %}

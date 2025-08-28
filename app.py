@@ -6,6 +6,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, sen
 from werkzeug.utils import secure_filename
 import os
 import utils # Import our helper functions
+from flask import jsonify
 from models import db, TranslationLog
 import sys
 from gtts import gTTS
@@ -20,6 +21,18 @@ ALLOWED_EXTENSIONS_IMG = {'png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'}
 ALLOWED_EXTENSIONS_AUDIO = {'mp3', 'wav', 'ogg', 'flac', 'm4a'}
 
 app = Flask(__name__, instance_path=os.path.abspath(INSTANCE_FOLDER))
+
+# API endpoint for model status (for frontend JS)
+@app.route('/api/model-status')
+def api_model_status():
+    models = {}
+    for lang_name, nllb_code in utils.SUPPORTED_LANGUAGES.items():
+        try:
+            available = check_model_availability(nllb_code)
+        except Exception:
+            available = False
+        models[lang_name] = {"available": available}
+    return jsonify({"success": True, "models": models})
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['SECRET_KEY'] = 'your_very_secret_and_strong_key_here_12345' # CHANGE THIS!
@@ -59,6 +72,14 @@ NLLB_TO_FRIENDLY_NAME.update({v: k for k, v in utils.NLLB_SOURCE_LANG_CODES.item
 
 def allowed_file(filename, allowed_extensions):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in allowed_extensions
+
+@app.route('/api/languages')
+def api_languages():
+    langs = [
+        {"code": k, "name": k}
+        for k in utils.SUPPORTED_LANGUAGES.keys()
+    ]
+    return jsonify({"success": True, "languages": langs})
 
 @app.route('/', methods=['GET', 'POST'])
 def index_route():
@@ -201,14 +222,12 @@ def index_route():
                     if trans_error:
                         error = trans_error
                         log_entry.error_message = trans_error
-                        flash(f"Translation Error: {trans_error}", "danger")
                     elif translation_result:
                         log_entry.translated_text = translation_result
-                        flash("Translation successful!", "success")
+                        success = "Translation successful!"
                     else:
                         error = "Translation returned an empty result or failed silently."
                         log_entry.error_message = error
-                        flash(error, "warning")
             else:
                  error_msg = "Missing critical information for translation (e.g., extracted text, source language, or target language not set after processing input)."
                  # --- START OF FOCUSED DEBUGGING AREA ---
@@ -216,25 +235,19 @@ def index_route():
                  # --- END OF FOCUSED DEBUGGING AREA ---
                  error = error_msg
                  log_entry.error_message = error_msg
-                 flash(error, "danger")
+                 pass
 
         except ValueError as ve:
             error = str(ve)
             log_entry.error_message = error
-            flash(f"Input Error: {error}", "warning")
-            # --- START OF FOCUSED DEBUGGING AREA ---
             print(f"[DEBUG] ValueError caught: {error}")
-            # --- END OF FOCUSED DEBUGGING AREA ---
         except Exception as e:
             error = f"An unexpected error occurred: {e}"
             log_entry.error_message = error
-            flash(error, "danger")
             import traceback
-            # --- START OF FOCUSED DEBUGGING AREA ---
             print("[DEBUG] --- UNEXPECTED EXCEPTION CAUGHT ---")
             traceback.print_exc()
             print("[DEBUG] ----------------------------------")
-            # --- END OF FOCUSED DEBUGGING AREA ---
 
         try:
             if not log_entry.source_language: log_entry.source_language = "unknown_source"
@@ -243,13 +256,23 @@ def index_route():
         except Exception as db_err:
             db.session.rollback()
             print(f"Database Error during log commit: {db_err}") # This was already a good debug print
-            flash("Failed to save translation log to database.", "secondary")
+            pass
         # --- START OF FOCUSED DEBUGGING AREA ---
         print("--- POST Request Processing End ---")
         # --- END OF FOCUSED DEBUGGING AREA ---
 
+
+    # Convert UTC timestamps to IST for display
+    from datetime import timezone, timedelta
+    import pytz
+    IST = pytz.timezone('Asia/Kolkata')
     recent_logs = TranslationLog.query.order_by(TranslationLog.timestamp.desc()).limit(10).all()
-    # Removed ZoneInfo conversion for logs to keep focus on the primary issue
+    for log in recent_logs:
+        if hasattr(log, 'timestamp') and log.timestamp:
+            # Convert UTC to IST
+            log.timestamp_ist = log.timestamp.replace(tzinfo=timezone.utc).astimezone(IST)
+        else:
+            log.timestamp_ist = None
 
     selected_nllb_for_main_result = utils.SUPPORTED_LANGUAGES.get(selected_target_friendly_name)
     if selected_nllb_for_main_result:
@@ -266,6 +289,7 @@ def index_route():
         translation_result=translation_result,
         detected_lang=NLLB_TO_FRIENDLY_NAME.get(detected_lang_nllb, detected_lang_nllb if detected_lang_nllb else "N/A"),
         error=error,
+        success=locals().get('success', None),
         main_result_tts_supported=main_result_tts_supported,
         main_result_tts_code=main_result_tts_code,
         recent_logs=recent_logs,
