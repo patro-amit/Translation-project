@@ -1,4 +1,7 @@
 # app.py
+from translator_override import translate_pipeline, check_model_availability
+from translator_override import translate_pipeline
+from simple_translator import translate_text, translate_pipeline, check_model_availability
 from flask import Flask, render_template, request, redirect, url_for, flash, send_file
 from werkzeug.utils import secure_filename
 import os
@@ -298,4 +301,4 @@ def tts_route():
         return f"TTS generation failed for gTTS with language '{tts_lang_code}': {e}", 500
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5001, debug=True)
+    app.run(host="0.0.0.0", port=5002, debug=True)
