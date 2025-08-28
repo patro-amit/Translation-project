@@ -134,20 +134,16 @@ def index_route():
                         
                         elif input_type == 'audio':
                             print(f"[DEBUG] Performing STT on {filepath}")
-                            # Force Hindi language hint for Whisper
-                            stt_result_text, stt_detected_lang_short = utils.perform_stt(filepath, lang_code_hint='hi')
+                            # Let Whisper auto-detect language
+                            stt_result_text, stt_detected_lang_short = utils.perform_stt(filepath)
                             source_text_intermediate = stt_result_text
-                            # --- PATCH: Map Whisper's detected language to supported codes ---
-                            # Whisper returns ISO 639-1 codes (e.g., 'en', 'hi'), but may return others.
-                            # Only allow 'en' or 'hi', else default to 'en' and flash a warning.
+                            # Map Whisper's detected language to supported codes (default to 'en' if not supported)
                             if stt_detected_lang_short in utils.NLLB_SOURCE_LANG_CODES:
                                 source_lang_detected_short = stt_detected_lang_short
                             else:
                                 flash(f"Detected language '{stt_detected_lang_short}' from audio is not supported for translation. Defaulting to English.", "warning")
                                 source_lang_detected_short = 'en'
-                            # --- START OF FOCUSED DEBUGGING AREA ---
                             print(f"[DEBUG] STT Result: Text='{str(source_text_intermediate)[:100]}...', Detected Lang='{source_lang_detected_short}'")
-                            # --- END OF FOCUSED DEBUGGING AREA ---
                         
                         original_text = source_text_intermediate
                         if not source_text_intermediate:

@@ -246,8 +246,49 @@ def translate_text(text, source_lang_short, target_lang_friendly_name):
                translated_text is None if error occurs.
                error_message is None if successful.
     """
+
+    # Pre-processing: clean up input text
+
+    # Import multi-language manual dictionary replacement
+    try:
+        from manual_dictionaries import replace_with_manual_dictionary, MANUAL_DICTIONARIES
+    except ImportError:
+        def replace_with_manual_dictionary(text, lang_code):
+            return text
+
+    # Map friendly name to language code for dictionary
+    FRIENDLY_TO_LANG_CODE = {
+        "Hindi": "hi",
+        "Bengali": "bn",
+        "Gujarati": "gu",
+        "Assamese": "as",
+        "Kannada": "kn",
+        "Malayalam": "ml",
+        "Marathi": "mr",
+        "Odia": "or",
+        "Punjabi": "pa",
+        "Tamil": "ta",
+        "Telugu": "te",
+        "Urdu": "ur",
+    }
+
+    def preprocess_text(text, target_lang_friendly_name):
+        # Remove extra spaces
+        text = re.sub(r'\s+', ' ', text)
+        # Remove stray non-breaking spaces and normalize dashes/quotes
+        text = text.replace('\u00A0', ' ').replace('–', '-').replace('“', '"').replace('”', '"').replace('’', "'")
+        # Optionally, fix common OCR typos (add more as needed)
+        text = text.replace('Iang uage', 'language').replace('Tiles', 'tiles').replace('dpp', 'app')
+        # Multi-language manual dictionary replacement
+        lang_code = FRIENDLY_TO_LANG_CODE.get(target_lang_friendly_name, None)
+        if lang_code:
+            text = replace_with_manual_dictionary(text, lang_code)
+        return text.strip()
+
     if not text:
         return None, "No text provided for translation."
+
+    text = preprocess_text(text, target_lang_friendly_name)
 
     # Use only NLLB-200 model for all translations
     nllb_source_code = NLLB_SOURCE_LANG_CODES.get(source_lang_short)
@@ -268,8 +309,19 @@ def translate_text(text, source_lang_short, target_lang_friendly_name):
         for i in range(0, len(sentences), chunk_size):
             yield ' '.join(sentences[i:i+chunk_size])
 
+    # Helper: If no punctuation, split into word-based chunks (e.g., 25 words)
+    def chunk_by_words(text, word_chunk_size=25):
+        words = text.strip().split()
+        for i in range(0, len(words), word_chunk_size):
+            yield ' '.join(words[i:i+word_chunk_size])
+
     sentences = split_into_sentences(text)
-    chunks = list(chunk_sentences(sentences, chunk_size=3))
+    # If only one sentence and it's very long (no punctuation), use word-based chunking
+    if len(sentences) == 1 and len(sentences[0].split()) > 30:
+        chunks = list(chunk_by_words(sentences[0], word_chunk_size=25))
+    else:
+        chunks = list(chunk_sentences(sentences, chunk_size=3))
+
     translated_chunks = []
     try:
         translator = get_translation_pipeline(nllb_source_code, nllb_target_code)
