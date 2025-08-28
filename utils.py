@@ -1,3 +1,4 @@
+
 import easyocr
 import whisper
 from transformers import pipeline, AutoModelForSeq2SeqLM, AutoTokenizer # Added AutoTokenizer
@@ -5,6 +6,8 @@ import os
 from langdetect import detect
 import time # Added for retry logic in get_translation_pipeline
 import http.client # Added for retry logic in get_translation_pipeline
+# For sentence splitting
+import re
 
 OCR_READER = None
 WHISPER_MODEL = None
@@ -231,8 +234,9 @@ def get_translation_pipeline(source_lang_code, target_lang_code):
 
 
 def translate_text(text, source_lang_short, target_lang_friendly_name):
+
     """
-    Translates text using NLLB model.
+    Translates text using NLLB model, splitting long text into sentences for better quality.
     Args:
         text (str): Text to translate.
         source_lang_short (str): Short language code ('en', 'hi').
@@ -252,23 +256,38 @@ def translate_text(text, source_lang_short, target_lang_friendly_name):
     nllb_target_code = SUPPORTED_LANGUAGES.get(target_lang_friendly_name)
     if not nllb_target_code:
         return None, f"Target language name '{target_lang_friendly_name}' not mapped to NLLB code."
-    print(f"[utils.py DEBUG] Translation request: {nllb_source_code} -> {nllb_target_code}, Text: '{text[:50]}...'")
+
+    # Helper: Split text into sentences (simple, works for most English text)
+    def split_into_sentences(text):
+        sentence_endings = re.compile(r'(?<=[.!?])\s+')
+        sentences = sentence_endings.split(text.strip())
+        return [s for s in sentences if s.strip()]
+
+    # Helper: Group sentences into chunks (e.g., 2-3 sentences per chunk)
+    def chunk_sentences(sentences, chunk_size=3):
+        for i in range(0, len(sentences), chunk_size):
+            yield ' '.join(sentences[i:i+chunk_size])
+
+    sentences = split_into_sentences(text)
+    chunks = list(chunk_sentences(sentences, chunk_size=3))
+    translated_chunks = []
     try:
         translator = get_translation_pipeline(nllb_source_code, nllb_target_code)
         if translator is None:
             raise Exception(f"Translator pipeline for {nllb_source_code} -> {nllb_target_code} is not available.")
-        print(f"[utils.py DEBUG] Calling translator pipeline...")
-        results = translator(text)
-        if not results or not isinstance(results, list) or not results[0].get('translation_text'):
-            print("[utils.py WARNING] Translator pipeline returned empty or invalid results:", results)
-            raise Exception("Translation pipeline returned empty or invalid result format.")
-        translated_text = results[0]['translation_text']
-        print(f"[utils.py DEBUG] Translation successful: '{translated_text[:100]}...'")
-        return translated_text, None
+        print(f"[utils.py DEBUG] Calling translator pipeline for {len(chunks)} chunks...")
+        for chunk in chunks:
+            if not chunk.strip():
+                continue
+            results = translator(chunk)
+            if not results or not isinstance(results, list) or not results[0].get('translation_text'):
+                print("[utils.py WARNING] Translator pipeline returned empty or invalid results:", results)
+                raise Exception("Translation pipeline returned empty or invalid result format.")
+            translated_text = results[0]['translation_text']
+            translated_chunks.append(translated_text)
+        final_translation = ' '.join(translated_chunks)
+        print(f"[utils.py DEBUG] Translation successful. Chunks: {len(chunks)}")
+        return final_translation, None
     except Exception as e:
         print(f"[utils.py ERROR] Error during translation ({nllb_source_code} -> {nllb_target_code}): {e}")
-        # Optionally print full traceback for debugging
-        # import traceback
-        # traceback.print_exc()
-        # Return None for text, and the error message
         return None, f"Translation failed: {e}"
