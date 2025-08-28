@@ -7,7 +7,7 @@ google-cloud-texttospeech
 transformers
 langdetect
 soundfile
-torch==2.5.1
+torch>=2.6.0
 
 # For timezone support (zoneinfo is built-in for Python 3.9+)
 # If using Python <3.9, uncomment the next line:

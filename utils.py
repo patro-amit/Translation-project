@@ -245,37 +245,26 @@ def translate_text(text, source_lang_short, target_lang_friendly_name):
     if not text:
         return None, "No text provided for translation."
 
-    # Map short source code ('en', 'hi') to NLLB source code
+    # Use only NLLB-200 model for all translations
     nllb_source_code = NLLB_SOURCE_LANG_CODES.get(source_lang_short)
     if not nllb_source_code:
-         # This check might be redundant if app.py already validates, but good defense
         return None, f"Source language short code '{source_lang_short}' not mapped to NLLB code."
-
-    # Map friendly target name ('Hindi') to NLLB target code
     nllb_target_code = SUPPORTED_LANGUAGES.get(target_lang_friendly_name)
     if not nllb_target_code:
         return None, f"Target language name '{target_lang_friendly_name}' not mapped to NLLB code."
-
     print(f"[utils.py DEBUG] Translation request: {nllb_source_code} -> {nllb_target_code}, Text: '{text[:50]}...'")
-
     try:
         translator = get_translation_pipeline(nllb_source_code, nllb_target_code)
-        if translator is None: # Check if loading failed
-            # Error message should have been printed in get_translation_pipeline
+        if translator is None:
             raise Exception(f"Translator pipeline for {nllb_source_code} -> {nllb_target_code} is not available.")
-
-        # Perform the translation
         print(f"[utils.py DEBUG] Calling translator pipeline...")
         results = translator(text)
-        # Ensure results are not empty and have the expected key
         if not results or not isinstance(results, list) or not results[0].get('translation_text'):
-             print("[utils.py WARNING] Translator pipeline returned empty or invalid results:", results)
-             raise Exception("Translation pipeline returned empty or invalid result format.")
-
+            print("[utils.py WARNING] Translator pipeline returned empty or invalid results:", results)
+            raise Exception("Translation pipeline returned empty or invalid result format.")
         translated_text = results[0]['translation_text']
         print(f"[utils.py DEBUG] Translation successful: '{translated_text[:100]}...'")
-        return translated_text, None # Success
-
+        return translated_text, None
     except Exception as e:
         print(f"[utils.py ERROR] Error during translation ({nllb_source_code} -> {nllb_target_code}): {e}")
         # Optionally print full traceback for debugging
