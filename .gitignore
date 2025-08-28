@@ -1,5 +1,20 @@
+
+# Ignore virtual environments
 venv310/
-models/facebook/nllb-200-distilled-600M/pytorch_model.bin
+.venv/
+
+# Ignore all model files and directories
+models/facebook/nllb-200-distilled-600M/
+models/indictrans2-finetuned-en-to-bn-lora/
+models/indictrans2-finetuned-en-to-hi-lora/
+models/indictrans2-finetuned-en-to-or-lora/
+models/indictrans2-finetuned-en-to-ta-lora/
+models/indictrans2-finetuned-en-to-te-lora/
+
+# Ignore uploads
+uploads/
+
+# Ignore common large/data files
 *.crdownload
 *.dic
 *.db
