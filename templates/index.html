@@ -298,12 +298,12 @@
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" aria-expanded="false" aria-controls="collapse{{ loop.index }}">
                                 <span class="badge {{ 'bg-success' if log_item.translated_text else 'bg-danger' }} me-2">{{ 'Success' if log_item.translated_text else 'Failed' }}</span>
                                 <span class="fw-normal me-1">{{ log_item.input_type|title }}</span>
-                                <span class="text-primary">{{ NLLB_TO_FRIENDLY_NAME.get(log_item.source_language, log_item.source_language)|upper }}</span>
+                                <span class="text-primary">{{ NLLB_TO_ISO.get(log_item.source_language, log_item.source_language) }}</span>
                                 <i class="bi bi-arrow-right-short mx-1"></i>
-                                <span class="text-primary">{{ NLLB_TO_FRIENDLY_NAME.get(log_item.target_language, log_item.target_language) }}</span>
+                                <span class="text-primary">{{ NLLB_TO_ISO.get(log_item.target_language, log_item.target_language) }}</span>
                                 <span class="ms-auto text-muted small">
                                     {% if log_item.timestamp_ist %}
-                                        {{ log_item.timestamp_ist.strftime('%b %d, %I:%M %p IST') }}
+                                    {{ log_item.timestamp_ist.strftime('%b %d, %I:%M %p') }}
                                     {% elif log_item.timestamp %}
                                         {{ log_item.timestamp.strftime('%b %d, %H:%M UTC') }}
                                     {% else %}
@@ -317,7 +317,7 @@
                                 <ul class="list-unstyled mb-3 small">
                                     <li><strong>Timestamp:</strong>
                                         {% if log_item.timestamp_ist %}
-                                            {{ log_item.timestamp_ist.strftime('%Y-%m-%d %I:%M:%S %p %Z') }}
+                                        {{ log_item.timestamp_ist.strftime('%Y-%m-%d %I:%M:%S %p') }}
                                         {% elif log_item.timestamp %}
                                             {{ log_item.timestamp.strftime('%Y-%m-%d %H:%M:%S UTC') }}
                                         {% else %}
@@ -330,7 +330,7 @@
                                     <div class="bg-light border rounded p-2 small text-muted result-box-small">{{ log_item.original_text or 'N/A' }}</div>
                                 </div>
                                 <div class="mb-2">
-                                    <strong>Translated Text ({{ NLLB_TO_FRIENDLY_NAME.get(log_item.target_language, log_item.target_language) }}):</strong>
+                                    <strong>Translated Text ({{ NLLB_TO_ISO.get(log_item.target_language, log_item.target_language) }}):</strong>
                                     <div class="bg-light border rounded p-2 small result-box-small">{{ log_item.translated_text or 'N/A' }}</div>
                                     {% set log_nllb_code = log_item.target_language %}
                                     {% set log_tts_code_val = MASTER_TTS_CONFIG.get(log_nllb_code) %}
