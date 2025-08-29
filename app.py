@@ -295,6 +295,7 @@ def index_route():
         recent_logs=recent_logs,
         MASTER_TTS_CONFIG=MASTER_TTS_CONFIG,
         NLLB_TO_FRIENDLY_NAME=NLLB_TO_FRIENDLY_NAME,
+        NLLB_TO_ISO=utils.NLLB_TO_ISO,
         current_year=datetime.now().year,
     )
 

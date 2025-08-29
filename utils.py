@@ -1,3 +1,19 @@
+# NLLB code to ISO code (for unique, recognizable 2-letter codes)
+NLLB_TO_ISO = {
+    'asm_Beng': 'as',
+    'ben_Beng': 'bn',
+    'guj_Gujr': 'gu',
+    'hin_Deva': 'hi',
+    'kan_Knda': 'kn',
+    'mal_Mlym': 'ml',
+    'mar_Deva': 'mr',
+    'ory_Orya': 'or',
+    'pan_Guru': 'pa',
+    'tam_Taml': 'ta',
+    'tel_Telu': 'te',
+    'urd_Arab': 'ur',
+    'eng_Latn': 'en',
+}
 
 import easyocr
 import whisper
