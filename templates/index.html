@@ -19,6 +19,93 @@
     {# <link rel="stylesheet" href="{{ url_for('static', filename='additional-styles.css') }}"> #}
     <!-- Inline styles are used here for brevity, move to style.css for production -->
     <style>
+        /* Hide the alert container visually and from layout when alert is gone */
+        .translation-alert-fixed.fade-out {
+            opacity: 0 !important;
+            background: transparent !important;
+            box-shadow: none !important;
+            transition: opacity 0.3s, background 0s 0.3s, box-shadow 0s 0.3s;
+        }
+        /* Hide the alert container when alert is gone */
+        .translation-alert-fixed[style*="display: none"] {
+            opacity: 0 !important;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .translation-alert-fixed {
+            transition: opacity 0.3s;
+        }
+        /* Remove background and shadow when hiding to prevent ghost box */
+        .translation-alert-fixed .alert.hide-animated {
+            background: transparent !important;
+            box-shadow: none !important;
+            border-color: transparent !important;
+        }
+        /* Animation for alert appearance and disappearance */
+        .translation-alert-fixed .alert {
+            opacity: 0;
+            transform: translateY(-10px) scale(0.98);
+            transition: opacity 0.4s cubic-bezier(.4,0,.2,1), transform 0.4s cubic-bezier(.4,0,.2,1);
+        }
+        .translation-alert-fixed .alert.show-animated {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+        .translation-alert-fixed .alert.hide-animated {
+            opacity: 0;
+            transform: translateY(-10px) scale(0.98);
+        }
+        .translation-alert-fixed .alert {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 0.7rem;
+            padding-right: 2.2em;
+            min-height: 2.2em;
+            position: relative;
+        }
+        .translation-alert-fixed .alert span {
+            flex: 1 1 auto;
+            text-align: left;
+            line-height: 1.2;
+            display: flex;
+            align-items: center;
+        }
+        .translation-alert-fixed .btn-close {
+            position: absolute;
+            top: 50%;
+            right: 0.5em;
+            transform: translateY(-50%);
+            font-size: 1rem;
+            width: 1.5em;
+            height: 1.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            box-shadow: none;
+            margin: 0;
+        }
+        /* Custom: Right-aligned, smaller translation alert */
+        .translation-alert-fixed {
+            position: absolute;
+            top: 110px;
+            right: 40px;
+            min-width: 200px;
+            max-width: 260px;
+            width: 100%;
+            z-index: 1050;
+            /* Only one box-shadow, not on .alert */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .translation-alert-fixed .alert {
+            font-size: 1.08rem;
+            font-weight: 600;
+            padding: 0.6rem 1.2rem;
+            margin-bottom: 0;
+            letter-spacing: 0.01em;
+            box-shadow: none !important;
+        }
         body {
             padding-top: 56px; /* For fixed-top navbar */
         }
@@ -128,22 +215,18 @@
 
         {# Show translation status alert at the top center, just below the heading/intro #}
         {% if error and not original_text and not translation_result %}
-        <div class="row justify-content-center mb-3">
-            <div class="col-md-10 col-lg-8">
-                <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
-                    {{ error }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
+        <div class="translation-alert-fixed">
+            <div class="alert alert-danger alert-dismissible fade show mb-0" role="alert">
+                <span>{{ error }}</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         </div>
         {% endif %}
         {% if success %}
-        <div class="row justify-content-center mb-3">
-            <div class="col-md-10 col-lg-8">
-                <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
-                    {{ success }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
+        <div class="translation-alert-fixed">
+            <div class="alert alert-success alert-dismissible fade show mb-0" role="alert">
+                <span>{{ success }}</span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         </div>
         {% endif %}
@@ -402,6 +485,45 @@
 
     <!-- Custom JS -->
     <script>
+        // Animated show/hide for translation alert and fade out container after
+        document.addEventListener('DOMContentLoaded', function() {
+            var alertBox = document.querySelector('.translation-alert-fixed .alert');
+            var alertContainer = document.querySelector('.translation-alert-fixed');
+            if (alertBox) {
+                // Show animation
+                setTimeout(function() {
+                    alertBox.classList.add('show-animated');
+                }, 10);
+
+                // Auto-hide after 5 seconds with animation
+                setTimeout(function() {
+                    alertBox.classList.remove('show-animated');
+                    alertBox.classList.add('hide-animated');
+                    if (alertContainer) {
+                        alertContainer.classList.add('fade-out');
+                    }
+                    setTimeout(function() {
+                        var bsAlert = bootstrap.Alert.getOrCreateInstance(alertBox);
+                        bsAlert.close();
+                        if (alertContainer && alertContainer.parentNode) {
+                            alertContainer.parentNode.removeChild(alertContainer);
+                        }
+                    }, 400); // match transition duration
+                }, 5000);
+
+                // Also fade out container if closed manually
+                alertBox.addEventListener('closed.bs.alert', function() {
+                    if (alertContainer) {
+                        alertContainer.classList.add('fade-out');
+                    }
+                    setTimeout(function() {
+                        if (alertContainer && alertContainer.parentNode) {
+                            alertContainer.parentNode.removeChild(alertContainer);
+                        }
+                    }, 400);
+                });
+            }
+        });
         // Fallback for accordion if Bootstrap JS fails
         document.addEventListener('DOMContentLoaded', function() {
             // Only run if Bootstrap's Collapse is not available
