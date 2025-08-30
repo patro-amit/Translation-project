@@ -19,3 +19,12 @@ uploads/
 *.dic
 *.db
 *.dylib
+uploads/
+flores_data/
+dictionaries/
+models/.DS_Store
+models/facebook/.DS_Store
+translation_integration/.DS_Store
+.DS_Store
+download_indictrans2_base.py
+download_nllb_model.py
