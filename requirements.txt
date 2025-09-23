@@ -8,6 +8,8 @@ transformers
 langdetect
 soundfile
 torch>=2.6.0
+pyngrok>=7.1.6
+imageio-ffmpeg
 
 # For timezone support (zoneinfo is built-in for Python 3.9+)
 # If using Python <3.9, uncomment the next line:

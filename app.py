@@ -81,6 +81,36 @@ def api_languages():
     ]
     return jsonify({"success": True, "languages": langs})
 
+@app.route('/api/health')
+def api_health():
+    return jsonify({"ok": True, "time": datetime.utcnow().isoformat() + "Z"})
+
+@app.route('/api/ffmpeg-status')
+def api_ffmpeg_status():
+    """Report whether ffmpeg is available and the path of any bundled fallback."""
+    import shutil as _shutil
+    import os as _os
+    which_ffmpeg = _shutil.which('ffmpeg')
+    fallback = None
+    source = 'path'
+    if not which_ffmpeg:
+        try:
+            import imageio_ffmpeg as _imageio_ffmpeg
+            exe = _imageio_ffmpeg.get_ffmpeg_exe()
+            if exe and _os.path.exists(exe):
+                fallback = exe
+                source = 'imageio-ffmpeg'
+        except Exception as e:
+            fallback = f"unavailable: {e}"
+            source = 'none'
+    return jsonify({
+        'success': True,
+        'ffmpeg_on_path': which_ffmpeg is not None,
+        'ffmpeg_path': which_ffmpeg,
+        'fallback_source': source,
+        'fallback_path': fallback
+    })
+
 @app.route('/', methods=['GET', 'POST'])
 def index_route():
     translation_result = None
@@ -281,17 +311,46 @@ def index_route():
             main_result_tts_supported = True
             main_result_tts_code = tts_code_for_main
 
+    import re
+    translation_tokens = []
+    if translation_result:
+        # Split into words and spaces, so spaces are preserved in rendering
+        translation_tokens = re.findall(r'[\u0900-\u097F\w]+|\s+', translation_result)
+        # Remove leading whitespace-only tokens (spaces/newlines) to avoid top padding gap when centered
+        while translation_tokens and translation_tokens[0].isspace():
+            translation_tokens.pop(0)
+
+    # Original text TTS support (mirror translation logic)
+    original_tts_supported = False
+    original_tts_code = 'en'
+    if detected_lang_nllb:
+        tts_code_for_original = MASTER_TTS_CONFIG.get(detected_lang_nllb)
+        if tts_code_for_original:
+            original_tts_supported = True
+            original_tts_code = tts_code_for_original
+
+    # Tokenize original text for word highlighting similar to translation
+    original_tokens = []
+    if original_text:
+        original_tokens = re.findall(r'[\u0900-\u097F\w]+|\s+', original_text)
+        while original_tokens and original_tokens[0].isspace():
+            original_tokens.pop(0)
+
     return render_template(
         'index.html',
         utils_supported_languages=utils.SUPPORTED_LANGUAGES,
         selected_target_lang=selected_target_friendly_name,
         original_text=original_text,
         translation_result=translation_result,
+        translation_tokens=translation_tokens,
         detected_lang=NLLB_TO_FRIENDLY_NAME.get(detected_lang_nllb, detected_lang_nllb if detected_lang_nllb else "N/A"),
         error=error,
         success=locals().get('success', None),
         main_result_tts_supported=main_result_tts_supported,
         main_result_tts_code=main_result_tts_code,
+    original_tts_supported=original_tts_supported,
+    original_tts_code=original_tts_code,
+    original_tokens=original_tokens,
         recent_logs=recent_logs,
         MASTER_TTS_CONFIG=MASTER_TTS_CONFIG,
         NLLB_TO_FRIENDLY_NAME=NLLB_TO_FRIENDLY_NAME,
@@ -322,4 +381,5 @@ def tts_route():
         return f"TTS generation failed for gTTS with language '{tts_lang_code}': {e}", 500
 
 if __name__ == "__main__":
+    # Note: Debug reloader will auto-restart on file changes; this comment intentionally triggers a refresh.
     app.run(host="0.0.0.0", port=5002, debug=True)

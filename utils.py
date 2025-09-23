@@ -19,6 +19,7 @@ import easyocr
 import whisper
 from transformers import pipeline, AutoModelForSeq2SeqLM, AutoTokenizer # Added AutoTokenizer
 import os
+import shutil
 from langdetect import detect
 import time # Added for retry logic in get_translation_pipeline
 import http.client # Added for retry logic in get_translation_pipeline
@@ -68,8 +69,32 @@ ISO_TO_NLLB = {
     'en': 'eng_Latn',
 }
 
+def _ensure_ffmpeg_on_path():
+    """Ensure an FFmpeg binary is available on PATH. If not, try to use imageio-ffmpeg's bundled binary."""
+    try:
+        has_ffmpeg = shutil.which("ffmpeg") is not None
+        if has_ffmpeg:
+            print("[utils.py INFO] FFmpeg found on PATH.")
+            return
+        # Try to use imageio-ffmpeg if available
+        try:
+            import imageio_ffmpeg
+            ffmpeg_exe = imageio_ffmpeg.get_ffmpeg_exe()
+            if ffmpeg_exe and os.path.exists(ffmpeg_exe):
+                ffmpeg_dir = os.path.dirname(ffmpeg_exe)
+                os.environ["PATH"] = f"{ffmpeg_dir}:{os.environ.get('PATH','')}"
+                print(f"[utils.py INFO] FFmpeg not found on PATH; using imageio-ffmpeg binary at: {ffmpeg_exe}")
+            else:
+                print("[utils.py WARNING] imageio-ffmpeg could not provide a valid ffmpeg binary.")
+        except Exception as e:
+            print(f"[utils.py WARNING] imageio-ffmpeg not available or failed to load: {e}")
+    except Exception as e:
+        print(f"[utils.py WARNING] FFmpeg PATH setup encountered an error: {e}")
+
+
 def initialize_models():
     global OCR_READER, WHISPER_MODEL
+    _ensure_ffmpeg_on_path()
     print("[utils.py INFO] Initializing EasyOCR reader...")
     # Initialize EasyOCR with common languages to avoid reloading if possible
     # Adjust ['en', 'hi'] if you frequently OCR other specific scripts first
@@ -142,6 +167,8 @@ def perform_ocr(image_path, lang_code='en'):
 def perform_stt(audio_path, lang_code_hint=None):
     # Added debugging prints and fp16=False flag
     global WHISPER_MODEL # Ensure we are using the globally loaded model
+    # Make sure ffmpeg is set before trying to transcribe
+    _ensure_ffmpeg_on_path()
     if WHISPER_MODEL is None:
         print("[utils.py ERROR] Whisper model is None in perform_stt!")
         raise Exception("Whisper model not initialized.")

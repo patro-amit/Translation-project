@@ -223,12 +223,12 @@
         </div>
         {% endif %}
         {% if success %}
-        <div class="translation-alert-fixed">
-            <div class="alert alert-success alert-dismissible fade show mb-0" role="alert">
-                <span>{{ success }}</span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <div class="translation-alert-fixed" id="successAlertBox">
+                <div class="alert alert-success alert-dismissible fade show mb-0" role="alert">
+                    <span>{{ success }}</span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
             </div>
-        </div>
         {% endif %}
 
 
@@ -299,16 +299,54 @@
 
             <h2 class="text-center mb-4">Translation Results</h2>
 
-            <div class="row g-4 justify-content-center">
+            <div class="row g-4 justify-content-center align-items-stretch equal-height-row">
                 <!-- Original Text Box -->
                 {% if original_text %}
-                <div class="col-lg-6">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-header bg-light">
-                           <strong>Original Text {% if detected_lang %}(Detected: {{ detected_lang|title }}){% endif %}</strong>
+                <div class="col-lg-6 d-flex">
+                    <div class="card shadow-sm flex-fill d-flex flex-column result-card unified">
+                        <div class="card-header bg-light py-2"><strong>Original Text {% if detected_lang %}(Detected: {{ detected_lang|title }}){% endif %}</strong></div>
+                        <div class="card-body result-box balanced force-center d-flex flex-column">
+                            <div id="originalResultText" class="result-text-area m-0 flex-grow-1">
+                                {% if original_tokens %}
+                                    <span id="originalResultHighlight">
+                                        {%- for token in original_tokens -%}
+                                            {%- if token.isspace() -%}
+                                                {{ token }}
+                                            {%- else -%}
+                                                <span class="trans-word-original">{{ token }}</span>
+                                            {%- endif -%}
+                                        {%- endfor -%}
+                                    </span>
+                                {% else %}
+                                    {{ original_text }}
+                                {% endif %}
+                            </div>
                         </div>
-                        <div class="card-body result-box">
-                            {{ original_text }}
+                        <div class="card-footer bg-white py-2 text-center">
+                            {% if original_tts_supported and original_text %}
+                                <div class="d-flex flex-column align-items-center">
+                                    <button type="button" class="btn btn-secondary btn-sm" id="ttsListenBtnOriginal" onclick="playTTSOriginal()"><i class="bi bi-volume-up"></i> Listen</button>
+                                    <div id="customAudioControlsWrapperOriginal" class="custom-audio-controls-wrapper d-none mt-2">
+                                        <button type="button" class="player-skip-btn" onclick="skipAudio('ttsAudioOriginal', -window.ttsSkipInterval)" title="Skip Backward"><span class="skip-interval-label-adjacent">5</span><i class="bi bi-arrow-counterclockwise"></i></button>
+                                        <audio id="ttsAudioOriginal" controls></audio>
+                                        <button type="button" class="player-skip-btn" onclick="skipAudio('ttsAudioOriginal', window.ttsSkipInterval)" title="Skip Forward"><span class="skip-interval-label-adjacent">5</span><i class="bi bi-arrow-clockwise"></i></button>
+                                        <div class="dropdown">
+                                            <button class="btn dropdown-toggle player-skip-btn" type="button" id="skipIntervalDropdownOriginal" data-bs-toggle="dropdown" aria-expanded="false" title="Skip Interval Settings"><i class="bi bi-three-dots-vertical"></i></button>
+                                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="skipIntervalDropdownOriginal">
+                                                <li><a class="dropdown-item" href="#" onclick="setSkipInterval(5, 'Original'); return false;">Skip 5s</a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="setSkipInterval(10, 'Original'); return false;">Skip 10s</a></li>
+                                                <li><a class="dropdown-item" href="#" onclick="setSkipInterval(15, 'Original'); return false;">Skip 15s</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                <form id="ttsFormDataOriginal" class="d-none">
+                                    <input type="hidden" name="text" id="ttsTextOriginal" value="{{ original_text }}">
+                                    <input type="hidden" name="lang" id="ttsLangOriginal" value="{{ original_tts_code }}">
+                                </form>
+                            {% else %}
+                                <small class="text-muted d-block text-center mt-1"><i class="bi bi-speaker-fill"></i> TTS not available for this source language.</small>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -316,32 +354,32 @@
 
                 <!-- Translation Result Box -->
                 {% if translation_result %}
-                 <div class="col-lg-6">
-                    <div class="card h-100 shadow-sm">
-                         <div class="card-header bg-light">
-                             <strong>Translation ({{ selected_target_lang }})</strong>
+                 <div class="col-lg-6 d-flex">
+                    <div class="card shadow-sm flex-fill d-flex flex-column result-card unified">
+                         <div class="card-header bg-light py-2"><strong>Translation ({{ selected_target_lang }})</strong></div>
+                        <div class="card-body result-box balanced force-center d-flex flex-column">
+                            {% if translation_tokens %}
+                                <div id="translationResultHighlight" class="result-text-area flex-grow-1">
+                                    {%- for token in translation_tokens -%}
+                                        {%- if token.isspace() -%}
+                                            {{ token }}
+                                        {%- else -%}
+                                            <span class="trans-word">{{ token }}</span>
+                                        {%- endif -%}
+                                    {%- endfor -%}
+                                </div>
+                            {% endif %}
                         </div>
-                        <div class="card-body result-box">
-                           {{ translation_result }}
-                        </div>
-                        <div class="card-footer bg-white text-center">
-                             {% if main_result_tts_supported %}
+                        <div class="card-footer bg-white py-2 text-center">
+                            {% if main_result_tts_supported %}
                                 <div class="d-flex flex-column align-items-center">
-                                    <button type="button" class="btn btn-secondary btn-sm mb-2" id="ttsListenBtnMain" onclick="playTTSMain()">
-                                        <i class="bi bi-volume-up"></i> Listen
-                                    </button>
-                                    <div id="customAudioControlsWrapperMain" class="custom-audio-controls-wrapper d-none">
-                                        <button type="button" class="player-skip-btn" onclick="skipAudio('ttsAudioMain', -window.ttsSkipInterval)" title="Skip Backward">
-                                            <span class="skip-interval-label-adjacent">5</span><i class="bi bi-arrow-counterclockwise"></i>
-                                        </button>
+                                    <button type="button" class="btn btn-secondary btn-sm" id="ttsListenBtnMain" onclick="playTTSMain()"><i class="bi bi-volume-up"></i> Listen</button>
+                                    <div id="customAudioControlsWrapperMain" class="custom-audio-controls-wrapper d-none mt-2">
+                                        <button type="button" class="player-skip-btn" onclick="skipAudio('ttsAudioMain', -window.ttsSkipInterval)" title="Skip Backward"><span class="skip-interval-label-adjacent">5</span><i class="bi bi-arrow-counterclockwise"></i></button>
                                         <audio id="ttsAudioMain" controls></audio>
-                                        <button type="button" class="player-skip-btn" onclick="skipAudio('ttsAudioMain', window.ttsSkipInterval)" title="Skip Forward">
-                                            <span class="skip-interval-label-adjacent">5</span><i class="bi bi-arrow-clockwise"></i>
-                                        </button>
+                                        <button type="button" class="player-skip-btn" onclick="skipAudio('ttsAudioMain', window.ttsSkipInterval)" title="Skip Forward"><span class="skip-interval-label-adjacent">5</span><i class="bi bi-arrow-clockwise"></i></button>
                                         <div class="dropdown">
-                                            <button class="btn dropdown-toggle player-skip-btn" type="button" id="skipIntervalDropdownMain" data-bs-toggle="dropdown" aria-expanded="false" title="Skip Interval Settings">
-                                                <i class="bi bi-three-dots-vertical"></i>
-                                            </button>
+                                            <button class="btn dropdown-toggle player-skip-btn" type="button" id="skipIntervalDropdownMain" data-bs-toggle="dropdown" aria-expanded="false" title="Skip Interval Settings"><i class="bi bi-three-dots-vertical"></i></button>
                                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="skipIntervalDropdownMain">
                                                 <li><a class="dropdown-item" href="#" onclick="setSkipInterval(5, 'Main'); return false;">Skip 5s</a></li>
                                                 <li><a class="dropdown-item" href="#" onclick="setSkipInterval(10, 'Main'); return false;">Skip 10s</a></li>
@@ -354,13 +392,11 @@
                                      <input type="hidden" name="text" id="ttsTextMain" value="{{ translation_result }}">
                                      <input type="hidden" name="lang" id="ttsLangMain" value="{{ main_result_tts_code }}">
                                 </form>
-                             {% else %}
-                                 {% if translation_result %}
-                                <small class="text-muted">
-                                  <i class="bi bi-speaker-fill"></i> Text-to-speech not available for {{ selected_target_lang }}.
-                                </small>
+                            {% else %}
+                                {% if translation_result %}
+                                    <small class="text-muted d-block text-center mt-1"><i class="bi bi-speaker-fill"></i> TTS not available for {{ selected_target_lang }}.</small>
                                 {% endif %}
-                             {% endif %}
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -485,43 +521,144 @@
 
     <!-- Custom JS -->
     <script>
-        // Animated show/hide for translation alert and fade out container after
-        document.addEventListener('DOMContentLoaded', function() {
-            var alertBox = document.querySelector('.translation-alert-fixed .alert');
-            var alertContainer = document.querySelector('.translation-alert-fixed');
-            if (alertBox) {
-                // Show animation
-                setTimeout(function() {
-                    alertBox.classList.add('show-animated');
-                }, 10);
+        // Improved: Sync word highlights with audio playback
+        function setupAudioWordHighlighting() {
+            const audio = document.getElementById('ttsAudioMain');
+            const words = document.querySelectorAll('#translationResultHighlight .trans-word');
+            if (!audio || words.length === 0) return;
 
-                // Auto-hide after 5 seconds with animation
-                setTimeout(function() {
-                    alertBox.classList.remove('show-animated');
-                    alertBox.classList.add('hide-animated');
-                    if (alertContainer) {
-                        alertContainer.classList.add('fade-out');
-                    }
-                    setTimeout(function() {
-                        var bsAlert = bootstrap.Alert.getOrCreateInstance(alertBox);
-                        bsAlert.close();
-                        if (alertContainer && alertContainer.parentNode) {
-                            alertContainer.parentNode.removeChild(alertContainer);
-                        }
-                    }, 400); // match transition duration
-                }, 5000);
+            let lastIdx = -1;
 
-                // Also fade out container if closed manually
-                alertBox.addEventListener('closed.bs.alert', function() {
-                    if (alertContainer) {
-                        alertContainer.classList.add('fade-out');
-                    }
-                    setTimeout(function() {
-                        if (alertContainer && alertContainer.parentNode) {
-                            alertContainer.parentNode.removeChild(alertContainer);
-                        }
-                    }, 400);
+            function clearHighlights() {
+                words.forEach(w => {
+                    w.classList.remove('current-highlight');
+                    w.classList.remove('prev-highlight');
                 });
+            }
+
+            function updateHighlight() {
+                if (!audio.duration || words.length === 0) return;
+                // Calculate which word should be highlighted based on audio time
+                const idx = Math.floor((audio.currentTime / audio.duration) * words.length);
+                clearHighlights();
+                if (audio.currentTime >= audio.duration - 0.05) {
+                    // If at the end, highlight last word, then clear all highlights
+                    if (words.length > 0) {
+                        clearHighlights();
+                        words[words.length - 1].classList.add('current-highlight');
+                    }
+                    setTimeout(clearHighlights, 100);
+                    lastIdx = -1;
+                    return;
+                }
+                if (idx < words.length) {
+                    words[idx].classList.add('current-highlight');
+                    let start = Math.max(0, idx - 4);
+                    for (let i = start; i < idx; i++) {
+                        words[i].classList.add('prev-highlight');
+                    }
+                }
+                lastIdx = idx;
+            }
+
+            audio.addEventListener('timeupdate', updateHighlight);
+            audio.addEventListener('seeked', updateHighlight);
+            audio.addEventListener('play', updateHighlight);
+            audio.addEventListener('pause', updateHighlight);
+            function resetHighlightsIfAtEnd() {
+                if (audio.duration && audio.currentTime >= audio.duration - 0.05) {
+                    clearHighlights();
+                    lastIdx = -1;
+                }
+            }
+            audio.addEventListener('ended', resetHighlightsIfAtEnd);
+            audio.addEventListener('pause', resetHighlightsIfAtEnd);
+            audio.addEventListener('seeked', resetHighlightsIfAtEnd);
+            audio.addEventListener('emptied', resetHighlightsIfAtEnd);
+            audio.addEventListener('abort', resetHighlightsIfAtEnd);
+            audio.addEventListener('timeupdate', resetHighlightsIfAtEnd);
+            audio.addEventListener('loadeddata', function() {
+                clearHighlights();
+                lastIdx = -1;
+            });
+            audio.addEventListener('loadeddata', function() {
+                clearHighlights();
+                lastIdx = -1;
+            });
+        }
+
+        // Original text highlighting (mirrors translation logic)
+        function setupOriginalAudioWordHighlighting() {
+            const audio = document.getElementById('ttsAudioOriginal');
+            const words = document.querySelectorAll('#originalResultHighlight .trans-word-original');
+            if (!audio || words.length === 0) return;
+
+            let lastIdx = -1;
+
+            function clearHighlights() {
+                words.forEach(w => {
+                    w.classList.remove('current-highlight');
+                    w.classList.remove('prev-highlight');
+                });
+            }
+
+            function updateHighlight() {
+                if (!audio.duration || words.length === 0) return;
+                const idx = Math.floor((audio.currentTime / audio.duration) * words.length);
+                clearHighlights();
+                if (audio.currentTime >= audio.duration - 0.05) {
+                    if (words.length > 0) {
+                        clearHighlights();
+                        words[words.length - 1].classList.add('current-highlight');
+                    }
+                    setTimeout(clearHighlights, 100);
+                    lastIdx = -1;
+                    return;
+                }
+                if (idx < words.length) {
+                    words[idx].classList.add('current-highlight');
+                    let start = Math.max(0, idx - 4);
+                    for (let i = start; i < idx; i++) {
+                        words[i].classList.add('prev-highlight');
+                    }
+                }
+                lastIdx = idx;
+            }
+
+            function resetHighlightsIfAtEnd() {
+                if (audio.duration && audio.currentTime >= audio.duration - 0.05) {
+                    clearHighlights();
+                    lastIdx = -1;
+                }
+            }
+
+            audio.addEventListener('timeupdate', updateHighlight);
+            audio.addEventListener('seeked', updateHighlight);
+            audio.addEventListener('play', updateHighlight);
+            audio.addEventListener('pause', updateHighlight);
+            audio.addEventListener('ended', resetHighlightsIfAtEnd);
+            audio.addEventListener('pause', resetHighlightsIfAtEnd);
+            audio.addEventListener('seeked', resetHighlightsIfAtEnd);
+            audio.addEventListener('emptied', resetHighlightsIfAtEnd);
+            audio.addEventListener('abort', resetHighlightsIfAtEnd);
+            audio.addEventListener('timeupdate', resetHighlightsIfAtEnd);
+            audio.addEventListener('loadeddata', function() {
+                clearHighlights();
+                lastIdx = -1;
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            setupAudioWordHighlighting();
+            setupOriginalAudioWordHighlighting();
+            runAdaptiveAlignmentAll();
+            centerBoxesIfShort();
+            // Auto-hide success alert after 5 seconds
+            var successAlert = document.getElementById('successAlertBox');
+            if (successAlert) {
+                setTimeout(function() {
+                    successAlert.style.display = 'none';
+                }, 5000);
             }
         });
         // Fallback for accordion if Bootstrap JS fails
@@ -665,7 +802,60 @@
                     listenButton.disabled = false;
                     listenButton.innerHTML = '<i class="bi bi-volume-up"></i> Listen';
                 }
+                // Initialize dropdowns after controls are potentially revealed
+                initSkipDropdowns();
             });
+        }
+
+        function initSkipDropdowns() {
+            const toggles = document.querySelectorAll('.custom-audio-controls-wrapper .dropdown-toggle[data-bs-toggle="dropdown"]');
+            toggles.forEach(btn => {
+                const wrap = btn.closest('.dropdown');
+                const menu = wrap ? wrap.querySelector('.dropdown-menu') : null;
+                if (!menu) return;
+
+                // Bootstrap native init if available
+                if (typeof bootstrap !== 'undefined' && bootstrap.Dropdown && !btn._bsInit) {
+                    btn._bsInit = new bootstrap.Dropdown(btn, {autoClose: false});
+                }
+
+                // Manual fallback / always-on safeguard
+                if (!btn._manualInit) {
+                    btn._manualInit = true;
+                    btn.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        // Close other open menus
+                        document.querySelectorAll('.custom-audio-controls-wrapper .dropdown-menu.show').forEach(other => {
+                            if (other !== menu) other.classList.remove('show');
+                        });
+                        menu.classList.toggle('show');
+                        if (menu.classList.contains('show')) {
+                            btn.setAttribute('aria-expanded', 'true');
+                        } else {
+                            btn.setAttribute('aria-expanded', 'false');
+                        }
+                    });
+                }
+            });
+
+            // Global outside click / escape close (attach once)
+            if (!window._skipDropdownGlobalHandlers) {
+                window._skipDropdownGlobalHandlers = true;
+                document.addEventListener('click', (e) => {
+                    document.querySelectorAll('.custom-audio-controls-wrapper .dropdown-menu.show').forEach(menu => {
+                        // Close if clicking outside any dropdown
+                        if (!menu.parentElement.contains(e.target)) {
+                            menu.classList.remove('show');
+                        }
+                    });
+                });
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        document.querySelectorAll('.custom-audio-controls-wrapper .dropdown-menu.show').forEach(menu => menu.classList.remove('show'));
+                    }
+                });
+            }
         }
 
         function playTTSMain() {
@@ -674,10 +864,59 @@
             playTTSGeneric(text, lang, 'ttsAudioMain', 'ttsListenBtnMain', 'customAudioControlsWrapperMain');
         }
 
+        function playTTSOriginal() {
+            const text = document.getElementById('ttsTextOriginal').value;
+            const lang = document.getElementById('ttsLangOriginal').value;
+            playTTSGeneric(text, lang, 'ttsAudioOriginal', 'ttsListenBtnOriginal', 'customAudioControlsWrapperOriginal');
+        }
+
         function playTTSLogEntry(loopIndex) {
             const text = document.getElementById(`ttsTextLog${loopIndex}`).value;
             const lang = document.getElementById(`ttsLangLog${loopIndex}`).value;
             playTTSGeneric(text, lang, `ttsAudioLog${loopIndex}`, `ttsListenBtnLog${loopIndex}`, `customAudioControlsWrapperLog${loopIndex}`);
+        }
+
+        // Adaptive alignment: center only if content is very short (<= 80 chars & single line)
+        function applyAdaptiveAlignment(container) {
+            if (!container) return;
+            // Remove any prior centering utility
+            container.classList.remove('text-center');
+            const textContent = container.innerText.trim();
+            if (!textContent) return; // Do nothing for empty
+            // Determine if multi-line by measuring scrollHeight vs line-height * 1.5
+            const lineHeight = parseFloat(window.getComputedStyle(container).lineHeight) || 20;
+            const approxLines = container.scrollHeight / lineHeight;
+            if (textContent.length <= 80 && approxLines <= 1.4) {
+                container.classList.add('text-center');
+            }
+        }
+
+        function runAdaptiveAlignmentAll() {
+            applyAdaptiveAlignment(document.getElementById('originalResultText'));
+            applyAdaptiveAlignment(document.getElementById('translationResultHighlight'));
+        }
+
+        // Center boxes vertically + horizontally if content height is significantly smaller than container
+        function centerBoxesIfShort() {
+            const boxes = document.querySelectorAll('.card-body.result-box.balanced');
+            boxes.forEach(box => {
+                box.classList.remove('center-active');
+                const textArea = box.querySelector('.result-text-area');
+                if (!textArea) return;
+                // If box has a scrollbar (overflow), skip centering
+                if (box.scrollHeight > box.clientHeight + 2) return;
+                const contentHeight = textArea.scrollHeight;
+                const available = box.clientHeight;
+                // Center only if content uses less than ~65% of vertical space and is not empty
+                if (contentHeight > 0 && contentHeight < available * 0.65) {
+                    box.classList.add('center-active');
+                }
+            });
+        }
+
+        // Debounce helper for resize
+        function debounce(fn, delay=120) {
+            let t; return (...args) => { clearTimeout(t); t = setTimeout(()=>fn(...args), delay); };
         }
 
 
@@ -705,6 +944,10 @@
             const translateBtn = document.getElementById('translate-btn');
             const translationStatus = document.getElementById('translation-status');
             console.log('DOM elements:', {sourceText, targetText, targetLanguage, translateBtn, translationStatus});
+            initSkipDropdowns();
+            runAdaptiveAlignmentAll();
+            centerBoxesIfShort();
+            window.addEventListener('resize', debounce(()=>{ runAdaptiveAlignmentAll(); centerBoxesIfShort(); }, 150));
 
             // Fetch available languages
             async function fetchLanguages() {

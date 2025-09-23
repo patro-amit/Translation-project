@@ -1,3 +1,44 @@
+/* Alert Styling */
+/* Highlight for currently spoken word */
+/* Ensure translated words are inline for paragraph flow */
+.trans-word {
+    display: inline;
+}
+/* Make current word highlight more prominent */
+.trans-word.current-highlight {
+    background-color: #90caf9; /* Deeper blue */
+    border-radius: 4px;
+    transition: background 0.2s;
+    font-weight: bold;
+    color: #0d47a1;
+    box-shadow: 0 2px 8px rgba(33,150,243,0.12);
+}
+
+/* Highlight for previous words (lighter blue) */
+.trans-word.prev-highlight {
+    background-color: #e6f2ff; /* Even lighter blue */
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+/* Original text word highlighting with black text */
+.trans-word-original {
+    display: inline;
+}
+.trans-word-original.current-highlight {
+    background-color: #ffe082; /* Amber */
+    border-radius: 4px;
+    transition: background 0.2s;
+    font-weight: 600;
+    color: #7a4e00; /* dark amber text */
+    box-shadow: 0 2px 6px rgba(255,193,7,0.25);
+}
+.trans-word-original.prev-highlight {
+    background-color: #fff8e1; /* Light amber */
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
 /* static/style.css */
 
 body {
@@ -40,6 +81,30 @@ textarea.form-control {
     word-wrap: break-word; /* Break long words */
     overflow-y: auto; /* Add scroll if content overflows */
     max-height: 400px; /* Prevent excessively tall boxes */
+}
+
+/* Compact variation for minimal whitespace */
+.result-box.compact {
+    padding: 0.75rem 0.9rem;
+    min-height: unset;
+}
+
+/* Extra tight variant for single short sentences */
+.result-box.compact.tight { 
+    padding: 0.4rem 0.6rem; /* Further reduced padding */
+}
+
+/* Balanced variant: centered text with consistent inner spacing */
+.result-box.balanced {
+    padding: 0.5rem 1rem 0.55rem 1rem; /* tighter top and balanced bottom */
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+.result-box.balanced .result-text-area {
+    /* Remove forced centering; JS will decide if centering is appropriate for very short single-line content */
+    width: 100%;
+    margin: 0 auto;
 }
 
 
@@ -174,11 +239,114 @@ footer {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0;
-    line-height: 1;
-    transition: background-color 0.2s ease, box-shadow 0.2s ease;
-    text-decoration: none;
-    /* box-shadow: 0 1px 3px rgba(0,0,0,0.1); */
+}
+
+/* Ensure the success alert is visible and above other content */
+.translation-alert-fixed {
+    position: fixed;
+    top: 32px;
+    right: 32px;
+    z-index: 1055; /* Above modal and navbar */
+    width: auto;
+    max-width: 350px;
+    pointer-events: none;
+    left: auto;
+    transform: none;
+    box-shadow: none !important;
+}
+.translation-alert-fixed .alert {
+    opacity: 1 !important;
+    box-shadow: none !important;
+    padding: 0.6rem 1.2rem;
+    line-height: 1.2;
+    font-size: 1.08rem;
+    font-weight: 600;
+    margin-bottom: 0;
+    letter-spacing: 0.01em;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.7rem;
+    padding-right: 2.2em;
+    min-height: 2.2em;
+    position: relative;
+    pointer-events: auto;
+}
+.translation-alert-fixed .alert-success {
+    background-color: #d1e7dd !important;
+    color: #0f5132 !important;
+    border: 1px solid #badbcc !important;
+    box-shadow: none !important;
+}
+
+/* --- Result Cards Layout Cleanup --- */
+.result-card {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Unified equal-height styling */
+.equal-height-row .result-card.unified { display:flex; }
+.equal-height-row .result-card.unified .result-box { flex:1 1 auto; }
+.placeholder-footer { line-height:0; font-size:0; }
+
+/* Prevent a card from stretching to equal height when not desired */
+.no-stretch { height: auto !important; }
+.no-stretch .result-box { max-height: none; }
+
+/* Make both result cards visually same height while content is short */
+.row.g-4 > [class*='col-'] > .card.no-stretch { display:flex; flex-direction:column; }
+.row.g-4 > [class*='col-'] > .card.no-stretch .result-box { flex:1 1 auto; }
+.result-card .card-body.result-box {
+    flex: 1 1 auto;
+    display: block;
+    background: #fff;
+    overflow-y: auto;
+}
+.result-text-area {
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: 1.02rem;
+    line-height: 1.45;
+    text-align: left; /* default left; JS may center */
+    min-height: 60px; /* tighter */
+    margin: 0;
+}
+
+/* When we want full vertical & horizontal centering for short content */
+.result-box.balanced.center-active { justify-content: center; }
+.result-box.balanced.center-active .result-text-area { text-align: center; }
+
+/* Always center mode (overrides adaptive) */
+.result-box.force-center { justify-content: flex-start !important; }
+.result-box.force-center .result-text-area { text-align: center !important; }
+
+/* If text-center applied, ensure consistent wrapping */
+.result-text-area.text-center { text-align: center; }
+
+/* Optional vertical + horizontal centering utility (not forced) */
+.result-text-area.center-both {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.compact .result-text-area,
+.result-box.compact .result-text-area {
+    min-height: 48px;
+    line-height: 1.38;
+    font-size: 1.0rem;
+}
+
+/* Keep both boxes the same height visually when side by side */
+@media (min-width: 992px) { /* lg and up */
+    .row .result-card { height: 100%; }
+}
+
+/* Remove excessive padding on very small screens */
+@media (max-width: 575.98px) {
+    .result-text-area { font-size: 1rem; }
 }
 
 .player-skip-btn:hover {
@@ -186,11 +354,9 @@ footer {
     /* box-shadow: 0 2px 5px rgba(0,0,0,0.15); */
 }
 .player-skip-btn:active {
-    background-color: #d0d0d0;
-    /* box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); */
+    background-color: #d0d0d0; /* Active press feedback */
+    transform: scale(0.96);
 }
-
-/* For the number + icon combination */
 .player-skip-btn .skip-interval-label-adjacent {
     font-size: 0.85em; /* Smaller, distinct number */
     font-weight: 600; /* Semi-bold */
@@ -212,6 +378,8 @@ footer {
     font-size: 0.9em;
     box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15); /* Add shadow to dropdown */
     border-radius: 0.3rem;
+    z-index: 4000; /* ensure on top of audio controls */
+    margin-top: 4px;
 }
 .custom-audio-controls-wrapper .dropdown-item {
     padding: 0.35rem 1rem; /* Adjust padding for dropdown items */
@@ -220,3 +388,7 @@ footer {
     background-color: #0d6efd; /* Bootstrap primary for active item */
     color: white;
 }
+/* Fallback visibility when manually toggling .show without Bootstrap positioning adjustments */
+.custom-audio-controls-wrapper .dropdown .dropdown-menu:not([style]) { position: absolute; }
+.custom-audio-controls-wrapper .dropdown { position: relative; }
+.custom-audio-controls-wrapper .dropdown-menu.show { display: block; }
