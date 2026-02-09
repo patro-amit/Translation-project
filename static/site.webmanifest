@@ -1,0 +1,16 @@
+{
+  "name": "LinguaLink Translator",
+  "short_name": "LinguaLink",
+  "description": "Multi-modal translation application for Indian regional languages",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8f9fa",
+  "theme_color": "#0d6efd",
+  "icons": [
+    {
+      "src": "/static/bi-chat-dots.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
