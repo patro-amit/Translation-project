@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ML Research Visualizations Gallery</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+        
+        .stats {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #ffd89b;
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+        
+        .category {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .category-title {
+            font-size: 1.8em;
+            color: #667eea;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .category-desc {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 0.95em;
+        }
+        
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+        }
+        
+        .chart-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 2px solid #e9ecef;
+        }
+        
+        .chart-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+            border-color: #667eea;
+        }
+        
+        .chart-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            background: #f0f0f0;
+            cursor: pointer;
+        }
+        
+        .chart-info {
+            padding: 15px;
+        }
+        
+        .chart-number {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 0.85em;
+        }
+        
+        .chart-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .chart-desc {
+            font-size: 0.85em;
+            color: #666;
+            line-height: 1.4;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            position: relative;
+            margin: auto;
+            top: 50%;
+            transform: translateY(-50%);
+            max-width: 90vw;
+            max-height: 90vh;
+        }
+        
+        .modal-img {
+            width: 100%;
+            height: auto;
+            max-height: 85vh;
+            object-fit: contain;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 35px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            background: rgba(0,0,0,0.5);
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .close-btn:hover {
+            background: rgba(0,0,0,0.8);
+        }
+        
+        footer {
+            text-align: center;
+            color: white;
+            padding: 30px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            margin-top: 40px;
+        }
+        
+        .emoji {
+            font-size: 1.2em;
+            margin-right: 5px;
+        }
+        
+        @media (max-width: 768px) {
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            header h1 {
+                font-size: 1.8em;
+            }
+            
+            .stats {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 ML Research Visualizations</h1>
+            <p>Professional Machine Learning Evaluation Charts & Graphs</p>
+        </header>
+        
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number">19</div>
+                <div class="stat-label">Total Charts</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">300</div>
+                <div class="stat-label">DPI Resolution</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">6</div>
+                <div class="stat-label">Categories</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number">3.4M</div>
+                <div class="stat-label">Total Size</div>
+            </div>
+        </div>
+
+        <!-- Model Evaluation -->
+        <div class="category">
+            <div class="category-title">
+                <span class="emoji">🎯</span>Model Evaluation Charts
+            </div>
+            <div class="category-desc">
+                Core metrics for assessing classifier performance and model quality
+            </div>
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <img src="01_roc_curve_multiclass.png" class="chart-image" onclick="openModal(this.src)">
+                    <div class="chart-info">
+                        <div class="chart-number">Chart 1</div>
+                        <div class="chart-title">ROC Curve (Multi-class)</div>
+                        <div class="chart-desc">Multi-class classifier ROC curves and AUC scores for performance evaluation</div>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <img src="02_confusion_matrix.png" class="chart-image" onclick="openModal(this.src)">
+                    <div class="chart-info">
+                        <div class="chart-number">Chart 2</div>
+                        <div class="chart-title">Confusion Matrix</div>
+                        <div class="chart-desc">Classification results heatmap showing true/false positives and negatives</div>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <img src="03_feature_importance.png" class="chart-image" onclick="openModal(this.src)">
+                    <div class="chart-info">
+                        <div class="chart-number">Chart 3</div>
+                        <div class="chart-title">Feature Importance</div>
+                        <div class="chart-desc">Top 15 most important features with contribution scores</div>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <img src="04_precision_recall_curve.png" class="chart-image" onclick="openModal(this.src)">
+                    <div class="chart-info">
+                        <div class="chart-number">Chart 4</div>
+                        <div class="chart-title">Precision-Recall Curve</div>
+                        <div class="chart-desc">Binary classifier trade-offs at different decision thresholds</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Performance Comparison -->
+        <div class="category">
+            <div class="category-title">
+                <span class="emoji">📈</span>Performance Comparison Charts
+            </div>
+            <div class="category-desc">
+                Comparative analysis across multiple models and training scenarios
+            </div>
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <img src="05_model_performance_comparison.png" class="chart-image" onclick="openModal(this.src)">
+                    <div class="chart-info">
+                        <div class="chart-number">Chart 5</div>
+                        <div class="chart-title">Model Performance Comparison</div>
+                        <div class="chart-desc">Benchmark comparison of accuracy, precision, and recall across 5 models</div>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <img src="06_training_validation_loss.png" class="chart-image" onclick="openModal(this.src)">
+                    <div class="chart-info">
+                        <div class="chart-number">Chart 6</div>
+                        <div class="chart-title">Training vs Validation Loss</div>
+                        <div class="chart-desc">Learning curves showing training dynamics over 100 epochs</div>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <img src="07_f1_score_threshold.png" class="chart-image" onclick="openModal(this.src)">
+                    <div class="chart-info">
+                        <div class="chart-number">Chart 7</div>
+                        <div class="chart-title">F1-Score vs Threshold</div>
+                        <div class="chart-desc">Optimal decision threshold identification for binary classification</div>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <img src="08_fairness_demographics.png" class="chart-image" onclick="openModal(this.src)">
+                    <div class="chart-info">
+                        <div class="chart-number">Chart 8</div>
+                        <div class="chart-title">Fairness Across Demographics</div>
+                        <div class="chart-desc">Bias detection and disparate impact analysis across demographic groups</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Performance -->
+        <div class="category">
+            <div class="category-title">
+                <span class="emoji">⚡</span>System Performance Charts
+            </div>
+            <div class="category-desc">
+                Infrastructure and computational performance metrics
+            </div>
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <img src="09_latency_distribution.png" class="chart-image" onclick="openModal(this.src)">
+                    <div class="chart-info">
+                        <div class="chart-number">Chart 9</div>
+                        <div class="chart-title">Inference Latency Distribution</div>
+                        <div class="chart-desc">Histogram and box plot analysis of inference time measurements</div>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <img src="10_memory_usage.png" class="chart-image" onclick="openModal(this.src)">
+                    <div class="chart-info">
+                        <div class="chart-number">Chart 10</div>
+                        <div class="chart-title">Memory Usage Over Time</div>
+                        <div class="chart-desc">CPU and GPU memory consumption patterns during inference</div>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <img src="11_gpu_utilization_heatmap.png" class="chart-image" onclick="openModal(this.src)">
+                    <div class="chart-info">
+                        <div class="chart-number">Chart 11</div>
+                        <div class="chart-title">GPU Utilization Heatmap</div>
+                        <div class="chart-desc">Per-core GPU utilization over 24-hour monitoring period</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Anomaly Detection -->
+        <div class="category">
+            <div class="category-title">
+                <span class="emoji">🚨</span>Anomaly Detection Charts
+            </div>
+            <div class="category-desc">
+                Outlier detection and anomalous pattern identification
+            </div>
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <img src="12_anomaly_detection_scatter.png" class="chart-image" onclick="openModal(this.src)">
+                    <div class="chart-info">
+                        <div class="chart-number">Chart 12</div>
+                        <div class="chart-title">Anomaly Detection Scatter</div>
+                        <div class="chart-desc">2D visualization with normal and anomalous samples highlighted</div>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <img src="13_anomaly_score_distribution.png" class="chart-image" onclick="openModal(this.src)">
+                    <div class="chart-info">
+                        <div class="chart-number">Chart 13</div>
+                        <div class="chart-title">Anomaly Score Distribution</div>
+                        <div class="chart-desc">Distribution analysis with threshold-based classification</div>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <img src="14_timeseries_anomaly.png" class="chart-image" onclick="openModal(this.src)">
+                    <div class="chart-info">
+                        <div class="chart-number">Chart 14</div>
+                        <div class="chart-title">Time Series Anomaly Detection</div>
+                        <div class="chart-desc">Temporal anomaly detection in sequential time-series data</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Monitoring & Deployment -->
+        <div class="category">
+            <div class="category-title">
+                <span class="emoji">📊</span>Monitoring & Deployment Charts
+            </div>
+            <div class="category-desc">
+                Production monitoring and deployment optimization metrics
+            </div>
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <img src="15_model_drift.png" class="chart-image" onclick="openModal(this.src)">
+                    <div class="chart-info">
+                        <div class="chart-number">Chart 15</div>
+                        <div class="chart-title">Model Drift Detection</div>
+                        <div class="chart-desc">Performance degradation monitoring with alert thresholds</div>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <img src="16_retraining_schedule.png" class="chart-image" onclick="openModal(this.src)">
+                    <div class="chart-info">
+                        <div class="chart-number">Chart 16</div>
+                        <div class="chart-title">Retraining Schedule</div>
+                        <div class="chart-desc">Model version progression and training time analysis</div>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <img src="17_cost_performance_tradeoff.png" class="chart-image" onclick="openModal(this.src)">
+                    <div class="chart-info">
+                        <div class="chart-number">Chart 17</div>
+                        <div class="chart-title">Cost vs Performance</div>
+                        <div class="chart-desc">Business-critical analysis of inference cost and model quality trade-offs</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Architecture Diagrams -->
+        <div class="category">
+            <div class="category-title">
+                <span class="emoji">🏗️</span>Architecture Diagrams
+            </div>
+            <div class="category-desc">
+                System design and workflow architecture visualizations
+            </div>
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <img src="18_model_architecture.png" class="chart-image" onclick="openModal(this.src)">
+                    <div class="chart-info">
+                        <div class="chart-number">Chart 18</div>
+                        <div class="chart-title">Model Architecture</div>
+                        <div class="chart-desc">Neural network layer visualization with activation functions</div>
+                    </div>
+                </div>
+                
+                <div class="chart-card">
+                    <img src="19_ml_pipeline_workflow.png" class="chart-image" onclick="openModal(this.src)">
+                    <div class="chart-info">
+                        <div class="chart-number">Chart 19</div>
+                        <div class="chart-title">ML Pipeline Workflow</div>
+                        <div class="chart-desc">End-to-end machine learning pipeline with feedback loop architecture</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>📚 <strong>ML Research Visualizations Suite</strong> | College Research Project</p>
+            <p>Generated: February 2026 | Resolution: 300 DPI | Format: PNG | Total Size: 3.4 MB</p>
+        </footer>
+    </div>
+
+    <!-- Modal for fullscreen view -->
+    <div id="imageModal" class="modal" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="close-btn" onclick="closeModal()">&times;</button>
+            <img id="modalImage" class="modal-img" src="">
+        </div>
+    </div>
+
+    <script>
+        function openModal(imgSrc) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modalImg.src = imgSrc;
+            modal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+        
+        function closeModal() {
+            const modal = document.getElementById('imageModal');
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Close modal on ESC key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
