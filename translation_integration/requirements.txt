@@ -1,0 +1,14 @@
+
+# Core dependencies
+Flask>=2.0.0
+gunicorn>=20.1.0
+
+# Utilities
+pandas>=2.0.0
+numpy>=1.24.0
+
+# Only add ML libraries when ready to implement real models
+# transformers>=4.30.0
+# sentencepiece>=0.1.99
+# peft>=0.4.0
+# accelerate>=0.20.0

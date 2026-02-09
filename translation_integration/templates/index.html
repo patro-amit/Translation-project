@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Translation Project - Home{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-12 text-center">
+            <h1>Welcome to Translation Project</h1>
+            <p class="lead">Enabling communication across Indian languages</p>
+
+            <div class="mt-5">
+                <a href="/translate" class="btn btn-primary btn-lg">Try Our Translator</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Translator UI with toast notifications -->
+    <div class="mt-5">
+        {% include 'includes/indic_translator.html' %}
+    </div>
+</div>
+{% endblock %}
