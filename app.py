@@ -8,7 +8,8 @@ import sys
 from gtts import gTTS
 import io
 from datetime import datetime
-# Removed ZoneInfo imports as they were not requested for this fix.
+import secrets
+import secrets
 
 # --- Configuration ---
 UPLOAD_FOLDER = 'uploads'
@@ -19,20 +20,20 @@ ALLOWED_EXTENSIONS_AUDIO = {'mp3', 'wav', 'ogg', 'flac', 'm4a'}
 app = Flask(__name__, instance_path=os.path.abspath(INSTANCE_FOLDER))
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
-app.config['SECRET_KEY'] = 'your_very_secret_and_strong_key_here_12345' # CHANGE THIS!
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False 
 
 for folder_name in [UPLOAD_FOLDER]:
     abs_folder_path = os.path.join(app.root_path, folder_name)
     if not os.path.exists(abs_folder_path):
         try:
             os.makedirs(abs_folder_path)
-            # print(f"Created directory: {abs_folder_path}") # Less verbose for focused debug
         except OSError as e:
             print(f"ERROR: Could not create directory '{abs_folder_path}': {e}")
             sys.exit(1)
     if not os.access(abs_folder_path, os.W_OK):
         print(f"ERROR: Directory '{abs_folder_path}' is not writable.")
+        sys.exit(1)
 
 DATABASE_URI = f"sqlite:///{os.path.join(app.instance_path, 'translations.db')}"
 app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URI
@@ -71,16 +72,13 @@ def index_route():
     main_result_tts_code = 'en'
 
     if request.method == 'POST':
-        # --- START OF FOCUSED DEBUGGING AREA ---
-        print("\n--- POST Request Received ---")
         input_type = request.form.get('input_type')
         target_nllb_code = utils.SUPPORTED_LANGUAGES.get(selected_target_friendly_name)
-        print(f"[DEBUG] Input Type: {input_type}, Target Lang (Friendly): {selected_target_friendly_name}, Target NLLB: {target_nllb_code}")
 
-        log_entry = TranslationLog(target_language=target_nllb_code if target_nllb_code else "unknown_target")
-        source_text_intermediate = None # Text extracted from OCR/STT/Input
-        source_lang_detected_short = None # Short code like 'en', 'hi' from detection/Whisper
-        # --- END OF FOCUSED DEBUGGING AREA ---
+        log_entry = TranslationLog()
+        log_entry.target_language = target_nllb_code if target_nllb_code else "unknown_target"
+        source_text_intermediate = None
+        source_lang_detected_short = None
 
         try:
             if input_type == 'text':
@@ -96,85 +94,53 @@ def index_route():
 
             elif input_type in ['image', 'audio']:
                 log_entry.input_type = 'ocr' if input_type == 'image' else 'audio'
-                # --- START OF FOCUSED DEBUGGING AREA ---
-                print(f"[DEBUG] File Input Type: {log_entry.input_type}")
-                # --- END OF FOCUSED DEBUGGING AREA ---
 
                 if 'file' not in request.files:
                     raise ValueError('No file part in request.')
                 file = request.files['file']
-                if file.filename == '':
+                if not file or not file.filename or file.filename == '':
                     raise ValueError('No file selected.')
 
                 allowed_extensions = ALLOWED_EXTENSIONS_IMG if input_type == 'image' else ALLOWED_EXTENSIONS_AUDIO
-                if file and allowed_file(file.filename, allowed_extensions):
+                if file and file.filename and allowed_file(file.filename, allowed_extensions):
                     filename = secure_filename(file.filename)
                     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                    # --- START OF FOCUSED DEBUGGING AREA ---
-                    print(f"[DEBUG] Saving uploaded file '{filename}' to: {filepath}")
-                    # --- END OF FOCUSED DEBUGGING AREA ---
                     file.save(filepath)
-                    # --- START OF FOCUSED DEBUGGING AREA ---
-                    print(f"[DEBUG] File '{filename}' saved successfully.")
-                    # --- END OF FOCUSED DEBUGGING AREA ---
 
                     try:
                         if input_type == 'image':
-                            # --- START OF FOCUSED DEBUGGING AREA ---
-                            print(f"[DEBUG] Performing OCR on {filepath}")
-                            # --- END OF FOCUSED DEBUGGING AREA ---
                             source_text_intermediate, detected_lang_ocr_short = utils.perform_ocr(filepath)
-                            # --- START OF FOCUSED DEBUGGING AREA ---
-                            print(f"[DEBUG] OCR Result: Text='{str(source_text_intermediate)[:100]}...', Detected Lang='{detected_lang_ocr_short}'")
-                            # --- END OF FOCUSED DEBUGGING AREA ---
                             source_lang_detected_short = detected_lang_ocr_short if detected_lang_ocr_short in utils.NLLB_SOURCE_LANG_CODES.keys() else 'en'
                         
                         elif input_type == 'audio':
-                            print(f"[DEBUG] Performing STT on {filepath}")
-                            # Force Hindi language hint for Whisper
                             stt_result_text, stt_detected_lang_short = utils.perform_stt(filepath, lang_code_hint='hi')
                             source_text_intermediate = stt_result_text
-                            # --- PATCH: Map Whisper's detected language to supported codes ---
-                            # Whisper returns ISO 639-1 codes (e.g., 'en', 'hi'), but may return others.
-                            # Only allow 'en' or 'hi', else default to 'en' and flash a warning.
                             if stt_detected_lang_short in utils.NLLB_SOURCE_LANG_CODES:
                                 source_lang_detected_short = stt_detected_lang_short
                             else:
                                 flash(f"Detected language '{stt_detected_lang_short}' from audio is not supported for translation. Defaulting to English.", "warning")
                                 source_lang_detected_short = 'en'
-                            # --- START OF FOCUSED DEBUGGING AREA ---
-                            print(f"[DEBUG] STT Result: Text='{str(source_text_intermediate)[:100]}...', Detected Lang='{source_lang_detected_short}'")
-                            # --- END OF FOCUSED DEBUGGING AREA ---
                         
                         original_text = source_text_intermediate
                         if not source_text_intermediate:
-                            # --- START OF FOCUSED DEBUGGING AREA ---
-                            print(f"[DEBUG] ERROR: Text extraction failed for {log_entry.input_type}.")
-                            # --- END OF FOCUSED DEBUGGING AREA ---
                             raise ValueError(f"Could not extract text using {log_entry.input_type}.")
 
                     except Exception as proc_err:
-                        # --- START OF FOCUSED DEBUGGING AREA ---
-                        print(f"[DEBUG] Error during file processing ({log_entry.input_type}): {proc_err}")
                         import traceback
-                        traceback.print_exc() # Print full traceback for processing errors
-                        # --- END OF FOCUSED DEBUGGING AREA ---
+                        traceback.print_exc()
                         raise proc_err
                     finally:
                         if os.path.exists(filepath):
-                            # --- START OF FOCUSED DEBUGGING AREA ---
-                            print(f"[DEBUG] Removing temporary file: {filepath}")
-                            # --- END OF FOCUSED DEBUGGING AREA ---
                             os.remove(filepath)
                 else:
-                    raise ValueError(f"File type '{file.filename.rsplit('.',1)[-1] if '.' in file.filename else 'unknown'}' not allowed or file error.")
+                    file_ext = 'unknown'
+                    if file.filename and '.' in file.filename:
+                        file_ext = file.filename.rsplit('.', 1)[-1]
+                    raise ValueError(f"File type '{file_ext}' not allowed or file error.")
             else:
                 raise ValueError("Invalid input type specified.")
 
             # --- Perform Translation ---
-            # --- START OF FOCUSED DEBUGGING AREA ---
-            print(f"[DEBUG] Pre-Translation Check: source_text_intermediate is_not_None? {source_text_intermediate is not None}, source_lang_detected_short? '{source_lang_detected_short}', target_nllb_code? '{target_nllb_code}'")
-            # --- END OF FOCUSED DEBUGGING AREA ---
             if source_text_intermediate and source_lang_detected_short and target_nllb_code:
                 source_nllb_code = utils.NLLB_SOURCE_LANG_CODES.get(source_lang_detected_short)
                 detected_lang_nllb = source_nllb_code
@@ -185,9 +151,6 @@ def index_route():
                     error = error_msg
                     log_entry.error_message = error_msg
                 else:
-                    # --- START OF FOCUSED DEBUGGING AREA ---
-                    print(f"[DEBUG] Calling utils.translate_text with: text='{source_text_intermediate[:50]}...', source_short='{source_lang_detected_short}', target_friendly='{selected_target_friendly_name}'")
-                    # --- END OF FOCUSED DEBUGGING AREA ---
                     log_entry.source_language = source_nllb_code
                     log_entry.original_text = source_text_intermediate
                     translation_result, trans_error = utils.translate_text(
@@ -195,9 +158,6 @@ def index_route():
                         source_lang_detected_short,
                         selected_target_friendly_name
                     )
-                    # --- START OF FOCUSED DEBUGGING AREA ---
-                    print(f"[DEBUG] utils.translate_text returned: result='{str(translation_result)[:100]}...', error='{trans_error}'")
-                    # --- END OF FOCUSED DEBUGGING AREA ---
 
                     if trans_error:
                         error = trans_error
@@ -212,9 +172,6 @@ def index_route():
                         flash(error, "warning")
             else:
                  error_msg = "Missing critical information for translation (e.g., extracted text, source language, or target language not set after processing input)."
-                 # --- START OF FOCUSED DEBUGGING AREA ---
-                 print(f"[DEBUG] Skipping translation due to: {error_msg}")
-                 # --- END OF FOCUSED DEBUGGING AREA ---
                  error = error_msg
                  log_entry.error_message = error_msg
                  flash(error, "danger")
@@ -223,19 +180,12 @@ def index_route():
             error = str(ve)
             log_entry.error_message = error
             flash(f"Input Error: {error}", "warning")
-            # --- START OF FOCUSED DEBUGGING AREA ---
-            print(f"[DEBUG] ValueError caught: {error}")
-            # --- END OF FOCUSED DEBUGGING AREA ---
         except Exception as e:
             error = f"An unexpected error occurred: {e}"
             log_entry.error_message = error
             flash(error, "danger")
             import traceback
-            # --- START OF FOCUSED DEBUGGING AREA ---
-            print("[DEBUG] --- UNEXPECTED EXCEPTION CAUGHT ---")
             traceback.print_exc()
-            print("[DEBUG] ----------------------------------")
-            # --- END OF FOCUSED DEBUGGING AREA ---
 
         try:
             if not log_entry.source_language: log_entry.source_language = "unknown_source"
@@ -243,11 +193,8 @@ def index_route():
             db.session.commit()
         except Exception as db_err:
             db.session.rollback()
-            print(f"Database Error during log commit: {db_err}") # This was already a good debug print
+            print(f"Database Error during log commit: {db_err}")
             flash("Failed to save translation log to database.", "secondary")
-        # --- START OF FOCUSED DEBUGGING AREA ---
-        print("--- POST Request Processing End ---")
-        # --- END OF FOCUSED DEBUGGING AREA ---
 
     recent_logs = TranslationLog.query.order_by(TranslationLog.timestamp.desc()).limit(10).all()
     # Removed ZoneInfo conversion for logs to keep focus on the primary issue
@@ -259,13 +206,17 @@ def index_route():
             main_result_tts_supported = True
             main_result_tts_code = tts_code_for_main
 
+    detected_lang_display = "N/A"
+    if detected_lang_nllb:
+        detected_lang_display = NLLB_TO_FRIENDLY_NAME.get(detected_lang_nllb, detected_lang_nllb)
+    
     return render_template(
         'index.html',
         utils_supported_languages=utils.SUPPORTED_LANGUAGES,
         selected_target_lang=selected_target_friendly_name,
         original_text=original_text,
         translation_result=translation_result,
-        detected_lang=NLLB_TO_FRIENDLY_NAME.get(detected_lang_nllb, detected_lang_nllb if detected_lang_nllb else "N/A"),
+        detected_lang=detected_lang_display,
         error=error,
         main_result_tts_supported=main_result_tts_supported,
         main_result_tts_code=main_result_tts_code,

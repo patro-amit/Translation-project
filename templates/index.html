@@ -15,95 +15,6 @@
     <link rel="icon" href="{{ url_for('static', filename='bi-chat-dots.svg') }}" type="image/svg+xml">
     <link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
     <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
-
-    {# <link rel="stylesheet" href="{{ url_for('static', filename='additional-styles.css') }}"> #}
-    <!-- Inline styles are used here for brevity, move to style.css for production -->
-    <style>
-        body {
-            padding-top: 56px; /* For fixed-top navbar */
-        }
-        /* Custom audio bar styles from previous response */
-        .custom-audio-controls-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 0.5em;
-            margin-top: 0.5rem;
-            width: 100%;
-            flex-wrap: nowrap;
-            justify-content: center;
-        }
-        .custom-audio-controls-wrapper audio {
-            flex-grow: 1;
-            min-width: 120px;
-            max-width: 300px;
-            margin-left: 0.5em;
-            margin-right: 0.5em;
-            background: transparent;
-            border-radius: 25px;
-        }
-        .custom-audio-controls-wrapper audio::-webkit-media-controls-panel {
-            background-color: #f8f9fa;
-            border-radius: 20px;
-            padding: 5px;
-        }
-        .player-skip-btn {
-            background-color: #f0f0f0;
-            border: 1px solid #d7d7d7;
-            color: #333;
-            font-size: 1em;
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
-            line-height: 1;
-            transition: background-color 0.2s ease, box-shadow 0.2s ease;
-            text-decoration: none;
-        }
-        .player-skip-btn:hover { background-color: #e0e0e0; }
-        .player-skip-btn:active { background-color: #d0d0d0; }
-        .player-skip-btn .skip-interval-label-adjacent {
-            font-size: 0.85em;
-            font-weight: 600;
-            margin-right: 2px;
-            color: #555;
-        }
-        .player-skip-btn .bi {
-            font-size: 1.3em;
-            vertical-align: middle;
-        }
-        .custom-audio-controls-wrapper .dropdown .player-skip-btn .bi-three-dots-vertical {
-             font-size: 1.3em;
-        }
-        .custom-audio-controls-wrapper .dropdown-menu {
-            min-width: 120px;
-            font-size: 0.9em;
-            box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15);
-            border-radius: 0.3rem;
-        }
-        .custom-audio-controls-wrapper .dropdown-item {
-            padding: 0.35rem 1rem;
-        }
-        .custom-audio-controls-wrapper .dropdown-item:active {
-            background-color: #0d6efd;
-            color: white;
-        }
-         @media (max-width: 767.98px) {
-            .custom-audio-controls-wrapper {
-                flex-wrap: wrap;
-            }
-            .custom-audio-controls-wrapper audio {
-                min-width: 100%;
-                margin-left: 0; margin-right: 0; margin-top: 0.5em; margin-bottom: 0.5em;
-                order: 0; 
-            }
-            .player-skip-btn { margin-bottom: 0.25em; }
-            .custom-audio-controls-wrapper .dropdown { margin-left: 0; }
-        }
-    </style>
 </head>
 <body>
 
@@ -111,7 +22,7 @@
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm fixed-top">
         <div class="container">
             <a class="navbar-brand fw-bold" href="/">
-                <img src="{{ url_for('static', filename='bi-chat-dots.svg') }}" alt="Chat Icon" width="28" height="28" class="d-inline-block align-text-top me-2" style="filter: invert(1) brightness(1.5);">
+                <img src="{{ url_for('static', filename='bi-chat-dots.svg') }}" alt="Chat Icon" width="28" height="28" class="d-inline-block align-text-top me-2 navbar-icon-filter">
                 Language Translator
             </a>
         </div>
@@ -176,7 +87,7 @@
                         </div>
 
                         <!-- File Input -->
-                        <div class="col-12" id="file_input_div" style="display: none;">
+                        <div class="col-12 file-input-hidden" id="file_input_div">
                             <label for="file" class="form-label fw-medium">2. Upload File:</label>
                             <input class="form-control" type="file" id="file" name="file">
                             <small id="fileHelp" class="form-text text-muted"></small>
@@ -191,7 +102,7 @@
                     </div>
                 </form>
                  <!-- Loading Indicator Placeholder -->
-                <div id="loadingIndicator" class="text-center mt-3" style="display: none;">
+                <div id="loadingIndicator" class="text-center mt-3 loading-indicator-hidden">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Loading...</span>
                     </div>
@@ -235,8 +146,8 @@
                          <div class="card-header bg-light">
                              <strong>Translation ({{ selected_target_lang }})</strong>
                         </div>
-                        <div class="card-body result-box">
-                           {{ translation_result }}
+                        <div class="card-body result-box" id="mainTranslationResultBox">
+                           <span id="mainTranslationText">{{ translation_result }}</span>
                         </div>
                         <div class="card-footer bg-white text-center">
                              {% if main_result_tts_supported %}
@@ -288,7 +199,7 @@
         <div class="mt-5 pt-4 border-top">
             <h3 class="text-center mb-4">Activity Log</h3>
             {% if recent_logs %}
-                <div class="accordion shadow-sm mx-auto" id="activityLogAccordion" style="max-width: 800px;">
+                <div class="accordion shadow-sm mx-auto activity-log-container" id="activityLogAccordion">
                     {% for log_item in recent_logs %}
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="heading{{ loop.index }}">
@@ -312,7 +223,7 @@
                                 </div>
                                 <div class="mb-2">
                                     <strong>Translated Text ({{ NLLB_TO_FRIENDLY_NAME.get(log_item.target_language, log_item.target_language) }}):</strong>
-                                    <div class="bg-light border rounded p-2 small result-box-small">{{ log_item.translated_text or 'N/A' }}</div>
+                                    <div class="bg-light border rounded p-2 small result-box-small" id="logTranslationText{{ loop.index }}"><span id="logTranslationTextContent{{ loop.index }}">{{ log_item.translated_text or 'N/A' }}</span></div>
                                     {% set log_nllb_code = log_item.target_language %}
                                     {% set log_tts_code_val = MASTER_TTS_CONFIG.get(log_nllb_code) %}
                                     {% if log_item.translated_text and log_tts_code_val %}
@@ -390,16 +301,16 @@
             const fileHelp = document.getElementById('fileHelp');
             const fileInput = document.getElementById('file');
 
-            textDiv.style.display = 'none';
-            fileDiv.style.display = 'none';
+            textDiv.classList.add('file-input-hidden');
+            fileDiv.classList.add('file-input-hidden');
 
             if (inputType === 'text') {
-                textDiv.style.display = 'block';
+                textDiv.classList.remove('file-input-hidden');
                 fileInput.value = '';
                 fileInput.removeAttribute('accept');
                 fileHelp.textContent = '';
             } else {
-                fileDiv.style.display = 'block';
+                fileDiv.classList.remove('file-input-hidden');
                 document.getElementById('text_input').value = '';
                  if (inputType === 'image') {
                     fileInput.setAttribute('accept', 'image/png, image/jpeg, image/jpg, image/gif, image/bmp, image/webp');
@@ -432,7 +343,7 @@
         }
 
 
-        function playTTSGeneric(text, lang, audioPlayerId, listenButtonId, customControlsWrapperId) {
+        function playTTSGeneric(text, lang, audioPlayerId, listenButtonId, customControlsWrapperId, textContainerId = null) {
             console.log(`--- playTTSGeneric CALLED for ${audioPlayerId} ---`);
             const audioPlayer = document.getElementById(audioPlayerId);
             const listenButton = document.getElementById(listenButtonId);
@@ -467,12 +378,21 @@
                 customControlsWrapper.classList.remove('d-none');
                 if(listenButton) listenButton.classList.add('d-none');
                 
+                // Setup word highlighting if textContainerId is provided
+                if (textContainerId) {
+                    setupWordHighlighting(audioPlayer, textContainerId, text);
+                }
+                
                 audioPlayer.play().catch(e => {console.error(`play() error (${audioPlayerId}):`, e); alert("Error playing: " + e.message);});
                 audioPlayer.onended = () => {
                     console.log(`Audio ended (${audioPlayerId}), revoking URL.`);
                     URL.revokeObjectURL(audioUrl);
                     customControlsWrapper.classList.add('d-none');
                     if(listenButton) listenButton.classList.remove('d-none');
+                    // Clear highlighting when audio ends
+                    if (textContainerId) {
+                        clearWordHighlighting(textContainerId);
+                    }
                 };
             })
             .catch(error => {
@@ -492,15 +412,125 @@
         function playTTSMain() {
             const text = document.getElementById('ttsTextMain').value;
             const lang = document.getElementById('ttsLangMain').value;
-            playTTSGeneric(text, lang, 'ttsAudioMain', 'ttsListenBtnMain', 'customAudioControlsWrapperMain');
+            playTTSGeneric(text, lang, 'ttsAudioMain', 'ttsListenBtnMain', 'customAudioControlsWrapperMain', 'mainTranslationText');
         }
 
         function playTTSLogEntry(loopIndex) {
             const text = document.getElementById(`ttsTextLog${loopIndex}`).value;
             const lang = document.getElementById(`ttsLangLog${loopIndex}`).value;
-            playTTSGeneric(text, lang, `ttsAudioLog${loopIndex}`, `ttsListenBtnLog${loopIndex}`, `customAudioControlsWrapperLog${loopIndex}`);
+            playTTSGeneric(text, lang, `ttsAudioLog${loopIndex}`, `ttsListenBtnLog${loopIndex}`, `customAudioControlsWrapperLog${loopIndex}`, `logTranslationTextContent${loopIndex}`);
         }
 
+
+        // Word-by-word highlighting functionality
+        function setupWordHighlighting(audioPlayer, textContainerId, text) {
+            const textContainer = document.getElementById(textContainerId);
+            if (!textContainer) return;
+            
+            // Split text into words while preserving spaces and punctuation
+            const words = text.split(/\s+/).filter(w => w.length > 0);
+            
+            // Calculate timing for each word based on its length
+            // gTTS speaks at approximately 150-180 words per minute (average 165)
+            const baseCharsPerSecond = 12; // Approximate speaking rate
+            let cumulativeTime = 0;
+            const wordTimings = words.map(word => {
+                // Add slight pause for punctuation
+                const hasPunctuation = /[.!?,;:]$/.test(word);
+                const wordDuration = (word.length / baseCharsPerSecond) + (hasPunctuation ? 0.3 : 0);
+                const startTime = cumulativeTime;
+                cumulativeTime += wordDuration;
+                return {
+                    word: word,
+                    startTime: startTime,
+                    endTime: cumulativeTime
+                };
+            });
+            
+            // Wrap each word in a span for individual highlighting
+            textContainer.innerHTML = words.map((word, index) => 
+                `<span class="tts-word" data-word-index="${index}">${word}</span>`
+            ).join(' ');
+            
+            const wordSpans = textContainer.querySelectorAll('.tts-word');
+            let animationFrameId = null;
+            
+            // Function to update highlight based on current audio time
+            const updateHighlight = () => {
+                if (audioPlayer.paused || audioPlayer.ended) {
+                    return;
+                }
+                
+                const currentTime = audioPlayer.currentTime;
+                const totalDuration = audioPlayer.duration;
+                
+                // Scale the theoretical timings to match actual audio duration
+                const timeScale = totalDuration / cumulativeTime;
+                
+                // Remove all highlights first
+                wordSpans.forEach(span => span.classList.remove('tts-word-active'));
+                
+                // Find and highlight the current word
+                for (let i = 0; i < wordTimings.length; i++) {
+                    const scaledStart = wordTimings[i].startTime * timeScale;
+                    const scaledEnd = wordTimings[i].endTime * timeScale;
+                    
+                    if (currentTime >= scaledStart && currentTime < scaledEnd) {
+                        wordSpans[i].classList.add('tts-word-active');
+                        
+                        // Scroll to keep highlighted word visible
+                        wordSpans[i].scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'nearest',
+                            inline: 'nearest'
+                        });
+                        break;
+                    }
+                }
+                
+                // Continue updating while playing
+                animationFrameId = requestAnimationFrame(updateHighlight);
+            };
+            
+            // Start highlighting when audio plays
+            const startHighlighting = () => {
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId);
+                }
+                updateHighlight();
+            };
+            
+            // Stop highlighting
+            const stopHighlighting = () => {
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId);
+                    animationFrameId = null;
+                }
+            };
+            
+            audioPlayer.addEventListener('play', startHighlighting);
+            audioPlayer.addEventListener('playing', startHighlighting);
+            audioPlayer.addEventListener('pause', stopHighlighting);
+            audioPlayer.addEventListener('ended', () => {
+                stopHighlighting();
+                // Remove all highlights when ended
+                wordSpans.forEach(span => span.classList.remove('tts-word-active'));
+            });
+            audioPlayer.addEventListener('seeked', () => {
+                if (!audioPlayer.paused) {
+                    updateHighlight();
+                }
+            });
+        }
+        
+        function clearWordHighlighting(textContainerId) {
+            const textContainer = document.getElementById(textContainerId);
+            if (!textContainer) return;
+            
+            // Remove all highlighting classes
+            const wordSpans = textContainer.querySelectorAll('.tts-word');
+            wordSpans.forEach(span => span.classList.remove('tts-word-active'));
+        }
 
         document.addEventListener('DOMContentLoaded', function() {
             toggleInputFields();
@@ -514,8 +544,14 @@
                     let hasInput = false;
                     if (inputType === 'text' && textInputVal) { hasInput = true; }
                     else if ((inputType === 'image' || inputType === 'audio') && fileInputFiles.length > 0) { hasInput = true;}
-                    if (hasInput) { loadingIndicator.style.display = 'block'; }
-                    else { event.preventDefault(); alert("Please provide text or upload a file to translate."); loadingIndicator.style.display = 'none'; }
+                    if (hasInput) { 
+                        loadingIndicator.classList.remove('loading-indicator-hidden'); 
+                    }
+                    else { 
+                        event.preventDefault(); 
+                        alert("Please provide text or upload a file to translate."); 
+                        loadingIndicator.classList.add('loading-indicator-hidden'); 
+                    }
                 });
             }
         });
