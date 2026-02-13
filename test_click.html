@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Click Test</title>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .clickable { 
+            padding: 20px; 
+            margin: 10px; 
+            background: #007bff; 
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .clickable:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>Simple Click Test</h1>
+    
+    <div class="clickable" onclick="alert('Clicked Item 1!'); console.log('Item 1 clicked');">
+        Click Me - Item 1
+    </div>
+    
+    <div class="clickable" onclick="handleClick('Item 2')">
+        Click Me - Item 2 (uses function)
+    </div>
+    
+    <button onclick="handleClick('Button')">Click Button</button>
+    
+    <div id="output"></div>
+    
+    <script>
+        console.log('JavaScript loaded successfully');
+        
+        function handleClick(name) {
+            console.log('handleClick called with:', name);
+            document.getElementById('output').innerHTML += '<div>Clicked: ' + name + ' at ' + new Date().toLocaleTimeString() + '</div>';
+        }
+        
+        console.log('handleClick function defined');
+        console.log('Ready for clicks!');
+    </script>
+</body>
+</html>

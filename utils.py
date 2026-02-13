@@ -227,7 +227,13 @@ def translate_text(text, source_lang_short, target_lang_friendly_name):
     if not text:
         return None, "No text provided for translation."
 
+    if source_lang_short == "auto":
+        detected_lang = detect_language(text)
+        source_lang_short = detected_lang if detected_lang != "unknown" else "en"
+
     nllb_source_code = NLLB_SOURCE_LANG_CODES.get(source_lang_short)
+    if not nllb_source_code:
+        nllb_source_code = ISO_TO_NLLB.get(source_lang_short)
     if not nllb_source_code:
         return None, f"Source language short code '{source_lang_short}' not mapped to NLLB code."
 
