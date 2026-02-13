@@ -1,5 +1,5 @@
 # app.py
-from flask import Flask, render_template, request, redirect, url_for, flash, send_file
+from flask import Flask, render_template, request, redirect, url_for, flash, send_file, jsonify
 from werkzeug.utils import secure_filename
 import os
 import utils # Import our helper functions
@@ -10,6 +10,7 @@ import io
 from datetime import datetime
 import secrets
 import secrets
+from schemes_data import get_schemes, get_scheme_by_id, get_daily_schemes
 
 # --- Configuration ---
 UPLOAD_FOLDER = 'uploads'
@@ -44,6 +45,20 @@ db.init_app(app)
 with app.app_context():
     utils.initialize_models()
     db.create_all()
+
+# Disable caching for development
+@app.after_request
+def add_header(response):
+    response.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, post-check=0, pre-check=0, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '-1'
+    return response
+
+# Add cache-busting version to templates
+import time
+@app.context_processor
+def inject_cache_buster():
+    return {'cache_buster': int(time.time())}
 
 MASTER_TTS_CONFIG = {
     "asm_Beng": None, "ben_Beng": "bn", "guj_Gujr": "gu", "hin_Deva": "hi",
@@ -247,6 +262,217 @@ def tts_route():
         import traceback
         traceback.print_exc() # Already good
         return f"TTS generation failed for gTTS with language '{tts_lang_code}': {e}", 500
+
+# --- New API Routes for Enhanced Features ---
+
+@app.route('/api/schemes/daily', methods=['GET'])
+def get_daily_schemes_route():
+    """Get schemes for daily display (rotates based on date)"""
+    count = request.args.get('count', 3, type=int)
+    schemes = get_daily_schemes(count)
+    return jsonify({'schemes': schemes, 'success': True})
+
+@app.route('/api/schemes/all', methods=['GET'])
+def get_all_schemes_route():
+    """Get all available government schemes"""
+    limit = request.args.get('limit', 20, type=int)
+    schemes = get_schemes(limit=limit)
+    return jsonify({'schemes': schemes, 'success': True, 'count': len(schemes)})
+
+@app.route('/api/schemes/<scheme_id>', methods=['GET'])
+def get_scheme_detail_route(scheme_id):
+    """Get detailed information about a specific scheme"""
+    scheme = get_scheme_by_id(scheme_id)
+    if scheme:
+        return jsonify({'scheme': scheme, 'success': True})
+    return jsonify({'success': False, 'error': 'Scheme not found'}), 404
+
+@app.route('/api/schemes/all-with-translations', methods=['GET'])
+def get_all_schemes_with_translations():
+    """Get all schemes - returns English only, frontend handles caching and translation"""
+    limit = request.args.get('limit', 20, type=int)
+    schemes = get_schemes(limit=limit)
+    
+    # Return schemes in a format optimized for frontend caching
+    schemes_data = []
+    for scheme in schemes:
+        schemes_data.append({
+            'id': scheme['id'],
+            'name': scheme['name'],
+            'icon': scheme['icon'],
+            'category': scheme['category'],
+            'officialLink': scheme['officialLink'],
+            'fullName': scheme['fullName'],
+            'summary': scheme['summary']
+        })
+    
+    return jsonify({
+        'schemes': schemes_data,
+        'success': True,
+        'count': len(schemes_data)
+    })
+
+@app.route('/api/translate/instant', methods=['POST'])
+def instant_translate_route():
+    """Instant translation API for scheme text and other content"""
+    data = request.get_json()
+    text = data.get('text', '').strip()
+    source_lang_short = data.get('source_lang', 'en')
+    target_friendly_name = data.get('target_lang', 'Hindi')
+    
+    if not text:
+        return jsonify({'success': False, 'error': 'No text provided'}), 400
+    
+    try:
+        # Use existing translation function
+        translation_result, trans_error = utils.translate_text(
+            text,
+            source_lang_short,
+            target_friendly_name
+        )
+        
+        if trans_error:
+            return jsonify({'success': False, 'error': trans_error}), 500
+        
+        if translation_result:
+            # Get TTS code for audio support
+            target_nllb_code = utils.SUPPORTED_LANGUAGES.get(target_friendly_name)
+            tts_code = MASTER_TTS_CONFIG.get(target_nllb_code) if target_nllb_code else None
+            
+            return jsonify({
+                'success': True,
+                'translated_text': translation_result,
+                'source_lang': source_lang_short,
+                'target_lang': target_friendly_name,
+                'tts_supported': tts_code is not None,
+                'tts_code': tts_code
+            })
+        else:
+            return jsonify({'success': False, 'error': 'Translation returned empty result'}), 500
+            
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/history/device', methods=['GET'])
+def get_device_history_route():
+    """Get translation history for a specific device"""
+    device_id = request.args.get('device_id')
+    limit = request.args.get('limit', 10, type=int)
+    
+    if not device_id:
+        return jsonify({'success': False, 'error': 'Device ID required'}), 400
+    
+    try:
+        # For now, return all recent logs
+        # In a production app, you'd store device_id in TranslationLog model
+        recent_logs = TranslationLog.query.order_by(
+            TranslationLog.timestamp.desc()
+        ).limit(limit).all()
+        
+        logs_data = []
+        for log in recent_logs:
+            logs_data.append({
+                'id': log.id,
+                'input_type': log.input_type,
+                'source_language': log.source_language,
+                'target_language': log.target_language,
+                'original_text': log.original_text[:100] if log.original_text else '',
+                'translated_text': log.translated_text[:100] if log.translated_text else '',
+                'timestamp': log.timestamp.isoformat() if log.timestamp else None,
+                'error_message': log.error_message
+            })
+        
+        return jsonify({
+            'success': True,
+            'logs': logs_data,
+            'count': len(logs_data),
+            'device_id': device_id
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/translate/file', methods=['POST'])
+def translate_file_instant_route():
+    """Handle instant file translation (OCR/STT) without page reload"""
+    try:
+        if 'file' not in request.files:
+            return jsonify({'success': False, 'error': 'No file provided'}), 400
+        
+        file = request.files['file']
+        input_type = request.form.get('input_type', 'image')
+        target_friendly_name = request.form.get('target_language', 'Hindi')
+        device_id = request.form.get('device_id', 'unknown')
+        
+        if not file or not file.filename:
+            return jsonify({'success': False, 'error': 'No file selected'}), 400
+        
+        allowed_extensions = ALLOWED_EXTENSIONS_IMG if input_type == 'image' else ALLOWED_EXTENSIONS_AUDIO
+        
+        if not allowed_file(file.filename, allowed_extensions):
+            return jsonify({'success': False, 'error': 'Invalid file type'}), 400
+        
+        filename = secure_filename(file.filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+        
+        try:
+            source_text = None
+            source_lang_detected = 'en'
+            
+            if input_type == 'image':
+                source_text, detected_lang = utils.perform_ocr(filepath)
+                source_lang_detected = detected_lang if detected_lang in utils.NLLB_SOURCE_LANG_CODES.keys() else 'en'
+            elif input_type == 'audio':
+                source_text, detected_lang = utils.perform_stt(filepath, lang_code_hint='hi')
+                source_lang_detected = detected_lang if detected_lang in utils.NLLB_SOURCE_LANG_CODES else 'en'
+            
+            if not source_text:
+                return jsonify({'success': False, 'error': f'Could not extract text from {input_type}'}), 500
+            
+            # Translate the extracted text
+            translation_result, trans_error = utils.translate_text(
+                source_text,
+                source_lang_detected,
+                target_friendly_name
+            )
+            
+            if trans_error:
+                return jsonify({'success': False, 'error': trans_error}), 500
+            
+            # Log the translation
+            log_entry = TranslationLog()
+            log_entry.input_type = 'ocr' if input_type == 'image' else 'audio'
+            log_entry.source_language = utils.NLLB_SOURCE_LANG_CODES.get(source_lang_detected)
+            log_entry.target_language = utils.SUPPORTED_LANGUAGES.get(target_friendly_name)
+            log_entry.original_text = source_text
+            log_entry.translated_text = translation_result
+            db.session.add(log_entry)
+            db.session.commit()
+            
+            # Get TTS info
+            target_nllb_code = utils.SUPPORTED_LANGUAGES.get(target_friendly_name)
+            tts_code = MASTER_TTS_CONFIG.get(target_nllb_code) if target_nllb_code else None
+            
+            return jsonify({
+                'success': True,
+                'original_text': source_text,
+                'translated_text': translation_result,
+                'source_lang': source_lang_detected,
+                'target_lang': target_friendly_name,
+                'tts_supported': tts_code is not None,
+                'tts_code': tts_code,
+                'log_id': log_entry.id
+            })
+            
+        finally:
+            if os.path.exists(filepath):
+                os.remove(filepath)
+                
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5001, debug=True)

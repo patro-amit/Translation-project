@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test - Click Handlers</title>
+    <style>
+        .test-box {
+            padding: 20px;
+            margin: 10px;
+            background: #f0f0f0;
+            cursor: pointer;
+            border: 2px solid #333;
+        }
+        .test-box:hover {
+            background: #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Click Handler Test Page</h1>
+    
+    <div class="test-box" onclick="testClick('Test 1')">
+        Click me - Test 1
+    </div>
+    
+    <div class="test-box" onclick="testClick('Test 2')">
+        Click me - Test 2
+    </div>
+    
+    <button onclick="testClick('Button Test')">Click Button</button>
+    
+    <div id="output"></div>
+    
+    <script>
+        console.log('✓ Test page JavaScript loaded');
+        
+        function testClick(name) {
+            console.log('✓ testClick called with:', name);
+            document.getElementById('output').innerHTML += '<p>Clicked: ' + name + ' at ' + new Date().toLocaleTimeString() + '</p>';
+            alert('Click worked! ' + name);
+        }
+        
+        console.log('✓ testClick function defined');
+        console.log('✓ Ready for testing');
+    </script>
+</body>
+</html>

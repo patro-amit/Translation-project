@@ -28,6 +28,7 @@
             <a class="navbar-brand fw-bold" href="/">
                 <i class="bi bi-flower3 me-2" style="font-size: 1.8rem;"></i>
                 <span data-i18n="navbar.title">🌾 किसान योजना अनुवादक | Farmer Portal</span>
+                <small style="color: #00ff00; font-size: 0.7rem; background: rgba(0,255,0,0.1); padding: 2px 6px; border-radius: 3px; margin-left: 8px;">V2.0-CLICKABLE</small>
             </a>
             <div class="ms-auto">
                 <div class="dropdown">
@@ -102,8 +103,8 @@
                             </div>
                         </div>
                         <div class="text-center mt-4">
-                            <button class="btn-view-all pulse-animation" onclick="openSchemesPanel()" type="button" id="viewAllButton">
-                                <i class="bi bi-grid-3x3-gap"></i> <span id="viewAllText" data-i18n="schemes.viewAll">View All 20 Schemes</span>
+                            <button class="btn-view-all pulse-animation" onclick="openSchemesPanel()" type="button">
+                                <i class="bi bi-grid-3x3-gap"></i> <span data-i18n="schemes.viewAll">View All 20 Schemes | सभी 20 योजनाएं देखें</span>
                             </button>
                         </div>
                         <div class="text-center mt-3">
@@ -188,65 +189,76 @@
 
                         <!-- Submit Button -->
                         <div class="col-12 text-center mt-5">
-                            <button type="submit" class="btn btn-primary btn-lg px-5 py-3" id="translateSubmitButton">
+                            <button type="submit" class="btn btn-primary btn-lg px-5 py-3">
                                 <i class="bi bi-arrow-repeat"></i> <span data-i18n="form.translateButton">अनुवाद करें | Translate Now</span>
                             </button>
-                            <div class="inline-action d-none mt-3" id="translateInlineSpinner">
-                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                <span id="translateInlineText"></span>
-                            </div>
                         </div>
                     </div>
                 </form>
-                <!-- Loading indicator replaced by inline action spinner -->
+                 <!-- Loading Indicator with Cultural Design -->
+                <div id="loadingIndicator" class="text-center mt-4 loading-indicator-hidden">
+                    <div class="spinner-border" role="status" style="border-color: #FF9933; border-right-color: transparent; width: 4rem; height: 4rem;">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="text-muted mt-3" style="font-size: 1.2rem; font-weight: 600;">
+                        <i class="bi bi-hourglass-split"></i> <span data-i18n="loading.message">प्रसंस्करण जारी है | Processing, please wait...</span>
+                    </p>
+                </div>
             </div>
         </div>
 
 
         <!-- Results Section with Enhanced Visibility -->
-        <div class="mt-5 pt-4{% if not (original_text or translation_result or (error and not original_text and not translation_result)) %} d-none{% endif %}" id="resultsSection">
+        {% if original_text or translation_result or (error and not original_text and not translation_result) %}
+        <div class="mt-5 pt-4">
             <div class="cultural-border"></div>
             <h2 class="text-center mb-5">
                 <i class="bi bi-file-earmark-text"></i> <span data-i18n="results.header">अनुवाद परिणाम | Translation Results</span>
             </h2>
-             <div class="row justify-content-center{% if not (error and not original_text and not translation_result) %} d-none{% endif %}" id="resultsErrorRow">
-                <div class="col-md-10 col-lg-8">
-                    <div class="alert alert-danger" style="font-size: 1.1rem;" id="resultsErrorAlert">
-                        <i class="bi bi-exclamation-triangle-fill"></i> {{ error or '' }}
+             {% if error and not original_text and not translation_result %}
+                <div class="row justify-content-center">
+                    <div class="col-md-10 col-lg-8">
+                        <div class="alert alert-danger" style="font-size: 1.1rem;">
+                            <i class="bi bi-exclamation-triangle-fill"></i> {{ error }}
+                        </div>
                     </div>
                 </div>
-            </div>
+             {% endif %}
 
             <div class="row g-4 justify-content-center">
                 <!-- Original Text Box -->
-                <div class="col-lg-6{% if not original_text %} d-none{% endif %}" id="originalTextCard">
+                {% if original_text %}
+                <div class="col-lg-6">
                     <div class="card h-100 shadow-sm">
                         <div class="card-header">
                            <i class="bi bi-file-text"></i> <strong><span data-i18n="results.originalText">मूल पाठ | Original Text</span></strong> 
-                           <span class="badge bg-secondary ms-2{% if not detected_lang or detected_lang == 'N/A' %} d-none{% endif %}" id="detectedLangBadge">{{ detected_lang|title if detected_lang else '' }}</span>
+                           {% if detected_lang %}<span class="badge bg-secondary ms-2">{{ detected_lang|title }}</span>{% endif %}
                         </div>
                         <div class="card-body result-box">
-                            <span id="originalTextContent">{{ original_text or '' }}</span>
+                            {{ original_text }}
                         </div>
                     </div>
                 </div>
+                {% endif %}
 
                 <!-- Translation Result Box -->
-                 <div class="col-lg-6{% if not translation_result %} d-none{% endif %}" id="translationResultCard">
+                {% if translation_result %}
+                 <div class="col-lg-6">
                     <div class="card h-100 shadow-sm">
                          <div class="card-header">
                              <i class="bi bi-translate"></i> <strong><span data-i18n="results.translation">अनुवाद | Translation</span></strong> 
-                             <span class="badge bg-success ms-2" id="targetLangBadge">{{ selected_target_lang }}</span>
+                             <span class="badge bg-success ms-2">{{ selected_target_lang }}</span>
                         </div>
                         <div class="card-body result-box" id="mainTranslationResultBox">
-                           <span id="mainTranslationText">{{ translation_result or '' }}</span>
+                           <span id="mainTranslationText">{{ translation_result }}</span>
                         </div>
                         <div class="card-footer text-center">
-                            <div class="d-flex flex-column align-items-center" id="mainTtsControls">
-                                <button type="button" class="btn btn-success btn-lg mb-3{% if not main_result_tts_supported %} d-none{% endif %}" id="ttsListenBtnMain" onclick="playTTSMain()" style="border-radius: 50px; padding: 0.75rem 2rem;">
-                                    <i class="bi bi-volume-up"></i> <span data-i18n="results.listen">सुनें | Listen</span>
-                                </button>
-                                <div id="customAudioControlsWrapperMain" class="custom-audio-controls-wrapper d-none">
+                             {% if main_result_tts_supported %}
+                                <div class="d-flex flex-column align-items-center">
+                                    <button type="button" class="btn btn-success btn-lg mb-3" id="ttsListenBtnMain" onclick="playTTSMain()" style="border-radius: 50px; padding: 0.75rem 2rem;">
+                                        <i class="bi bi-volume-up"></i> <span data-i18n="results.listen">सुनें | Listen</span>
+                                    </button>
+                                    <div id="customAudioControlsWrapperMain" class="custom-audio-controls-wrapper d-none">
                                         <button type="button" class="player-skip-btn" onclick="skipAudio('ttsAudioMain', -window.ttsSkipInterval)" title="Skip Backward">
                                             <span class="skip-interval-label-adjacent">5</span><i class="bi bi-arrow-counterclockwise"></i>
                                         </button>
@@ -264,20 +276,26 @@
                                                 <li><a class="dropdown-item" href="#" onclick="setSkipInterval(15, 'Main'); return false;">Skip 15s</a></li>
                                             </ul>
                                         </div>
-                                                                </div>
-                                                        </div>
-                                                        <form id="ttsFormDataMain" class="d-none">
-                                                                 <input type="hidden" name="text" id="ttsTextMain" value="{{ translation_result or '' }}">
-                                                                 <input type="hidden" name="lang" id="ttsLangMain" value="{{ main_result_tts_code }}">
-                                                        </form>
-                                                        <small class="text-muted{% if main_result_tts_supported or not translation_result %} d-none{% endif %}" style="font-size: 1rem;" id="ttsUnavailableNotice">
-                                                            <i class="bi bi-speaker-fill"></i> Text-to-speech not available for {{ selected_target_lang }}.
-                                                        </small>
+                                    </div>
+                                </div>
+                                <form id="ttsFormDataMain" class="d-none">
+                                     <input type="hidden" name="text" id="ttsTextMain" value="{{ translation_result }}">
+                                     <input type="hidden" name="lang" id="ttsLangMain" value="{{ main_result_tts_code }}">
+                                </form>
+                             {% else %}
+                                 {% if translation_result %}
+                                <small class="text-muted" style="font-size: 1rem;">
+                                  <i class="bi bi-speaker-fill"></i> Text-to-speech not available for {{ selected_target_lang }}.
+                                </small>
+                                {% endif %}
+                             {% endif %}
                         </div>
                     </div>
                 </div>
+                {% endif %}
             </div>
         </div>
+        {% endif %}
 
 
         <!-- Recent Translations Activity Log -->
@@ -397,6 +415,9 @@
 
     <!-- Custom JS -->
     <script>
+        console.log('🚀 JavaScript V2.0 Loading - Clickable schemes enabled');
+        console.log('Timestamp:', new Date().toISOString());
+        
         // ==================== UI LANGUAGE TRANSLATIONS ====================
         const uiTranslations = {
             'en': {
@@ -408,7 +429,7 @@
                     title: 'Government Scheme Translator',
                     subtitle: 'Government Farming Scheme Translator',
                     description1: 'Understand government farming schemes in your own language.',
-                    description2: 'Get clear, simple scheme details for quick decisions.',
+                    description2: 'Understand government farming schemes in your own language.',
                     description3: 'Translate English/Hindi scheme details into various Indian regional languages.'
                 },
                 schemes: {
@@ -416,7 +437,6 @@
                     pmkisan: 'PM Kisan Samman Nidhi<br>₹6000/year direct benefit',
                     pmfby: 'Crop Insurance Scheme<br>Crop Insurance Scheme',
                     kcc: 'Kisan Credit Card<br>Easy Credit for Farmers',
-                    panelTitle: 'All Government Schemes',
                     info: 'Select scheme details above and translate to your language below'
                 },
                 form: {
@@ -460,7 +480,7 @@
                     title: 'सरकारी योजना अनुवादक',
                     subtitle: 'सरकारी कृषि योजना अनुवादक',
                     description1: 'किसानों के लिए सरकारी योजनाओं को अपनी भाषा में समझें।',
-                    description2: 'योजना विवरण को स्पष्ट और सरल रूप में पाएं।',
+                    description2: 'सरकारी कृषि योजनाओं को अपनी भाषा में समझें।',
                     description3: 'अंग्रेजी/हिंदी योजना विवरण को विभिन्न भारतीय क्षेत्रीय भाषाओं में अनुवाद करें।'
                 },
                 schemes: {
@@ -468,7 +488,6 @@
                     pmkisan: 'प्रधानमंत्री किसान सम्मान निधि<br>₹6000/वर्ष प्रत्यक्ष लाभ',
                     pmfby: 'फसल बीमा योजना<br>फसल बीमा योजना',
                     kcc: 'किसान क्रेडिट कार्ड<br>किसानों के लिए आसान ऋण',
-                    panelTitle: 'सभी सरकारी योजनाएं',
                     info: 'ऊपर योजना विवरण चुनें और नीचे अपनी भाषा में अनुवाद करें'
                 },
                 form: {
@@ -512,7 +531,7 @@
                     title: 'সরকারি স্কিম অনুবাদক',
                     subtitle: 'সরকারি কৃষি স্কিম অনুবাদক',
                     description1: 'আপনার নিজের ভাষায় সরকারি কৃষি স্কিম বুঝুন।',
-                    description2: 'পরিষ্কার ও সহজ পরিকল্পনার বিবরণ পান।',
+                    description2: 'আপনার নিজের ভাষায় সরকারি কৃষি স্কিম বুঝুন।',
                     description3: 'ইংরেজি/হিন্দি স্কিম বিবরণ বিভিন্ন ভারতীয় আঞ্চলিক ভাষায় অনুবাদ করুন।'
                 },
                 schemes: {
@@ -520,7 +539,6 @@
                     pmkisan: 'প্রধানমন্ত্রী কিষাণ সম্মান নিধি<br>₹6000/বছর সরাসরি সুবিধা',
                     pmfby: 'ফসল বীমা স্কিম<br>ফসলবীমা স্কিম',
                     kcc: 'কিষাণ ক্রেডিট কার্ড<br>কৃষকদের জন্য সহজ ঋণ',
-                    panelTitle: 'সমস্ত সরকারি প্রকল্প',
                     info: 'উপরে স্কিম বিবরণ নির্বাচন করুন এবং নীচে আপনার ভাষায় অনুবাদ করুন'
                 },
                 form: {
@@ -564,7 +582,7 @@
                     title: 'அரசு திட்ட மொழிபெயர்ப்பாளர்',
                     subtitle: 'அரசு விவசாய திட்ட மொழிபெயர்ப்பாளர்',
                     description1: 'உங்கள் சொந்த மொழியில் அரசு விவசாய திட்டங்களை புரிந்து கொள்ளுங்கள்.',
-                    description2: 'திட்ட விவரங்களை தெளிவாகவும் எளிமையாகவும் பெறுங்கள்.',
+                    description2: 'உங்கள் சொந்த மொழியில் அரசு விவசாய திட்டங்களை புரிந்து கொள்ளுங்கள்.',
                     description3: 'ஆங்கிலம்/இந்தி திட்ட விவரங்களை பல்வேறு இந்திய பிராந்திய மொழிகளாக மொழிபெயர்க்கவும்.'
                 },
                 schemes: {
@@ -572,7 +590,6 @@
                     pmkisan: 'பிரதம மந்திரி கிசான் சம்மான் நிதி<br>₹6000/ஆண்டு நேரடி நலன்',
                     pmfby: 'பயிர் காப்பீடு திட்டம்<br>பயிர் காப்பீடு திட்டம்',
                     kcc: 'கிசான் கிரெடிட் கார்டு<br>விவசாயிகளுக்கு எளிதான கடன்',
-                    panelTitle: 'அனைத்து அரசு திட்டங்கள்',
                     info: 'மேலே திட்ட விவரங்களைத் தேர்ந்தெடுத்து உங்கள் மொழியில் மொழிபெயர்க்கவும்'
                 },
                 form: {
@@ -616,7 +633,7 @@
                     title: 'ప్రభుత్వ పథకం అనువాదకుడు',
                     subtitle: 'ప్రభుత్వ వ్యవసాయ పథకం అనువాదకుడు',
                     description1: 'మీ స్వంత భాషలో ప్రభుత్వ వ్యవసాయ పథకాలను అర్థం చేసుకోండి.',
-                    description2: 'పథకం వివరాలను స్పష్టంగా, సులభంగా పొందండి.',
+                    description2: 'మీ స్వంత భాషలో ప్రభుత్వ వ్యవసాయ పథకాలను అర్థం చేసుకోండి.',
                     description3: 'ఆంగ్లం/హిందీ పథకం వివరాలను వివిధ భారతీయ ప్రాంతీయ భాషలలోకి అనువదించండి.'
                 },
                 schemes: {
@@ -624,7 +641,6 @@
                     pmkisan: 'ప్రధాన మంత్రి కిసాన్ సమ్మాన్ నిధి<br>₹6000/సంవత్సరం ప్రత్యక్ష ప్రయోజనం',
                     pmfby: 'పంట బీమా పథకం<br>పంట బీమా పథకం',
                     kcc: 'కిసాన్ క్రెడిట్ కార్డ్<br>రైతులకు సులభ రుణం',
-                    panelTitle: 'అన్ని ప్రభుత్వ పథకాలు',
                     info: 'పైన పథకం వివరాలను ఎంచుకోండి మరియు దిగువ మీ భాషలోకి అనువదించండి'
                 },
                 form: {
@@ -668,7 +684,7 @@
                     title: 'सरकारी योजना अनुवादक',
                     subtitle: 'सरकारी शेती योजना अनुवादक',
                     description1: 'तुमच्या स्वत:च्या भाषेत सरकारी शेती योजना समजून घ्या.',
-                    description2: 'योजना तपशील स्पष्ट आणि सोप्या रूपात मिळवा.',
+                    description2: 'तुमच्या स्वत:च्या भाषेत सरकारी शेती योजना समजून घ्या.',
                     description3: 'इंग्रजी/हिंदी योजना तपशील विविध भारतीय प्रादेशिक भाषांमध्ये भाषांतरित करा.'
                 },
                 schemes: {
@@ -676,7 +692,6 @@
                     pmkisan: 'पंतप्रधान किसान सन्मान निधी<br>₹6000/वर्ष थेट लाभ',
                     pmfby: 'पीक विमा योजना<br>पीक विमा योजना',
                     kcc: 'किसान क्रेडिट कार्ड<br>शेतकऱ्यांसाठी सोपे कर्ज',
-                    panelTitle: 'सर्व सरकारी योजना',
                     info: 'वर योजना तपशील निवडा आणि खाली तुमच्या भाषेत भाषांतर करा'
                 },
                 form: {
@@ -720,7 +735,7 @@
                     title: 'સરકારી યોજના અનુવાદક',
                     subtitle: 'સરકારી ખેતી યોજના અનુવાદક',
                     description1: 'તમારી પોતાની ભાષામાં સરકારી ખેતી યોજનાઓ સમજો.',
-                    description2: 'યોજના વિગતો સ્પષ્ટ અને સરળ રીતે મેળવો.',
+                    description2: 'તમારી પોતાની ભાષામાં સરકારી ખેતી યોજનાઓ સમજો.',
                     description3: 'અંગ્રેજી/હિન્દી યોજના વિગતોને વિવિધ ભારતીય પ્રાદેશિક ભાષાઓમાં અનુવાદ કરો.'
                 },
                 schemes: {
@@ -728,7 +743,6 @@
                     pmkisan: 'પ્રધાનમંત્રી કિસાન સમ્માન નિધિ<br>₹6000/વર્ષ સીધો લાભ',
                     pmfby: 'પાક વીમા યોજના<br>પાક વીમા યોજના',
                     kcc: 'કિસાન ક્રેડિટ કાર્ડ<br>ખેડૂતો માટે સરળ ધિરાણ',
-                    panelTitle: 'બધી સરકારી યોજનાઓ',
                     info: 'ઉપર યોજના વિગતો પસંદ કરો અને નીચે તમારી ભાષામાં અનુવાદ કરો'
                 },
                 form: {
@@ -772,7 +786,7 @@
                     title: 'ಸರ್ಕಾರಿ ಯೋಜನೆ ಅನುವಾದಕ',
                     subtitle: 'ಸರ್ಕಾರಿ ಕೃಷಿ ಯೋಜನೆ ಅನುವಾದಕ',
                     description1: 'ನಿಮ್ಮ ಸ್ವಂತ ಭಾಷೆಯಲ್ಲಿ ಸರ್ಕಾರಿ ಕೃಷಿ ಯೋಜನೆಗಳನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಿ.',
-                    description2: 'ಯೋಜನೆ ವಿವರಗಳನ್ನು ಸ್ಪಷ್ಟವಾಗಿ ಮತ್ತು ಸರಳವಾಗಿ ಪಡೆಯಿರಿ.',
+                    description2: 'ನಿಮ್ಮ ಸ್ವಂತ ಭಾಷೆಯಲ್ಲಿ ಸರ್ಕಾರಿ ಕೃಷಿ ಯೋಜನೆಗಳನ್ನು ಅರ್ಥಮಾಡಿಕೊಳ್ಳಿ.',
                     description3: 'ಇಂಗ್ಲಿಷ್/ಹಿಂದಿ ಯೋಜನೆ ವಿವರಗಳನ್ನು ವಿವಿಧ ಭಾರತೀಯ ಪ್ರಾದೇಶಿಕ ಭಾಷೆಗಳಿಗೆ ಭಾಷಾಂತರಿಸಿ.'
                 },
                 schemes: {
@@ -780,7 +794,6 @@
                     pmkisan: 'ಪ್ರಧಾನ ಮಂತ್ರಿ ಕಿಸಾನ್ ಸಮ್ಮಾನ್ ನಿಧಿ<br>₹6000/ವರ್ಷ ನೇರ ಲಾಭ',
                     pmfby: 'ಬೆಳೆ ವಿಮಾ ಯೋಜನೆ<br>ಬೆಳೆ ವಿಮಾ ಯೋಜನೆ',
                     kcc: 'ಕಿಸಾನ್ ಕ್ರೆಡಿಟ್ ಕಾರ್ಡ್<br>ರೈತರಿಗೆ ಸುಲಭ ಸಾಲ',
-                    panelTitle: 'ಎಲ್ಲಾ ಸರ್ಕಾರಿ ಯೋಜನೆಗಳು',
                     info: 'ಮೇಲೆ ಯೋಜನೆ ವಿವರಗಳನ್ನು ಆಯ್ಕೆ ಮಾಡಿ ಮತ್ತು ಕೆಳಗೆ ನಿಮ್ಮ ಭಾಷೆಗೆ ಭಾಷಾಂತರಿಸಿ'
                 },
                 form: {
@@ -824,7 +837,7 @@
                     title: 'സർക്കാർ പദ്ധതി വിവർത്തകൻ',
                     subtitle: 'സർക്കാർ കൃഷി പദ്ധതി വിവർത്തകൻ',
                     description1: 'നിങ്ങളുടെ സ്വന്തം ഭാഷയിൽ സർക്കാർ കൃഷി പദ്ധതികൾ മനസ്സിലാക്കുക.',
-                    description2: 'പദ്ധതി വിവരങ്ങൾ വ്യക്തവും ലളിതവും ആയി നേടുക.',
+                    description2: 'നിങ്ങളുടെ സ്വന്തം ഭാഷയിൽ സർക്കാർ കൃഷി പദ്ധതികൾ മനസ്സിലാക്കുക.',
                     description3: 'ഇംഗ്ലീഷ്/ഹിന്ദി പദ്ധതി വിശദാംശങ്ങൾ വിവിധ ഇന്ത്യൻ പ്രാദേശിക ഭാഷകളിലേക്ക് വിവർത്തനം ചെയ്യുക.'
                 },
                 schemes: {
@@ -832,7 +845,6 @@
                     pmkisan: 'പ്രധാനമന്ത്രി കിസാൻ സമ്മാൻ നിധി<br>₹6000/വർഷം നേരിട്ടുള്ള ആനുകൂല്യം',
                     pmfby: 'വിള ഇൻഷുറൻസ് പദ്ധതി<br>വിള ഇൻഷുറൻസ് പദ്ധതി',
                     kcc: 'കിസാൻ ക്രെഡിറ്റ് കാർഡ്<br>കർഷകർക്ക് എളുപ്പമുള്ള വായ്പ',
-                    panelTitle: 'എല്ലാ സർക്കാർ പദ്ധതികൾ',
                     info: 'മുകളിൽ പദ്ധതി വിശദാംശങ്ങൾ തിരഞ്ഞെടുക്കുകയും താഴെ നിങ്ങളുടെ ഭാഷയിലേക്ക് വിവർത്തനം ചെയ്യുകയും ചെയ്യുക'
                 },
                 form: {
@@ -876,7 +888,7 @@
                     title: 'ਸਰਕਾਰੀ ਸਕੀਮ ਅਨੁਵਾਦਕ',
                     subtitle: 'ਸਰਕਾਰੀ ਖੇਤੀਬਾੜੀ ਸਕੀਮ ਅਨੁਵਾਦਕ',
                     description1: 'ਆਪਣੀ ਭਾਸ਼ਾ ਵਿੱਚ ਸਰਕਾਰੀ ਖੇਤੀਬਾੜੀ ਸਕੀਮਾਂ ਨੂੰ ਸਮਝੋ।',
-                    description2: 'ਯੋਜਨਾ ਵੇਰਵੇ ਸਾਫ਼ ਅਤੇ ਸਾਦੇ ਤਰੀਕੇ ਨਾਲ ਪ੍ਰਾਪਤ ਕਰੋ।',
+                    description2: 'ਆਪਣੀ ਭਾਸ਼ਾ ਵਿੱਚ ਸਰਕਾਰੀ ਖੇਤੀਬਾੜੀ ਸਕੀਮਾਂ ਨੂੰ ਸਮਝੋ।',
                     description3: 'ਅੰਗਰੇਜ਼ੀ/ਹਿੰਦੀ ਸਕੀਮ ਵੇਰਵੇ ਨੂੰ ਵੱਖ-ਵੱਖ ਭਾਰਤੀ ਖੇਤਰੀ ਭਾਸ਼ਾਵਾਂ ਵਿੱਚ ਅਨੁਵਾਦ ਕਰੋ।'
                 },
                 schemes: {
@@ -884,7 +896,6 @@
                     pmkisan: 'ਪ੍ਰਧਾਨ ਮੰਤਰੀ ਕਿਸਾਨ ਸਮਾਨ ਨਿਧੀ<br>₹6000/ਸਾਲ ਸਿੱਧਾ ਲਾਭ',
                     pmfby: 'ਫਸਲ ਬੀਮਾ ਸਕੀਮ<br>ਫਸਲ ਬੀਮਾ ਸਕੀਮ',
                     kcc: 'ਕਿਸਾਨ ਕ੍ਰੈਡਿਟ ਕਾਰਡ<br>ਕਿਸਾਨਾਂ ਲਈ ਆਸਾਨ ਕਰਜ਼ਾ',
-                    panelTitle: 'ਸਾਰੀਆਂ ਸਰਕਾਰੀ ਯੋਜਨਾਵਾਂ',
                     info: 'ਉੱਪਰ ਸਕੀਮ ਵੇਰਵੇ ਚੁਣੋ ਅਤੇ ਹੇਠਾਂ ਆਪਣੀ ਭਾਸ਼ਾ ਵਿੱਚ ਅਨੁਵਾਦ ਕਰੋ'
                 },
                 form: {
@@ -928,7 +939,7 @@
                     title: 'ସରକାରୀ ଯୋଜନା ଅନୁବାଦକ',
                     subtitle: 'ସରକାରୀ କୃଷି ଯୋଜନା ଅନୁବାଦକ',
                     description1: 'ଆପଣଙ୍କ ନିଜ ଭାଷାରେ ସରକାରୀ କୃଷି ଯୋଜନା ବୁଝନ୍ତୁ।',
-                    description2: 'ଯୋଜନା ବିବରଣୀକୁ ସ୍ପଷ୍ଟ ଏବଂ ସରଳ ଭାବରେ ପାଆନ୍ତୁ।',
+                    description2: 'ଆପଣଙ୍କ ନିଜ ଭାଷାରେ ସରକାରୀ କୃଷି ଯୋଜନା ବୁଝନ୍ତୁ।',
                     description3: 'ଇଂରାଜୀ/ହିନ୍ଦୀ ଯୋଜନା ବିବରଣୀକୁ ବିଭିନ୍ନ ଭାରତୀୟ ଆଞ୍ଚଳିକ ଭାଷାରେ ଅନୁବାଦ କରନ୍ତୁ।'
                 },
                 schemes: {
@@ -936,7 +947,6 @@
                     pmkisan: 'ପ୍ରଧାନମନ୍ତ୍ରୀ କିସାନ ସମ୍ମାନ ନିଧି<br>₹6000/ବର୍ଷ ସିଧାସଳଖ ଲାଭ',
                     pmfby: 'ଫସଲ ବୀମା ଯୋଜନା<br>ଫସଲ ବୀମା ଯୋଜନା',
                     kcc: 'କିସାନ କ୍ରେଡିଟ କାର୍ଡ<br>କୃଷକଙ୍କ ପାଇଁ ସହଜ ଋଣ',
-                    panelTitle: 'ସମସ୍ତ ସରକାରୀ ଯୋଜନା',
                     info: 'ଉପରେ ଯୋଜନା ବିବରଣୀ ଚୟନ କରନ୍ତୁ ଏବଂ ତଳେ ଆପଣଙ୍କ ଭାଷାରେ ଅନୁବାଦ କରନ୍ତୁ'
                 },
                 form: {
@@ -973,68 +983,6 @@
             }
         };
 
-        const bilingualTextKeys = new Set([
-            'navbar.title',
-            'hero.title',
-            'hero.subtitle',
-            'hero.description1',
-            'hero.description2',
-            'hero.description3',
-            'schemes.header',
-            'schemes.panelTitle',
-            'schemes.info',
-            'form.header',
-            'form.inputType',
-            'form.textInput',
-            'form.imageInput',
-            'form.audioInput',
-            'form.targetLanguage',
-            'form.enterText',
-            'form.uploadFile',
-            'form.translateButton',
-            'results.header',
-            'results.originalText',
-            'results.translation',
-            'results.listen',
-            'activity.header',
-            'activity.noActivity',
-            'footer.tagline',
-            'footer.madewith'
-        ]);
-
-        function getTranslationByKey(translations, keyPath) {
-            const keys = keyPath.split('.');
-            let value = translations;
-            for (const key of keys) {
-                if (value && Object.prototype.hasOwnProperty.call(value, key)) {
-                    value = value[key];
-                } else {
-                    return null;
-                }
-            }
-            return value;
-        }
-
-        function formatBilingualText(primary, secondary) {
-            if (!secondary || secondary === primary) {
-                return primary;
-            }
-            return `<span class="bilingual-primary">${primary}</span>` +
-                `<span class="bilingual-sep">/</span>` +
-                `<span class="bilingual-secondary">${secondary}</span>`;
-        }
-
-        function getBilingualText(keyPath, currentLang) {
-            const currentTranslations = uiTranslations[currentLang];
-            const englishTranslations = uiTranslations['en'];
-            const primary = getTranslationByKey(currentTranslations, keyPath);
-            const secondary = currentLang === 'en' ? null : getTranslationByKey(englishTranslations, keyPath);
-            if (!primary) {
-                return null;
-            }
-            return formatBilingualText(primary, secondary);
-        }
-
         // ==================== LANGUAGE SWITCHER FUNCTION ====================
         function changeUILanguage(langCode) {
             const translations = uiTranslations[langCode];
@@ -1045,23 +993,18 @@
 
             // Update all elements with data-i18n attribute
             document.querySelectorAll('[data-i18n]').forEach(element => {
-                const keyPath = element.getAttribute('data-i18n');
-                const translation = getTranslationByKey(translations, keyPath);
-                if (!translation) {
-                    if (keyPath !== 'schemes.viewAll') {
-                        console.warn('Translation key not found:', keyPath);
-                    }
-                    return;
-                }
-
-                if (bilingualTextKeys.has(keyPath)) {
-                    const bilingualText = getBilingualText(keyPath, langCode);
-                    if (bilingualText) {
-                        element.innerHTML = bilingualText;
+                const keys = element.getAttribute('data-i18n').split('.');
+                let translation = translations;
+                
+                for (const key of keys) {
+                    if (translation[key]) {
+                        translation = translation[key];
+                    } else {
+                        console.warn('Translation key not found:', element.getAttribute('data-i18n'));
                         return;
                     }
                 }
-
+                
                 element.innerHTML = translation;
             });
 
@@ -1087,9 +1030,6 @@
             // Store preference in localStorage (both keys for compatibility)
             localStorage.setItem('preferredUILanguage', langCode);
             localStorage.setItem('uiLanguage', langCode);
-            
-            // Update View All button with bilingual text
-            updateViewAllButton();
             
             // Update history labels when language changes
             translateHistoryLabels();
@@ -1160,110 +1100,6 @@
             }
         }
 
-        function setInlineLoading(isLoading, message) {
-            const submitButton = document.getElementById('translateSubmitButton');
-            const inlineSpinner = document.getElementById('translateInlineSpinner');
-            const inlineText = document.getElementById('translateInlineText');
-
-            if (!submitButton || !inlineSpinner || !inlineText) {
-                return;
-            }
-
-            if (isLoading) {
-                submitButton.disabled = true;
-                inlineSpinner.classList.remove('d-none');
-                const text = typeof message === 'string' ? message : formatBilingualText(message.primary, message.secondary);
-                inlineText.innerHTML = text;
-            } else {
-                submitButton.disabled = false;
-                inlineSpinner.classList.add('d-none');
-                inlineText.textContent = '';
-            }
-        }
-
-        function updateResultsSection({ originalText, translatedText, sourceLang, targetLang, ttsSupported, ttsCode }) {
-            const resultsSection = document.getElementById('resultsSection');
-            const errorRow = document.getElementById('resultsErrorRow');
-            const originalCard = document.getElementById('originalTextCard');
-            const translationCard = document.getElementById('translationResultCard');
-            const originalTextContent = document.getElementById('originalTextContent');
-            const translationText = document.getElementById('mainTranslationText');
-            const targetLangBadge = document.getElementById('targetLangBadge');
-            const detectedLangBadge = document.getElementById('detectedLangBadge');
-            const ttsListenBtn = document.getElementById('ttsListenBtnMain');
-            const ttsTextInput = document.getElementById('ttsTextMain');
-            const ttsLangInput = document.getElementById('ttsLangMain');
-            const ttsUnavailableNotice = document.getElementById('ttsUnavailableNotice');
-            const audioWrapper = document.getElementById('customAudioControlsWrapperMain');
-            const audioPlayer = document.getElementById('ttsAudioMain');
-
-            if (!resultsSection) {
-                return;
-            }
-
-            resultsSection.classList.remove('d-none');
-            if (errorRow) {
-                errorRow.classList.add('d-none');
-            }
-
-            if (originalCard) {
-                originalCard.classList.toggle('d-none', !originalText);
-            }
-            if (translationCard) {
-                translationCard.classList.toggle('d-none', !translatedText);
-            }
-
-            if (originalTextContent) {
-                originalTextContent.textContent = originalText || '';
-            }
-            if (translationText) {
-                translationText.textContent = translatedText || '';
-            }
-
-            if (targetLangBadge) {
-                targetLangBadge.textContent = targetLang || '';
-            }
-
-            if (detectedLangBadge) {
-                const labelMap = {
-                    en: 'English',
-                    hi: 'Hindi',
-                    bn: 'Bengali',
-                    ta: 'Tamil',
-                    te: 'Telugu',
-                    mr: 'Marathi',
-                    gu: 'Gujarati',
-                    kn: 'Kannada',
-                    ml: 'Malayalam',
-                    pa: 'Punjabi',
-                    or: 'Odia',
-                    ur: 'Urdu'
-                };
-                const label = sourceLang ? (labelMap[sourceLang] || sourceLang) : '';
-                detectedLangBadge.textContent = label;
-                detectedLangBadge.classList.toggle('d-none', !label);
-            }
-
-            if (ttsListenBtn) {
-                ttsListenBtn.classList.toggle('d-none', !ttsSupported);
-            }
-            if (ttsUnavailableNotice) {
-                ttsUnavailableNotice.classList.toggle('d-none', !!ttsSupported || !translatedText);
-            }
-            if (ttsTextInput) {
-                ttsTextInput.value = translatedText || '';
-            }
-            if (ttsLangInput) {
-                ttsLangInput.value = ttsCode || 'en';
-            }
-            if (audioWrapper) {
-                audioWrapper.classList.add('d-none');
-            }
-            if (audioPlayer) {
-                audioPlayer.src = '';
-            }
-        }
-
 
         function playTTSGeneric(text, lang, audioPlayerId, listenButtonId, customControlsWrapperId, textContainerId = null) {
             console.log(`--- playTTSGeneric CALLED for ${audioPlayerId} ---`);
@@ -1273,17 +1109,16 @@
 
             if (text === null || typeof text === 'undefined' || (typeof text === 'string' && text.trim() === "")) {
                  console.error(`TTS Error (${audioPlayerId}): Text is null, undefined, or empty string.`);
-                  showToast(getBilingualMessage('audioFailed'), 'error');
+                 alert("Cannot play: No valid text provided.");
                  return;
             }
-              if (typeof lang !== 'string' || lang.trim() === "") { console.error(`TTS Error (${audioPlayerId}): Lang invalid.`); showToast(getBilingualMessage('audioFailed'), 'error'); return; }
-              if (!audioPlayer) { console.error(`TTS Error (${audioPlayerId}): Audio player not found.`); showToast(getBilingualMessage('audioFailed'), 'error'); return; }
-              if (!customControlsWrapper) { console.error(`TTS Error (${audioPlayerId}): Controls wrapper not found.`); showToast(getBilingualMessage('audioFailed'), 'error'); return; }
+            if (typeof lang !== 'string' || lang.trim() === "") { console.error(`TTS Error (${audioPlayerId}): Lang invalid.`); alert("Cannot play: No lang."); return; }
+            if (!audioPlayer) { console.error(`TTS Error (${audioPlayerId}): Audio player not found.`); alert("Player error."); return; }
+            if (!customControlsWrapper) { console.error(`TTS Error (${audioPlayerId}): Controls wrapper not found.`); alert("Controls error."); return; }
             
             if(listenButton) {
                 listenButton.disabled = true;
-                const loadingMsg = getBilingualMessage('audioLoading');
-                listenButton.innerHTML = `<span class="spinner-border spinner-border-sm"></span> ${formatBilingualText(loadingMsg.primary, loadingMsg.secondary)}`;
+                listenButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Loading...';
             }
             console.log(`Fetching TTS for ${audioPlayerId}: Text='${text.substring(0,50)}', Lang='${lang}'`);
 
@@ -1306,10 +1141,7 @@
                     setupWordHighlighting(audioPlayer, textContainerId, text);
                 }
                 
-                audioPlayer.play().catch(e => {
-                    console.error(`play() error (${audioPlayerId}):`, e);
-                    showToast(getBilingualMessage('audioFailed'), 'error');
-                });
+                audioPlayer.play().catch(e => {console.error(`play() error (${audioPlayerId}):`, e); alert("Error playing: " + e.message);});
                 audioPlayer.onended = () => {
                     console.log(`Audio ended (${audioPlayerId}), revoking URL.`);
                     URL.revokeObjectURL(audioUrl);
@@ -1323,15 +1155,14 @@
             })
             .catch(error => {
                 console.error(`TTS Error (${audioPlayerId}):`, error);
-                showToast(getBilingualMessage('audioFailed'), 'error');
+                alert(`TTS failed for ${audioPlayerId}: ${error.message}`);
                 customControlsWrapper.classList.add('d-none');
                 if(listenButton) listenButton.classList.remove('d-none');
             })
             .finally(() => {
                 if (listenButton) {
                     listenButton.disabled = false;
-                    const listenText = getBilingualText('results.listen', localStorage.getItem('uiLanguage') || 'en') || 'Listen';
-                    listenButton.innerHTML = `<i class="bi bi-volume-up"></i> ${listenText}`;
+                    listenButton.innerHTML = '<i class="bi bi-volume-up"></i> Listen';
                 }
             });
         }
@@ -1462,68 +1293,32 @@
         document.addEventListener('DOMContentLoaded', function() {
             toggleInputFields();
             const form = document.querySelector('form');
-            if (!form) {
-                return;
-            }
-
-            form.addEventListener('submit', async function(event) {
-                event.preventDefault();
-                const textInputVal = document.getElementById('text_input').value.trim();
-                const fileInput = document.getElementById('file');
-                const fileInputFiles = fileInput ? fileInput.files : [];
-                const inputType = document.getElementById('input_type').value;
-                const targetLanguage = document.getElementById('target_language').value;
-
-                let hasInput = false;
-                if (inputType === 'text' && textInputVal) { hasInput = true; }
-                else if ((inputType === 'image' || inputType === 'audio') && fileInputFiles.length > 0) { hasInput = true; }
-
-                if (!hasInput) {
-                    showToast(getBilingualMessage('missingInput'), 'warning');
-                    return;
-                }
-
-                try {
-                    if (inputType === 'text') {
-                        setInlineLoading(true, getBilingualMessage('translating'));
-                        const response = await fetch('/api/translate/instant', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                text: textInputVal,
-                                source_lang: 'auto',
-                                target_lang: targetLanguage
-                            })
-                        });
-
-                        const data = await response.json();
-                        if (data.success) {
-                            updateResultsSection({
-                                originalText: textInputVal,
-                                translatedText: data.translated_text || '',
-                                sourceLang: data.source_lang || '',
-                                targetLang: data.target_lang || targetLanguage,
-                                ttsSupported: data.tts_supported,
-                                ttsCode: data.tts_code || ''
-                            });
-                            showToast(getBilingualMessage('translationSuccess'), 'success');
-                        } else {
-                            throw new Error(data.error || 'Translation failed');
-                        }
-                    } else {
-                        await instantFileTranslation(fileInputFiles[0], inputType, targetLanguage);
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            if (form && loadingIndicator) {
+                form.addEventListener('submit', function(event) {
+                    const textInputVal = document.getElementById('text_input').value.trim();
+                    const fileInputFiles = document.getElementById('file').files;
+                    const inputType = document.getElementById('input_type').value;
+                    let hasInput = false;
+                    if (inputType === 'text' && textInputVal) { hasInput = true; }
+                    else if ((inputType === 'image' || inputType === 'audio') && fileInputFiles.length > 0) { hasInput = true;}
+                    if (hasInput) { 
+                        loadingIndicator.classList.remove('loading-indicator-hidden'); 
                     }
-                } catch (error) {
-                    console.error('Translation error:', error);
-                    const msg = getBilingualMessage('translationFailed');
-                    msg.secondary = msg.secondary ? `${msg.secondary} (${error.message})` : error.message;
-                    showToast(msg, 'error');
-                } finally {
-                    setInlineLoading(false);
-                }
-            });
+                    else { 
+                        event.preventDefault(); 
+                        alert("Please provide text or upload a file to translate."); 
+                        loadingIndicator.classList.add('loading-indicator-hidden'); 
+                    }
+                });
+            }
         });
     </script>
+
+    <!-- Loading Overlay for Non-Blocking Operations -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
 
     <!-- Toast Notification Container -->
     <div class="toast-container" id="toastContainer"></div>
@@ -1532,7 +1327,8 @@
     <div id="schemes-panel">
         <div class="panel-header">
             <button class="panel-close" onclick="closeSchemesPanel()" aria-label="Close panel">×</button>
-            <h3 class="mb-0"><i class="bi bi-bank2"></i> <span data-i18n="schemes.panelTitle">All Government Schemes</span></h3>
+            <h3 class="mb-0"><i class="bi bi-bank2"></i> All Government Schemes</h3>
+            <p class="mb-0 small">सभी सरकारी योजनाएं</p>
         </div>
         <div class="panel-content" id="all-schemes-container">
             <!-- Dynamic schemes will be loaded here -->
@@ -1561,33 +1357,8 @@
         const DEVICE_ID = getDeviceId();
         console.log('Device ID:', DEVICE_ID);
 
-        // Bilingual View All button text
-        const viewAllTexts = {
-            'en': 'View All 20 Schemes',
-            'hi': 'सभी 20 योजनाएं देखें',
-            'bn': 'সমস্ত 20টি প্রকল্প দেখুন',
-            'ta': 'அனைத்து 20 திட்டங்களையும் காண்க',
-            'te': 'అన్ని 20 పథకాలను చూడండి',
-            'mr': 'सर्व 20 योजना पहा',
-            'gu': 'તમામ 20 યોજનાઓ જુઓ',
-            'kn': 'ಎಲ್ಲಾ 20 ಯೋಜನೆಗಳನ್ನು ವೀಕ್ಷಿಸಿ',
-            'ml': 'എല്ലാ 20 പദ്ധതികളും കാണുക',
-            'pa': 'ਸਾਰੀਆਂ 20 ਯੋਜਨਾਵਾਂ ਦੇਖੋ',
-            'or': 'ସମସ୍ତ 20 ଯୋଜନା ଦେଖନ୍ତୁ'
-        };
-
-        function updateViewAllButton() {
-            const currentLang = localStorage.getItem('uiLanguage') || 'en';
-            const viewAllBtn = document.getElementById('viewAllText');
-            if (viewAllBtn) {
-                const primary = viewAllTexts[currentLang] || viewAllTexts['en'];
-                const secondary = currentLang === 'en' ? null : viewAllTexts['en'];
-                viewAllBtn.innerHTML = formatBilingualText(primary, secondary);
-            }
-        }
-
-        // Bilingual toast messages
-        function getBilingualMessage(key, tokens = {}) {
+        // Translated messages for toast notifications
+        function getTranslatedMessage(key) {
             const currentLang = localStorage.getItem('uiLanguage') || 'en';
             const messages = {
                 'translationSuccess': {
@@ -1629,19 +1400,6 @@
                     'pa': 'ਆਡੀਓ ਚੱਲ ਰਿਹਾ ਹੈ...',
                     'or': 'ଅଡିଓ ଚାଲୁଛି...'
                 },
-                'audioLoading': {
-                    'en': 'Loading audio...',
-                    'hi': 'ऑडियो लोड हो रहा है...',
-                    'bn': 'অডিও লোড হচ্ছে...',
-                    'ta': 'ஒலி ஏற்றப்படுகிறது...',
-                    'te': 'ఆడియో లోడ్ అవుతోంది...',
-                    'mr': 'ऑडिओ लोड होत आहे...',
-                    'gu': 'ઓડિયો લોડ થઈ રહ્યો છે...',
-                    'kn': 'ಆಡಿಯೊ ಲೋಡ್ ಆಗುತ್ತಿದೆ...',
-                    'ml': 'ഓഡിയോ ലോഡ് ചെയ്യുന്നു...',
-                    'pa': 'ਆਡੀਓ ਲੋਡ ਹੋ ਰਿਹਾ ਹੈ...',
-                    'or': 'ଅଡିଓ ଲୋଡ୍ ହେଉଛି...'
-                },
                 'audioFailed': {
                     'en': 'Audio playback failed',
                     'hi': 'ऑडियो प्लेबैक विफल',
@@ -1667,161 +1425,60 @@
                     'ml': 'പദ്ധതികൾ ലോഡ് ചെയ്യുന്നു...',
                     'pa': 'ਯੋਜਨਾਵਾਂ ਲੋਡ ਹੋ ਰਹੀਆਂ ਹਨ...',
                     'or': 'ଯୋଜନା ଲୋଡ୍ ହେଉଛି...'
-                },
-                'missingInput': {
-                    'en': 'Please provide text or upload a file to translate.',
-                    'hi': 'अनुवाद के लिए टेक्स्ट दर्ज करें या फ़ाइल अपलोड करें।',
-                    'bn': 'অনুবাদের জন্য টেক্সট লিখুন বা ফাইল আপলোড করুন।',
-                    'ta': 'மொழிபெயர்க்க உரை உள்ளிடவும் அல்லது கோப்பை பதிவேற்றவும்.',
-                    'te': 'అనువాదానికి టెక్స్ట్ ఇవ్వండి లేదా ఫైల్ అప్లోడ్ చేయండి.',
-                    'mr': 'भाषांतरासाठी मजकूर द्या किंवा फाइल अपलोड करा.',
-                    'gu': 'અનુવાદ માટે ટેક્સ્ટ દાખલ કરો અથવા ફાઇલ અપલોડ કરો.',
-                    'kn': 'ಅನುವಾದಕ್ಕಾಗಿ ಪಠ್ಯ ನಮೂದಿಸಿ ಅಥವಾ ಫೈಲ್ ಅಪ್ಲೋಡ್ ಮಾಡಿ.',
-                    'ml': 'പരിഭാഷയ്ക്കായി ടെക്സ്റ്റ് നൽകുക അല്ലെങ്കിൽ ഫയൽ അപ്‌ലോഡ് ചെയ്യുക.',
-                    'pa': 'ਅਨੁਵਾਦ ਲਈ ਟੈਕਸਟ ਭਰੋ ਜਾਂ ਫਾਈਲ ਅਪਲੋਡ ਕਰੋ.',
-                    'or': 'ଅନୁବାଦ ପାଇଁ ଟେକ୍ସଟ୍ ଦିଅନ୍ତୁ କିମ୍ବା ଫାଇଲ୍ ଅପଲୋଡ୍ କରନ୍ତୁ।'
-                },
-                'translating': {
-                    'en': 'Translating...',
-                    'hi': 'अनुवाद हो रहा है...',
-                    'bn': 'অনুবাদ হচ্ছে...',
-                    'ta': 'மொழிபெயர்க்கப்படுகிறது...',
-                    'te': 'అనువదిస్తోంది...',
-                    'mr': 'भाषांतर होत आहे...',
-                    'gu': 'અનુવાદ થઈ રહ્યો છે...',
-                    'kn': 'ಅನುವಾದವಾಗುತ್ತಿದೆ...',
-                    'ml': 'പരിഭാഷ നടക്കുന്നു...',
-                    'pa': 'ਅਨੁਵਾਦ ਹੋ ਰਿਹਾ ਹੈ...',
-                    'or': 'ଅନୁବାଦ ହେଉଛି...'
-                },
-                'fileTranslating': {
-                    'en': 'Processing file...',
-                    'hi': 'फ़ाइल प्रोसेस हो रही है...',
-                    'bn': 'ফাইল প্রক্রিয়াকরণ হচ্ছে...',
-                    'ta': 'கோப்பு செயலாக்கப்படுகிறது...',
-                    'te': 'ఫైల్ ప్రాసెస్ అవుతోంది...',
-                    'mr': 'फाइल प्रक्रिया चालू आहे...',
-                    'gu': 'ફાઇલ પ્રક્રિયા થઈ રહી છે...',
-                    'kn': 'ಫೈಲ್ ಪ್ರಕ್ರಿಯೆಯಲ್ಲಿದೆ...',
-                    'ml': 'ഫയൽ പ്രോസസിംഗ് നടക്കുന്നു...',
-                    'pa': 'ਫਾਈਲ ਪ੍ਰੋਸੈਸ ਹੋ ਰਹੀ ਹੈ...',
-                    'or': 'ଫାଇଲ୍ ପ୍ରକ୍ରିୟା ହେଉଛି...'
-                },
-                'translatedTo': {
-                    'en': 'Translated to {lang}',
-                    'hi': '{lang} में अनुवादित',
-                    'bn': '{lang} এ অনুবাদিত',
-                    'ta': '{lang} ஆக மொழிபெயர்க்கப்பட்டது',
-                    'te': '{lang} కు అనువదించబడింది',
-                    'mr': '{lang} मध्ये भाषांतरित',
-                    'gu': '{lang} માં અનુવાદિત',
-                    'kn': '{lang} ಗೆ ಅನುವಾದಿಸಲಾಗಿದೆ',
-                    'ml': '{lang} ലേക്ക് വിവർത്തനം ചെയ്തു',
-                    'pa': '{lang} ਵਿੱਚ ਅਨੁਵਾਦ ਕੀਤਾ',
-                    'or': '{lang} କୁ ଅନୁବାଦ କରାଯାଇଛି'
                 }
             };
-            const primaryTemplate = messages[key]?.[currentLang] || messages[key]?.['en'] || '';
-            const secondaryTemplate = currentLang === 'en' ? '' : (messages[key]?.['en'] || '');
-            const applyTokens = (template) => Object.keys(tokens).reduce((acc, tokenKey) => {
-                return acc.replaceAll(`{${tokenKey}}`, tokens[tokenKey]);
-            }, template);
-
-            return {
-                primary: applyTokens(primaryTemplate),
-                secondary: secondaryTemplate ? applyTokens(secondaryTemplate) : ''
-            };
+            
+            return messages[key]?.[currentLang] || messages[key]?.['en'] || 'Success';
         }
         
-        // Modern Toast Notification System with Icons and Auto-dismiss
+        // Toast Notification System
         function showToast(message, type = 'success', duration = 3000) {
             const toastContainer = document.getElementById('toastContainer');
             const toast = document.createElement('div');
             toast.className = `toast-notification toast-${type}`;
-
+            
             const icons = {
-                success: 'bi-check-circle-fill',
-                error: 'bi-x-circle-fill',
-                warning: 'bi-exclamation-triangle-fill',
-                info: 'bi-info-circle-fill'
+                success: '✓',
+                error: '✕',
+                warning: '⚠',
+                info: 'ℹ'
             };
-
-            const iconSpan = document.createElement('span');
-            iconSpan.className = 'toast-icon';
-            const icon = document.createElement('i');
-            icon.className = `bi ${icons[type] || icons.info}`;
-            iconSpan.appendChild(icon);
-
-            const messageWrapper = document.createElement('span');
-            messageWrapper.className = 'toast-message';
-
-            const normalizedMessage = typeof message === 'string'
-                ? { primary: message, secondary: '' }
-                : message;
-
-            const primaryLine = document.createElement('span');
-            primaryLine.className = 'toast-primary';
-            primaryLine.textContent = normalizedMessage.primary || '';
-            messageWrapper.appendChild(primaryLine);
-
-            if (normalizedMessage.secondary) {
-                const secondaryLine = document.createElement('span');
-                secondaryLine.className = 'toast-secondary';
-                secondaryLine.textContent = normalizedMessage.secondary;
-                messageWrapper.appendChild(secondaryLine);
-            }
-
-            toast.appendChild(iconSpan);
-            toast.appendChild(messageWrapper);
+            
+            toast.innerHTML = `
+                <span class="toast-icon">${icons[type] || icons.info}</span>
+                <span class="toast-message">${message}</span>
+            `;
+            
             toastContainer.appendChild(toast);
-
+            
+            // Auto-remove after duration
             setTimeout(() => {
-                toast.style.animation = 'fadeOut 0.35s ease-out';
-                setTimeout(() => toast.remove(), 350);
+                toast.remove();
             }, duration);
         }
 
-        // Sliding Panel Management - FRESH IMPLEMENTATION
+        // Sliding Panel Management
         function openSchemesPanel() {
-            console.log('[openSchemesPanel] Function called');
-            try {
-                const panel = document.getElementById('schemes-panel');
-                const mainContainer = document.getElementById('mainContentContainer');
-                
-                console.log('[openSchemesPanel] Panel element:', panel);
-                console.log('[openSchemesPanel] Container element:', mainContainer);
-                
-                if (!panel) {
-                    throw new Error('schemes-panel element not found!');
-                }
-                if (!mainContainer) {
-                    throw new Error('mainContentContainer element not found!');
-                }
-                
-                console.log('[openSchemesPanel] Adding open classes...');
-                panel.classList.add('open');
+            console.log('✓ openSchemesPanel() called - V2.0');
+            const panel = document.getElementById('schemes-panel');
+            const mainContainer = document.getElementById('mainContentContainer');
+            
+            console.log('Panel element:', panel);
+            console.log('Main container element:', mainContainer);
+            
+            panel.classList.add('open');
+            if (mainContainer) {
                 mainContainer.classList.add('panel-open');
-                console.log('[openSchemesPanel] Classes added successfully');
-                
-                console.log('[openSchemesPanel] Calling loadAllSchemes...');
-                loadAllSchemes();
-                console.log('[openSchemesPanel] Done!');
-            } catch (error) {
-                console.error('[openSchemesPanel] ERROR:', error);
-                const msg = getBilingualMessage('translationFailed');
-                msg.secondary = msg.secondary ? `${msg.secondary} (${error.message})` : error.message;
-                showToast(msg, 'error');
             }
+            
+            // Load all schemes
+            loadAllSchemes();
         }
         
-        // TEST: Verify function exists
-        console.log('✓ openSchemesPanel function defined:', typeof openSchemesPanel);
-        window.openSchemesPanel = openSchemesPanel; // Make it explicitly global
-        console.log('✓ openSchemesPanel added to window object');
-        
         function openSchemesPanelFromCard(schemeId) {
+            console.log('✓ openSchemesPanelFromCard() called with scheme:', schemeId, '- V2.0');
             openSchemesPanel();
-            // Scroll to specific scheme after panel opens
+            // Optionally scroll to that scheme in the panel
             setTimeout(() => {
                 const schemeCard = document.querySelector(`[data-scheme-id="${schemeId}"]`);
                 if (schemeCard) {
@@ -1830,11 +1487,6 @@
                 }
             }, 600);
         }
-        
-        // TEST: Verify function exists
-        console.log('✓ openSchemesPanelFromCard function defined:', typeof openSchemesPanelFromCard);
-        window.openSchemesPanelFromCard = openSchemesPanelFromCard; // Make it explicitly global
-        console.log('✓ openSchemesPanelFromCard added to window object');
 
         function closeSchemesPanel() {
             const panel = document.getElementById('schemes-panel');
@@ -1875,19 +1527,16 @@
             // For now, keep the existing hardcoded 3 schemes as they match the first 3
         }
 
-        // Load All Schemes (up to 20) - Non-blocking with smooth loading
+        // Load All Schemes (up to 20)
         async function loadAllSchemes() {
             const container = document.getElementById('all-schemes-container');
-            const msg = getBilingualMessage('schemesLoading');
-            const loadingText = formatBilingualText(msg.primary, msg.secondary);
-            
-            // Show lightweight, non-blocking loading indicator
+            const msg = getTranslatedMessage('schemesLoading');
             container.innerHTML = `
-                <div class="text-center py-3" style="background: rgba(255,255,255,0.8); border-radius: 10px;">
-                    <div class="spinner-border" style="color: var(--saffron); width: 2rem; height: 2rem;" role="status">
+                <div class="text-center py-3">
+                    <div class="spinner-border spinner-border-sm" style="color: var(--saffron);" role="status">
                         <span class="visually-hidden">Loading...</span>
                     </div>
-                    <p class="mt-3 fw-bold" style="color: var(--saffron); font-size: 0.95rem;">${loadingText}</p>
+                    <p class="mt-2 small">${msg}</p>
                 </div>
             `;
             
@@ -1898,28 +1547,25 @@
                 if (data.success && data.schemes) {
                     await renderAllSchemes(data.schemes);
                 } else {
-                    const errorMsg = getBilingualMessage('translationFailed');
-                    container.innerHTML = `<p class="text-center text-danger">${formatBilingualText(errorMsg.primary, errorMsg.secondary)}</p>`;
+                    container.innerHTML = '<p class="text-center text-danger">Error loading schemes</p>';
                 }
             } catch (error) {
                 console.error('Error loading all schemes:', error);
-                const errorMsg = getBilingualMessage('translationFailed');
-                container.innerHTML = `<p class="text-center text-danger">${formatBilingualText(errorMsg.primary, errorMsg.secondary)}</p>`;
-                showToast(errorMsg, 'error');
+                container.innerHTML = '<p class="text-center text-danger">Error loading schemes</p>';
+                const msg = getTranslatedMessage('translationFailed');
+                showToast(msg, 'error');
             }
         }
 
         async function renderAllSchemes(schemes) {
             const container = document.getElementById('all-schemes-container');
             const currentLang = localStorage.getItem('uiLanguage') || 'en';
-            const loadingMsg = getBilingualMessage('schemesLoading');
-            const loadingText = formatBilingualText(loadingMsg.primary, loadingMsg.secondary);
             
             // Show loading state
             container.innerHTML = `
                 <div class="text-center py-3">
                     <div class="spinner-border spinner-border-sm" style="color: var(--saffron);" role="status"></div>
-                    <p class="mt-2 small">${loadingText}</p>
+                    <p class="mt-2 small">Loading schemes...</p>
                 </div>
             `;
             
@@ -2066,8 +1712,7 @@
                 const cacheKey = `${schemeId}_${targetLang}`;
                 if (translatedSchemes[cacheKey]) {
                     updateSchemeCardText(schemeId, translatedSchemes[cacheKey]);
-                    const msg = getBilingualMessage('translatedTo', { lang: targetLang });
-                    showToast(msg, 'success');
+                    showToast(`Translated to ${targetLang}`, 'success');
                     button.disabled = false;
                     button.innerHTML = originalText;
                     return;
@@ -2091,16 +1736,13 @@
                 if (data.success) {
                     translatedSchemes[cacheKey] = data.translated_text;
                     updateSchemeCardText(schemeId, data.translated_text);
-                    const msg = getBilingualMessage('translatedTo', { lang: targetLang });
-                    showToast(msg, 'success');
+                    showToast(`Translated to ${targetLang}`, 'success');
                 } else {
                     throw new Error(data.error || 'Translation failed');
                 }
             } catch (error) {
                 console.error('Translation error:', error);
-                const msg = getBilingualMessage('translationFailed');
-                msg.secondary = msg.secondary ? `${msg.secondary} (${error.message})` : error.message;
-                showToast(msg, 'error');
+                showToast('Translation failed: ' + error.message, 'error');
             } finally {
                 button.disabled = false;
                 button.innerHTML = originalText;
@@ -2141,7 +1783,7 @@
                     'kn': 'kn',
                     'ml': 'ml',
                     'pa': 'pa',
-                    'or': 'en' // Odia not supported by gTTS, fallback to English
+                    'or': 'en' // Odia not supported, fallback to English
                 };
                 const ttsLang = ttsLangMap[currentLang] || 'en';
                 
@@ -2175,7 +1817,7 @@
                 setupWordHighlightingForScheme(audio, textContainerId, text);
                 
                 audio.play();
-                const msg = getBilingualMessage('playingAudio');
+                const msg = getTranslatedMessage('playingAudio');
                 showToast(msg, 'info', 2000);
                 
                 audio.onended = () => {
@@ -2190,13 +1832,13 @@
                     clearWordHighlighting(textContainerId);
                     button.disabled = false;
                     button.innerHTML = originalText;
-                    const msg = getBilingualMessage('audioFailed');
+                    const msg = getTranslatedMessage('audioFailed');
                     showToast(msg, 'error');
                 };
                 
             } catch (error) {
                 console.error('Audio error:', error);
-                const msg = getBilingualMessage('audioFailed');
+                const msg = getTranslatedMessage('audioFailed');
                 showToast(msg, 'error');
                 button.disabled = false;
                 button.innerHTML = originalText;
@@ -2269,8 +1911,10 @@
 
         // Instant File Translation (Non-blocking)
         async function instantFileTranslation(file, inputType, targetLanguage) {
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.classList.add('active');
+            
             try {
-                setInlineLoading(true, getBilingualMessage('fileTranslating'));
                 const formData = new FormData();
                 formData.append('file', file);
                 formData.append('input_type', inputType);
@@ -2285,43 +1929,41 @@
                 const data = await response.json();
                 
                 if (data.success) {
-                    showToast(getBilingualMessage('translationSuccess'), 'success');
+                    showToast('File translated successfully!', 'success');
+                    
+                    // Display results dynamically (you can enhance this)
                     displayTranslationResult(data);
                 } else {
                     throw new Error(data.error || 'Translation failed');
                 }
             } catch (error) {
                 console.error('File translation error:', error);
-                const msg = getBilingualMessage('translationFailed');
-                msg.secondary = msg.secondary ? `${msg.secondary} (${error.message})` : error.message;
-                showToast(msg, 'error');
+                showToast('File translation failed: ' + error.message, 'error');
             } finally {
-                setInlineLoading(false);
+                loadingOverlay.classList.remove('active');
             }
         }
 
         function displayTranslationResult(data) {
-            updateResultsSection({
-                originalText: data.original_text || '',
-                translatedText: data.translated_text || '',
-                sourceLang: data.source_lang || '',
-                targetLang: data.target_lang || '',
-                ttsSupported: data.tts_supported,
-                ttsCode: data.tts_code || ''
-            });
+            // This would dynamically update the page with results
+            // For simplicity, showing a toast - you can enhance this
+            console.log('Translation result:', data);
         }
 
         // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('✅ DOM fully loaded - V2.0');
+            console.log('✅ onclick handlers should be active now');
+            console.log('Test: Click PM-KISAN, PMFBY, or KCC cards, or the View All button');
+            
             // Load daily schemes
             loadDailySchemes();
             
-            // Restore UI language and update View All button
+            // Restore UI language
             const savedLang = localStorage.getItem('uiLanguage');
             if (savedLang) {
                 changeUILanguage(savedLang);
             }
-            updateViewAllButton();
             
             // Translate history section labels
             translateHistoryLabels();
@@ -2329,138 +1971,7 @@
         
         // Translate history section labels based on UI language
         function translateHistoryLabels() {
-            const currentLang = localStorage.getItem('uiLanguage') || 'en';
-            const historyTranslations = {
-                'activityHeader': {
-                    'en': '🕐 Activity Log',
-                    'hi': '🕐 गतिविधि लॉग',
-                    'bn': '🕐 কার্যকলাপ লগ',
-                    'ta': '🕐 செயல்பாடு பதிவு',
-                    'te': '🕐 కార్యాచరణ లాగ్',
-                    'mr': '🕐 क्रियाकलाप लॉग',
-                    'gu': '🕐 પ્રવૃત્તિ લોગ',
-                    'kn': '🕐 ಚಟುವಟಿಕೆ ದಾಖಲೆ',
-                    'ml': '🕐 പ്രവർത്തന രേഖ',
-                    'pa': '🕐 ਗਤੀਵਿਧੀ ਲਾੱਗ',
-                    'or': '🕐 କାର୍ଯ୍ୟକଳାପ ଲଗ୍'
-                },
-                'success': {
-                    'en': 'Success',
-                    'hi': 'सफल',
-                    'bn': 'সফল',
-                    'ta': 'வெற்றி',
-                    'te': 'విజయం',
-                    'mr': 'यशस्वी',
-                    'gu': 'સફળ',
-                    'kn': 'ಯಶಸ್ಸು',
-                    'ml': 'വിജയം',
-                    'pa': 'ਸਫਲ',
-                    'or': 'ସଫଳ'
-                },
-                'failed': {
-                    'en': 'Failed',
-                    'hi': 'विफल',
-                    'bn': 'ব্যর্থ',
-                    'ta': 'தோல்வி',
-                    'te': 'విఫలమైంది',
-                    'mr': 'अयशस्वी',
-                    'gu': 'નિષ્ફળ',
-                    'kn': 'ವಿಫಲವಾಗಿದೆ',
-                    'ml': 'പരാജയം',
-                    'pa': 'ਅਸਫਲ',
-                    'or': 'ବିଫଳ'
-                },
-                'timestamp': {
-                    'en': 'Timestamp',
-                    'hi': 'समय',
-                    'bn': 'সময়',
-                    'ta': 'நேரம்',
-                    'te': 'సమయం',
-                    'mr': 'वेळ',
-                    'gu': 'સમય',
-                    'kn': 'ಸಮಯ',
-                    'ml': 'സമയം',
-                    'pa': 'ਸਮਾਂ',
-                    'or': 'ସମୟ'
-                },
-                'originalText': {
-                    'en': 'Original Text',
-                    'hi': 'मूल पाठ',
-                    'bn': 'মূল পাঠ',
-                    'ta': 'அசல் உரை',
-                    'te': 'అసలు వచనం',
-                    'mr': 'मूळ मजकूर',
-                    'gu': 'મૂળ લખાણ',
-                    'kn': 'ಮೂಲ ಪಠ್ಯ',
-                    'ml': 'യഥാർത്ഥ വാചകം',
-                    'pa': 'ਅਸਲ ਪਾਠ',
-                    'or': 'ମୂଳ ପାଠ'
-                },
-                'translatedText': {
-                    'en': 'Translated Text',
-                    'hi': 'अनुवादित पाठ',
-                    'bn': 'অনূদিত পাঠ',
-                    'ta': 'மொழிபெயர்க்கப்பட்ட உரை',
-                    'te': 'అనువదించిన వచనం',
-                    'mr': 'भाषांतरित मजकूर',
-                    'gu': 'અનુવાદિત લખાણ',
-                    'kn': 'ಅನುವಾದಿತ ಪಠ್ಯ',
-                    'ml': 'വിവർത്തനം ചെയ്ത വാചകം',
-                    'pa': 'ਅਨુवाद ਕੀਤਾ ਪਾਠ',
-                    'or': 'ଅନୁବାଦିତ ପାଠ'
-                },
-                'listen': {
-                    'en': 'Listen',
-                    'hi': 'सुनें',
-                    'bn': 'শুনুন',
-                    'ta': 'கேள்',
-                    'te': 'వినండి',
-                    'mr': 'ऐका',
-                    'gu': 'સાંભળો',
-                    'kn': 'ಕೇಳಿ',
-                    'ml': 'കേൾക്കുക',
-                    'pa': 'ਸੁਣੋ',
-                    'or': 'ଶୁଣନ୍ତୁ'
-                },
-                'error': {
-                    'en': 'Error',
-                    'hi': 'त्रुटि',
-                    'bn': 'ত্রুটি',
-                    'ta': 'பிழை',
-                    'te': 'లోపం',
-                    'mr': 'त्रुटी',
-                    'gu': 'ભૂલ',
-                    'kn': 'ದೋಷ',
-                    'ml': 'പിശക്',
-                    'pa': 'ਗਲਤੀ',
-                    'or': 'ତ୍ରୁଟି'
-                }
-            };
-
-            // Update activity header if exists
-            const activityHeaders = document.querySelectorAll('[data-i18n="activity.header"]');
-            activityHeaders.forEach(header => {
-                if (historyTranslations.activityHeader[currentLang]) {
-                    const primary = historyTranslations.activityHeader[currentLang];
-                    const secondary = currentLang === 'en' ? null : historyTranslations.activityHeader.en;
-                    header.innerHTML = formatBilingualText(primary, secondary);
-                }
-            });
-
-            // Update badge texts in history
-            document.querySelectorAll('.accordion-button .badge').forEach(badge => {
-                const text = badge.textContent.trim();
-                if (text.includes('Success') || text.includes('सफल')) {
-                    const primary = historyTranslations.success[currentLang] || 'Success';
-                    const secondary = currentLang === 'en' ? null : historyTranslations.success.en;
-                    badge.innerHTML = formatBilingualText(primary, secondary);
-                } else if (text.includes('Failed') || text.includes('विफल')) {
-                    const primary = historyTranslations.failed[currentLang] || 'Failed';
-                    const secondary = currentLang === 'en' ? null : historyTranslations.failed.en;
-                    badge.innerHTML = formatBilingualText(primary, secondary);
-                }
-            });
-        }
+            const currentLang = localStorage.getItem('uiLanguage') || 'en';\n            const historyTranslations = {\n                'activityHeader': {\n                    'en': '🕐 Activity Log',\n                    'hi': '🕐 गतिविधि लॉग | Activity Log',\n                    'bn': '🕐 কার্যকলাপ লগ',\n                    'ta': '🕐 செயல்பாடு பதிவு',\n                    'te': '🕐 కార్యాచరణ లాగ్',\n                    'mr': '🕐 क्रियाकलाप लॉग',\n                    'gu': '🕐 પ્રવૃત્તિ લોગ',\n                    'kn': '🕐 ಚಟುವಟಿಕೆ ದಾಖಲೆ',\n                    'ml': '🕐 പ്രവർത്തന രേഖ',\n                    'pa': '🕐 ਗਤੀਵਿਧੀ ਲਾੱਗ',\n                    'or': '🕐 କାର୍ଯ୍ୟକଳାପ ଲଗ୍'\n                },\n                'success': {\n                    'en': 'Success',\n                    'hi': 'सफल',\n                    'bn': 'সফল',\n                    'ta': 'வெற்றி',\n                    'te': 'విజయం',\n                    'mr': 'यशस्वी',\n                    'gu': 'સફળ',\n                    'kn': 'ಯಶಸ್ಸು',\n                    'ml': 'വിജയം',\n                    'pa': 'ਸਫਲ',\n                    'or': 'ସଫଳ'\n                },\n                'failed': {\n                    'en': 'Failed',\n                    'hi': 'विफल',\n                    'bn': 'ব্যর্থ',\n                    'ta': 'தோல்வி',\n                    'te': 'విఫలమైంది',\n                    'mr': 'अयशस्वी',\n                    'gu': 'નિષ્ફળ',\n                    'kn': 'ವಿಫಲವಾಗಿದೆ',\n                    'ml': 'പരാജയം',\n                    'pa': 'ਅਸਫਲ',\n                    'or': 'ବିଫଳ'\n                },\n                'timestamp': {\n                    'en': 'Timestamp',\n                    'hi': 'समय',\n                    'bn': 'সময়',\n                    'ta': 'நேரம்',\n                    'te': 'సమయం',\n                    'mr': 'वेळ',\n                    'gu': 'સમય',\n                    'kn': 'ಸಮಯ',\n                    'ml': 'സമയം',\n                    'pa': 'ਸਮਾਂ',\n                    'or': 'ସମୟ'\n                },\n                'originalText': {\n                    'en': 'Original Text',\n                    'hi': 'मूल पाठ',\n                    'bn': 'মূল পাঠ',\n                    'ta': 'அசல் உரை',\n                    'te': 'అసలు వచనం',\n                    'mr': 'मूळ मजकूर',\n                    'gu': 'મૂળ લખાણ',\n                    'kn': 'ಮೂಲ ಪಠ್ಯ',\n                    'ml': 'യഥാർത്ഥ വാചകം',\n                    'pa': 'ਅਸਲ ਪਾਠ',\n                    'or': 'ମୂଳ ପାଠ'\n                },\n                'translatedText': {\n                    'en': 'Translated Text',\n                    'hi': 'अनुवादित पाठ',\n                    'bn': 'অনূদিত পাঠ',\n                    'ta': 'மொழிபெயர்க்கப்பட்ட உரை',\n                    'te': 'అనువదించిన వచనం',\n                    'mr': 'भाषांतरित मजकूर',\n                    'gu': 'અનુવાદિત લખાણ',\n                    'kn': 'ಅನುವಾದಿತ ಪಠ್ಯ',\n                    'ml': 'വിവർത്തനം ചെയ്ത വാചകം',\n                    'pa': 'ਅਨੁਵਾਦ ਕੀਤਾ ਪਾਠ',\n                    'or': 'ଅନୁବାଦିତ ପାଠ'\n                },\n                'listen': {\n                    'en': 'Listen',\n                    'hi': 'सुनें',\n                    'bn': 'শুনুন',\n                    'ta': 'கேள்',\n                    'te': 'వినండి',\n                    'mr': 'ऐका',\n                    'gu': 'સાંભળો',\n                    'kn': 'ಕೇಳಿ',\n                    'ml': 'കേൾക്കുക',\n                    'pa': 'ਸੁਣੋ',\n                    'or': 'ଶୁଣନ୍ତୁ'\n                },\n                'error': {\n                    'en': 'Error',\n                    'hi': 'त्रुटि',\n                    'bn': 'ত্রুটি',\n                    'ta': 'பிழை',\n                    'te': 'లోపం',\n                    'mr': 'त्रुटी',\n                    'gu': 'ભૂલ',\n                    'kn': 'ದೋಷ',\n                    'ml': 'പിശക്',\n                    'pa': 'ਗਲਤੀ',\n                    'or': 'ତ୍ରୁଟି'\n                }\n            };\n            \n            // Update activity header if exists\n            const activityHeaders = document.querySelectorAll('[data-i18n=\"activity.header\"]');\n            activityHeaders.forEach(header => {\n                if (historyTranslations.activityHeader[currentLang]) {\n                    header.textContent = historyTranslations.activityHeader[currentLang];\n                }\n            });\n            \n            // Update badge texts in history\n            document.querySelectorAll('.accordion-button .badge').forEach(badge => {\n                const text = badge.textContent.trim();\n                if (text.includes('Success') || text.includes('सफल')) {\n                    badge.textContent = historyTranslations.success[currentLang] || 'Success';\n                } else if (text.includes('Failed') || text.includes('विफल')) {\n                    badge.textContent = historyTranslations.failed[currentLang] || 'Failed';\n                }\n            });\n        }
     </script>
 
 </body>

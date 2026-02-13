@@ -1,99 +1,352 @@
-/* static/style.css */
+/* static/style.css - Indian Farming Scheme Translation Portal */
 
-body {
-    background-color: #f8f9fa; /* Light grey background */
-    padding-top: 56px; /* Adjust if navbar height changes - THIS IS IMPORTANT FOR FIXED NAVBAR */
-    padding-bottom: 3rem; /* Add space before footer */
+/* ========== Indian Color Palette ========== */
+:root {
+    --saffron: #FF9933;
+    --white: #FFFFFF;
+    --green: #138808;
+    --dark-green: #0d6006;
+    --light-saffron: #FFB366;
+    --cream: #FFF8E7;
+    --golden: #FFD700;
+    --earth-brown: #8B4513;
+    --sky-blue: #87CEEB;
+    --wheat-gold: #F5DEB3;
+    --text-dark: #2C3E50;
+    --success-green: #28A745;
 }
 
-/* Customize navbar further if needed */
+body {
+    background: linear-gradient(135deg, var(--cream) 0%, #FFF 50%, var(--wheat-gold) 100%);
+    background-attachment: fixed;
+    padding-top: 76px; /* Increased for larger header */
+    padding-bottom: 3rem;
+    font-family: 'Segoe UI', 'Noto Sans', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text-dark);
+    font-size: 16px; /* Larger base font for readability */
+    line-height: 1.7;
+}
+
+/* ========== Navbar with Indian Tricolor Theme ========== */
+.navbar {
+    background: linear-gradient(90deg, var(--saffron) 0%, var(--saffron) 100%) !important;
+    border-bottom: 4px solid var(--green);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    padding: 1rem 0;
+}
 
 .navbar-brand {
     font-weight: bold;
+    font-size: 1.5rem;
+    color: white !important;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    letter-spacing: 0.5px;
 }
 
-/* Main Form Card Styling */
+.navbar::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--saffron) 0%, var(--white) 50%, var(--green) 100%);
+}
+
+/* ========== Language Switcher Dropdown ========== */
+.navbar .dropdown-toggle {
+    background: white !important;
+    color: var(--green) !important;
+    border: 2px solid var(--golden);
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.navbar .dropdown-toggle:hover {
+    background: var(--wheat-gold) !important;
+    border-color: var(--saffron);
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(255, 153, 51, 0.3);
+}
+
+.navbar .dropdown-menu {
+    border: 2px solid var(--saffron);
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.navbar .dropdown-item {
+    padding: 0.75rem 1.5rem;
+    font-size: 1.05rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.navbar .dropdown-item:hover {
+    background: linear-gradient(90deg, var(--wheat-gold) 0%, var(--cream) 100%);
+    color: var(--green);
+    padding-left: 2rem;
+}
+
+.navbar .dropdown-item:active {
+    background: linear-gradient(90deg, var(--saffron) 0%, var(--light-saffron) 100%);
+    color: white;
+}
+
+
+/* ========== Card and Form Styling with Rural Theme ========== */
+.card {
+    border: 3px solid var(--saffron);
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(255, 153, 51, 0.2);
+    transition: all 0.3s ease-in-out;
+    background: white;
+}
+
 .card.shadow-sm {
-    transition: box-shadow 0.3s ease-in-out;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 }
 
 .card.shadow-sm:hover {
-    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+    transform: translateY(-5px);
+    box-shadow: 0 12px 25px rgba(19, 136, 8, 0.3) !important;
+    border-color: var(--green);
 }
 
-.form-select-lg {
-    font-size: 1.1rem; /* Slightly larger select dropdowns */
+.card-title {
+    color: var(--green);
+    font-size: 2rem;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+}
+
+.form-select-lg, .form-control {
+    font-size: 1.2rem; /* Larger for better readability */
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--light-saffron);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.form-select-lg:focus, .form-control:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 0 0.25rem rgba(19, 136, 8, 0.25);
+    outline: none;
 }
 
 textarea.form-control {
-    resize: vertical; /* Allow vertical resize only */
+    resize: vertical;
+    min-height: 150px;
 }
 
-/* Result Boxes Styling */
+.form-label {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--earth-brown);
+    margin-bottom: 0.5rem;
+}
+
+/* ========== Buttons with Indian Theme ========== */
+.btn-primary {
+    background: linear-gradient(135deg, var(--green) 0%, var(--dark-green) 100%);
+    border: 3px solid var(--saffron);
+    font-size: 1.3rem;
+    font-weight: bold;
+    padding: 1rem 2.5rem;
+    border-radius: 50px;
+    box-shadow: 0 6px 15px rgba(19, 136, 8, 0.3);
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, var(--saffron) 0%, var(--light-saffron) 100%);
+    border-color: var(--green);
+    transform: scale(1.05);
+    box-shadow: 0 8px 20px rgba(255, 153, 51, 0.4);
+}
+
+.btn-primary:active {
+    transform: scale(0.98);
+}
+
+/* ========== Result Boxes with Enhanced Contrast ========== */
 .result-box {
-    background-color: #ffffff; /* White background for readability */
-    border: 1px solid #e9ecef; /* Softer border */
-    border-radius: 0.25rem;
-    padding: 1rem;
-    min-height: 150px; /* Ensure a minimum height */
-    white-space: pre-wrap; /* Preserve whitespace and wrap lines */
-    word-wrap: break-word; /* Break long words */
-    overflow-y: auto; /* Add scroll if content overflows */
-    max-height: 400px; /* Prevent excessively tall boxes */
+    background: linear-gradient(135deg, #FFFFFF 0%, var(--cream) 100%);
+    border: 3px solid var(--golden);
+    border-radius: 12px;
+    padding: 1.5rem;
+    min-height: 180px;
+    font-size: 1.2rem; /* Larger text for better readability */
+    line-height: 1.8;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-y: auto;
+    max-height: 450px;
+    box-shadow: inset 0 2px 8px rgba(0,0,0,0.05);
+    color: var(--text-dark);
+    font-weight: 500;
+}
+
+.result-box::-webkit-scrollbar {
+    width: 10px;
+}
+
+.result-box::-webkit-scrollbar-track {
+    background: var(--cream);
+    border-radius: 10px;
+}
+
+.result-box::-webkit-scrollbar-thumb {
+    background: var(--saffron);
+    border-radius: 10px;
+}
+
+.result-box::-webkit-scrollbar-thumb:hover {
+    background: var(--green);
 }
 
 
-.result-box-small { /* For smaller text boxes in accordion */
-    min-height: 60px;    /* Optional: ensure a minimum space even for short text */
-    max-height: 150px;   /* <<< Crucial: Set a maximum height for the box */
-    overflow-y: auto;  /* <<< Crucial: Add vertical scrollbar if content overflows */
-    font-size: 0.9em;    /* Existing: Match accordion body font size */
-    padding: 0.5rem;     /* Optional: Add some padding inside the scrollable box */
-    border: 1px solid #e9ecef; /* Optional: Add a light border like other result boxes */
-    border-radius: 0.25rem; /* Optional: Rounded corners */
-    background-color: #f8f9fa; /* Optional: Light background for the text area */
-    white-space: pre-wrap; /* Ensures text wraps and newlines are preserved */
-    word-wrap: break-word; /* Breaks long words to prevent horizontal overflow */
+.result-box-small {
+    min-height: 80px;
+    max-height: 170px;
+    overflow-y: auto;
+    font-size: 1.05rem; /* Larger for accessibility */
+    padding: 0.75rem;
+    border: 2px solid var(--light-saffron);
+    border-radius: 8px;
+    background: linear-gradient(135deg, #FFFFFF 0%, var(--wheat-gold) 100%);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
 }
 
-
+/* ========== Card Headers with Cultural Design ========== */
 .card .card-header {
-    font-weight: 500; /* Slightly bolder headers */
+    background: linear-gradient(90deg, var(--saffron) 0%, var(--light-saffron) 100%);
+    color: white;
+    font-weight: 700;
+    font-size: 1.2rem;
+    padding: 1rem 1.5rem;
+    border-bottom: 3px solid var(--green);
+    border-radius: 12px 12px 0 0 !important;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
 }
 
-/* TTS Button and Player (General) */
 .card-footer {
-    border-top: 1px solid #e9ecef;
+    background: linear-gradient(90deg, var(--cream) 0%, var(--wheat-gold) 100%);
+    border-top: 2px solid var(--saffron);
+    padding: 1rem;
 }
 
-/* #ttsAudio { */ /* This ID is too specific, audio players have unique IDs now */
-    /* max-width: 100%; */ /* Ensure audio player fits - better to style the wrapper or audio tag directly */
-/* } */
+/* ========== Activity Log / Accordion with Farming Theme ========== */
+.accordion-item {
+    border: 2px solid var(--light-saffron);
+    margin-bottom: 0.75rem;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+}
 
-/* Activity Log Styling */
-/* .list-group-item {  This was for an older log style, accordion is used now
-    border-color: #e9ecef;
-    Match border colors
-} */
-/* .list-group-item h6 .badge {
-    vertical-align: middle;
-} */
+.accordion-header {
+    background: linear-gradient(90deg, var(--wheat-gold) 0%, var(--cream) 100%);
+}
 
-/* .list-group-item p {
-    font-size: 0.9em;
-    color: #6c757d; 
-} */
-/* Removed empty ruleset for .list-group-item p .badge */
+.accordion-button {
+    background: linear-gradient(90deg, var(--wheat-gold) 0%, var(--cream) 100%);
+    color: var(--text-dark);
+    font-weight: 600;
+    font-size: 1.1rem;
+    padding: 1rem 1.5rem;
+}
 
-/* Accordion body text if needed */
+.accordion-button:not(.collapsed) {
+    background: linear-gradient(90deg, var(--saffron) 0%, var(--light-saffron) 100%);
+    color: white;
+    box-shadow: none;
+}
+
+.accordion-button:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 0 0.25rem rgba(19, 136, 8, 0.25);
+}
+
+.accordion-body {
+    background: white;
+    padding: 1.5rem;
+    font-size: 1.05rem;
+}
+
 .accordion-body .small {
-    font-size: 0.9em; /* Ensure consistent small text */
+    font-size: 1rem;
 }
 
-
-/* Footer Styling */
+/* ========== Footer with Indian Theme ========== */
 footer {
-    border-top: 1px solid #e9ecef;
+    border-top: 4px solid var(--saffron);
+    background: linear-gradient(90deg, var(--green) 0%, var(--dark-green) 100%);
+    color: white;
+    padding: 2rem 0;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+/* ========== Alert Messages with Cultural Colors ========== */
+.alert {
+    border-radius: 10px;
+    border-width: 2px;
+    font-size: 1.1rem;
+    padding: 1rem 1.5rem;
+    font-weight: 500;
+}
+
+.alert-success {
+    background-color: #d4edda;
+    border-color: var(--success-green);
+    color: var(--dark-green);
+}
+
+.alert-warning {
+    background-color: #fff3cd;
+    border-color: var(--saffron);
+    color: var(--earth-brown);
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    border-color: #dc3545;
+    color: #721c24;
+}
+
+/* ========== Page Headings with Farming Theme ========== */
+h1 {
+    color: var(--green);
+    font-size: 2.8rem;
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 1rem;
+}
+
+h2 {
+    color: var(--saffron);
+    font-size: 2.2rem;
+    font-weight: bold;
+}
+
+h3 {
+    color: var(--earth-brown);
+    font-size: 1.8rem;
+    font-weight: 600;
+}
+
+.lead {
+    font-size: 1.4rem;
+    color: var(--text-dark);
+    font-weight: 500;
 }
 
 /* Helper class for slight fade effect on hover (optional) */
@@ -104,138 +357,183 @@ footer {
     opacity: 0.85;
 }
 
-/* Ensure results columns stack properly on small screens */
+/* ========== Responsive Design for Mobile & Tablets ========== */
 @media (max-width: 767.98px) {
+    body {
+        font-size: 15px;
+        padding-top: 70px;
+    }
+    
+    h1 {
+        font-size: 2.2rem;
+    }
+    
+    h2 {
+        font-size: 1.8rem;
+    }
+    
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+    
+    .card-title {
+        font-size: 1.6rem;
+    }
+    
+    .btn-primary {
+        font-size: 1.1rem;
+        padding: 0.8rem 1.8rem;
+    }
+    
+    .form-select-lg, .form-control {
+        font-size: 1.1rem;
+    }
+    
     .result-box {
-        min-height: 120px; /* Slightly smaller min-height on mobile */
+        min-height: 140px;
+        font-size: 1.1rem;
+        padding: 1rem;
     }
+    
     .custom-audio-controls-wrapper {
-        flex-wrap: wrap; /* Allow controls to wrap on very small screens */
-        justify-content: center; /* Center them when wrapped */
+        flex-wrap: wrap;
+        justify-content: center;
     }
+    
     .custom-audio-controls-wrapper audio {
-        min-width: 100%; /* Make audio take full width when wrapped */
+        min-width: 100%;
         margin-left: 0;
         margin-right: 0;
         margin-top: 0.5em;
         margin-bottom: 0.5em;
-        order: 0; /* Ensure audio is visually between buttons or as desired */
+        order: 0;
     }
+    
     .player-skip-btn {
-        margin-bottom: 0.25em; /* Add some space if buttons wrap */
+        margin-bottom: 0.25em;
     }
+    
     .custom-audio-controls-wrapper .dropdown {
-        margin-left: 0; /* Reset margin for wrapped state */
+        margin-left: 0;
     }
 }
 
-/* --- NEW/MODIFIED STYLES FOR CUSTOM AUDIO CONTROLS --- */
+/* ========== Custom Audio Controls with Indian Theme ========== */
 .custom-audio-controls-wrapper {
     display: flex;
     align-items: center;
-    gap: 0.5em; /* Space between elements */
-    margin-top: 0.5rem; /* Space above the control bar */
-    width: 100%; /* Take full available width */
-    flex-wrap: nowrap; /* Default to no wrap */
-    justify-content: center; /* Center the items if they don't fill the width */
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+    width: 100%;
+    flex-wrap: nowrap;
+    justify-content: center;
+    background: var(--cream);
+    padding: 0.75rem;
+    border-radius: 12px;
+    border: 2px solid var(--light-saffron);
 }
 
 .custom-audio-controls-wrapper audio {
-    flex-grow: 1; /* Allows the audio element to take up most of the space */
-    min-width: 120px;
-    max-width: 300px; /* Max width for the audio player itself */
+    flex-grow: 1;
+    min-width: 140px;
+    max-width: 350px;
     margin-left: 0.5em;
     margin-right: 0.5em;
-    background: transparent; /* Try to make native player less obtrusive */
-    /* Attempt to style default controls - very browser dependent */
-    border-radius: 25px; /* For the audio element itself, if visible */
-    /* box-shadow: 0 2px 5px rgba(0,0,0,0.1); */
+    border-radius: 25px;
 }
 
-/* Attempt to style WebKit (Chrome, Safari, Edge) native controls */
+/* WebKit (Chrome, Safari, Edge) native controls styling */
 .custom-audio-controls-wrapper audio::-webkit-media-controls-panel {
-    background-color: #f8f9fa; /* Light background for the panel */
-    border-radius: 20px; /* Rounded corners for the panel */
+    background-color: white;
+    border-radius: 20px;
     padding: 5px;
-    /* box-shadow: inset 0 0 5px rgba(0,0,0,0.05); */
+    border: 1px solid var(--light-saffron);
 }
-/* Removed empty ruleset for WebKit media controls selectors */
-
 
 .player-skip-btn {
-    background-color: #f0f0f0; /* Lighter grey for a softer look */
-    border: 1px solid #d7d7d7; /* Slightly softer border */
-    color: #333;
-    font-size: 1em;
-    width: 42px;    /* Slightly larger for touch */
-    height: 42px;
-    border-radius: 50%; /* Circle */
+    background: linear-gradient(135deg, var(--wheat-gold) 0%, var(--cream) 100%);
+    border: 2px solid var(--saffron);
+    color: var(--text-dark);
+    font-size: 1.1em;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     padding: 0;
     line-height: 1;
-    transition: background-color 0.2s ease, box-shadow 0.2s ease;
+    transition: all 0.3s ease;
     text-decoration: none;
-    /* box-shadow: 0 1px 3px rgba(0,0,0,0.1); */
+    box-shadow: 0 3px 8px rgba(0,0,0,0.15);
 }
 
 .player-skip-btn:hover {
-    background-color: #e0e0e0;
-    /* box-shadow: 0 2px 5px rgba(0,0,0,0.15); */
+    background: linear-gradient(135deg, var(--saffron) 0%, var(--light-saffron) 100%);
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(255, 153, 51, 0.3);
 }
+
 .player-skip-btn:active {
-    background-color: #d0d0d0;
-    /* box-shadow: inset 0 1px 3px rgba(0,0,0,0.2); */
+    background: var(--green);
+    color: white;
+    transform: scale(0.95);
 }
 
-/* For the number + icon combination */
 .player-skip-btn .skip-interval-label-adjacent {
-    font-size: 0.85em; /* Smaller, distinct number */
-    font-weight: 600; /* Semi-bold */
-    margin-right: 2px; /* Tiny space if needed */
-    color: #555;
-}
-.player-skip-btn .bi { /* Bootstrap Icon within the button */
-    font-size: 1.3em; /* Adjust icon size relative to button */
-    vertical-align: middle; /* Helps with alignment */
+    font-size: 0.9em;
+    font-weight: 700;
+    margin-right: 2px;
+    color: var(--earth-brown);
 }
 
-/* Styling for the 3-dot menu button if it uses player-skip-btn class */
+.player-skip-btn .bi {
+    font-size: 1.4em;
+    vertical-align: middle;
+}
+
 .custom-audio-controls-wrapper .dropdown .player-skip-btn .bi-three-dots-vertical {
-     font-size: 1.3em; /* Ensure icon size consistency */
+    font-size: 1.4em;
 }
 
 .custom-audio-controls-wrapper .dropdown-menu {
-    min-width: 120px; /* Ensure dropdown has enough width for items */
-    font-size: 0.9em;
-    box-shadow: 0 0.5rem 1rem rgba(0,0,0,.15); /* Add shadow to dropdown */
-    border-radius: 0.3rem;
+    min-width: 140px;
+    font-size: 1rem;
+    box-shadow: 0 0.5rem 1rem rgba(0,0,0,.2);
+    border-radius: 8px;
+    border: 2px solid var(--saffron);
 }
+
 .custom-audio-controls-wrapper .dropdown-item {
-    padding: 0.35rem 1rem; /* Adjust padding for dropdown items */
+    padding: 0.5rem 1.25rem;
+    font-weight: 500;
 }
+
 .custom-audio-controls-wrapper .dropdown-item:active {
-    background-color: #0d6efd; /* Bootstrap primary for active item */
+    background-color: var(--green);
     color: white;
 }
 
-/* Word-by-word highlighting for TTS */
+.custom-audio-controls-wrapper .dropdown-item:hover {
+    background-color: var(--wheat-gold);
+}
+
+/* ========== TTS Word-by-Word Highlighting ========== */
 .tts-word {
     display: inline;
     transition: all 0.3s ease;
-    padding: 2px 0;
-    border-radius: 3px;
+    padding: 3px 1px;
+    border-radius: 4px;
 }
 
 .tts-word-active {
-    background-color: #ffd700; /* Golden/yellow highlight like Google */
+    background-color: var(--golden);
     color: #000;
-    font-weight: 600;
-    padding: 2px 4px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    animation: highlight-pulse 0.3s ease-in-out;
+    font-weight: 700;
+    padding: 4px 6px;
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.4);
+    animation: highlight-pulse 0.4s ease-in-out;
 }
 
 @keyframes highlight-pulse {
@@ -244,20 +542,59 @@ footer {
         background-color: #ffed4e;
     }
     50% {
-        transform: scale(1.05);
-        background-color: #ffd700;
+        transform: scale(1.08);
+        background-color: var(--golden);
     }
     100% {
         transform: scale(1);
-        background-color: #ffd700;
+        background-color: var(--golden);
     }
 }
 
-/* Additional utility classes */
-.navbar-icon-filter {
-    filter: invert(1) brightness(1.5);
+/* ========== Badge Styling with Indian Colors ========== */
+.badge {
+    font-size: 0.95rem;
+    padding: 0.5rem 0.8rem;
+    border-radius: 8px;
+    font-weight: 600;
 }
 
+.badge.bg-primary {
+    background-color: var(--green) !important;
+}
+
+.badge.bg-secondary {
+    background-color: var(--earth-brown) !important;
+}
+
+.badge.bg-warning {
+    background-color: var(--saffron) !important;
+    color: white !important;
+}
+
+/* ========== Loading Indicator with Cultural Style ========== */
+.spinner-border {
+    border-color: var(--saffron);
+    border-right-color: transparent;
+    width: 3rem;
+    height: 3rem;
+}
+
+.spinner-border.text-primary {
+    border-color: var(--green);
+    border-right-color: transparent;
+}
+
+/* ========== Icon Styling ========== */
+.bi {
+    color: inherit;
+}
+
+.navbar-icon-filter {
+    filter: brightness(0) invert(1);
+}
+
+/* ========== Utility Classes ========== */
 .file-input-hidden {
     display: none;
 }
@@ -267,5 +604,523 @@ footer {
 }
 
 .activity-log-container {
-    max-width: 800px;
+    max-width: 900px;
+}
+
+/* ========== Decorative Elements for Farming Theme ========== */
+.farming-icon {
+    font-size: 2.5rem;
+    color: var(--green);
+    margin: 0 0.5rem;
+}
+
+.cultural-border {
+    border-top: 3px solid;
+    border-image: linear-gradient(90deg, var(--saffron) 0%, var(--white) 50%, var(--green) 100%) 1;
+    margin: 2rem 0;
+}
+
+.scheme-quick-link {
+    background: linear-gradient(135deg, var(--cream) 0%, var(--wheat-gold) 100%);
+    border: 2px solid var(--saffron);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 0.75rem 0;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    text-decoration: none;
+    display: block;
+    color: var(--text-dark);
+}
+
+.scheme-quick-link:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(255, 153, 51, 0.3);
+    border-color: var(--green);
+    background: linear-gradient(135deg, var(--wheat-gold) 0%, var(--cream) 100%);
+}
+
+.scheme-icon {
+    font-size: 2rem;
+    color: var(--green);
+    margin-right: 1rem;
+}
+
+/* ========== Accessibility Enhancements ========== */
+.high-contrast-text {
+    color: var(--text-dark);
+    font-weight: 500;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ========== Focus Indicators for Accessibility ========== */
+button:focus, 
+a:focus, 
+select:focus, 
+input:focus, 
+textarea:focus {
+    outline: 3px solid var(--saffron);
+    outline-offset: 2px;
+}
+
+/* ========== Sliding Panel System ========== */
+.main-container {
+    transition: all 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
+    position: relative;
+    will-change: transform;
+}
+
+.main-container.panel-open {
+    transform: translateX(-420px);
+}
+
+#schemes-panel {
+    position: fixed;
+    top: 76px;
+    right: -500px;
+    width: 480px;
+    height: calc(100vh - 76px);
+    background: linear-gradient(135deg, #FFF8E7 0%, #FFFFFF 50%, #F5DEB3 100%);
+    box-shadow: -4px 0 20px rgba(0,0,0,0.2);
+    transition: right 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
+    z-index: 1000;
+    overflow-y: auto;
+    border-left: 4px solid var(--saffron);
+}
+
+#schemes-panel.open {
+    right: 0;
+}
+
+#schemes-panel .panel-header {
+    position: sticky;
+    top: 0;
+    background: linear-gradient(90deg, var(--saffron) 0%, var(--light-saffron) 100%);
+    color: white;
+    padding: 1.5rem;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+#schemes-panel .panel-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: white;
+    color: var(--saffron);
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+#schemes-panel .panel-close:hover {
+    background: var(--green);
+    color: white;
+    transform: rotate(90deg);
+}
+
+.panel-content {
+    padding: 1.5rem;
+}
+
+.scheme-card-full {
+    background: white;
+    border: 2px solid var(--golden);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
+}
+
+.scheme-card-full:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(255, 153, 51, 0.3);
+    border-color: var(--saffron);
+}
+
+.scheme-card-full .scheme-icon {
+    font-size: 2rem;
+    color: var(--saffron);
+    margin-right: 1rem;
+}
+
+.scheme-card-full .scheme-title {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--green);
+    margin-bottom: 0.5rem;
+}
+
+.scheme-card-full .scheme-summary {
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    line-height: 1.6;
+    margin-bottom: 0.75rem;
+}
+
+.scheme-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.75rem;
+}
+
+.scheme-actions button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.85rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 600;
+}
+
+.btn-audio-scheme-small {
+    background: linear-gradient(135deg, var(--saffron) 0%, var(--light-saffron) 100%);
+    color: white;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.9rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-audio-scheme-small:hover {
+    transform: scale(1.08);
+    box-shadow: 0 4px 12px rgba(255, 153, 51, 0.4);
+}
+
+.btn-audio-scheme-small:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.btn-official-link-small {
+    background: linear-gradient(135deg, #6C757D 0%, #495057 100%);
+    color: white;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.9rem;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-official-link-small:hover {
+    transform: scale(1.08);
+    box-shadow: 0 4px 12px rgba(108, 117, 125, 0.4);
+}
+
+/* Scheme Badge */
+.scheme-badge {
+    display: inline-block;
+    background: var(--golden);
+    color: var(--text-dark);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+}
+
+/* ========== Toast Notification System ========== */
+.toast-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 9999;
+    width: 360px;
+}
+
+.toast-notification {
+    background: linear-gradient(135deg, #FFFFFF 0%, var(--cream) 100%);
+    border: 1px solid rgba(255, 153, 51, 0.35);
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+    margin-bottom: 0.75rem;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    animation: slideInRight 0.35s ease, fadeOut 0.35s ease 2.65s;
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+}
+
+.toast-notification.toast-error {
+    border-color: rgba(220, 53, 69, 0.45);
+}
+
+.toast-notification.toast-warning {
+    border-color: rgba(255, 193, 7, 0.45);
+}
+
+.toast-notification.toast-info {
+    border-color: rgba(23, 162, 184, 0.45);
+}
+
+.toast-notification.toast-success {
+    border-color: rgba(40, 167, 69, 0.45);
+}
+
+.toast-notification .toast-icon {
+    font-size: 1.4rem;
+    line-height: 1;
+    margin-top: 0.1rem;
+}
+
+.toast-notification .toast-message {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    font-size: 0.98rem;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.toast-notification .toast-primary {
+    font-weight: 700;
+}
+
+.toast-notification .toast-secondary {
+    font-weight: 500;
+    font-size: 0.9rem;
+    opacity: 0.85;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+        transform: translateX(400px);
+    }
+}
+
+/* ========== Loading Spinner Overlay ========== */
+.loading-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9998;
+    justify-content: center;
+    align-items: center;
+}
+
+/* ========== Inline Action Spinners ========== */
+.inline-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--earth-brown);
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.inline-action .spinner-border {
+    width: 1rem;
+    height: 1rem;
+    border-width: 0.15rem;
+}
+
+/* ========== Bilingual Text Helpers ========== */
+.bilingual-primary {
+    font-weight: 700;
+}
+
+.bilingual-secondary {
+    font-weight: 600;
+    opacity: 0.85;
+}
+
+.bilingual-sep {
+    margin: 0 0.35rem;
+    opacity: 0.7;
+}
+
+.loading-overlay.active {
+    display: flex;
+}
+
+.loading-spinner {
+    width: 80px;
+    height: 80px;
+    border: 8px solid rgba(255, 255, 255, 0.3);
+    border-top: 8px solid var(--saffron);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* ========== View All Button Styling ========== */
+.btn-view-all {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--saffron) 0%, var(--golden) 100%);
+    color: white;
+    padding: 0.75rem 2rem;
+    border-radius: 30px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(255, 153, 51, 0.3);
+    border: none;
+    cursor: pointer;
+    margin: 1rem auto;
+    display: block;
+    width: fit-content;
+}
+
+.btn-view-all:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(255, 153, 51, 0.5);
+    background: linear-gradient(135deg, var(--golden) 0%, var(--saffron) 100%);
+    color: white;
+}
+
+/* ========== Enhanced Scheme Quick Link Cards ========== */
+.scheme-quick-link {
+    position: relative;
+    overflow: hidden;
+}
+
+.scheme-quick-link::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+    transition: left 0.5s ease;
+}
+
+.scheme-quick-link:hover::before {
+    left: 100%;
+}
+
+/* ========== Pulse Animation for New Features ========== */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(255, 153, 51, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 15px rgba(255, 153, 51, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(255, 153, 51, 0);
+    }
+}
+
+.pulse-animation {
+    animation: pulse 2s infinite;
+}
+
+@keyframes highlightScheme {
+    0%, 100% {
+        background: white;
+    }
+    50% {
+        background: linear-gradient(135deg, #FFF8E7 0%, #FFE4B3 100%);
+        transform: scale(1.02);
+    }
+}
+
+/* ========== Mobile Responsiveness for Sliding Panel ========== */
+@media (max-width: 768px) {
+    #schemes-panel {
+        width: 100%;
+        right: -100%;
+    }
+    
+    #schemes-panel.open {
+        right: 0;
+    }
+    
+    .main-container.panel-open {
+        transform: translateX(-100%);
+    }
+    
+    .toast-container {
+        width: calc(100% - 40px);
+        left: 20px;
+        right: 20px;
+    }
+    
+    .scheme-actions {
+        justify-content: center;
+    }
+}
+
+/* ========== Smooth Scroll Behavior ========== */
+html {
+    scroll-behavior: smooth;
+}
+
+/* ========== Enhanced Scheme Section Title ========== */
+.schemes-section-title {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.schemes-section-title h2 {
+    color: var(--green);
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+.schemes-section-title p {
+    color: var(--text-dark);
+    font-size: 1.1rem;
+    font-style: italic;
+}
+
+/* ========== TTS Word Highlighting for Schemes ========== */
+.scheme-summary .tts-word {
+    display: inline;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.scheme-summary .tts-word-active {
+    background-color: var(--golden);
+    color: var(--text-dark);
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-weight: 600;
 }
