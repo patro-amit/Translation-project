@@ -292,7 +292,7 @@
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="heading{{ loop.index }}">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ loop.index }}" aria-expanded="false" aria-controls="collapse{{ loop.index }}">
-                                <span class="badge {{ 'bg-success' if log_item.translated_text else 'bg-danger' }} me-3">{{ 'सफल | Success' if log_item.translated_text else 'विफल | Failed' }}</span>
+                                <span class="badge {{ 'bg-success' if log_item.translated_text else 'bg-danger' }} me-3" data-i18n-history="badge">{{ 'सफल | Success' if log_item.translated_text else 'विफल | Failed' }}</span>
                                 <span class="fw-normal me-2"><i class="bi bi-{{ 'file-text' if log_item.input_type == 'text' else ('image' if log_item.input_type == 'ocr' else 'mic') }}"></i> {{ log_item.input_type|title }}</span>
                                 <span class="text-primary fw-bold">{{ NLLB_TO_FRIENDLY_NAME.get(log_item.source_language, log_item.source_language)|upper }}</span>
                                 <i class="bi bi-arrow-right-short mx-2" style="font-size: 1.5rem; color: #FF9933;"></i>
@@ -305,21 +305,21 @@
                         <div id="collapse{{ loop.index }}" class="accordion-collapse collapse" aria-labelledby="heading{{ loop.index }}" data-bs-parent="#activityLogAccordion">
                             <div class="accordion-body">
                                 <ul class="list-unstyled mb-3">
-                                    <li style="font-size: 1.05rem;"><strong><i class="bi bi-clock"></i> समय | Timestamp:</strong> {{ log_item.timestamp_ist.strftime('%Y-%m-%d %H:%M:%S %Z') if log_item.timestamp_ist else (log_item.timestamp.strftime('%Y-%m-%d %H:%M:%S UTC') if log_item.timestamp else 'N/A') }}</li>
+                                    <li style="font-size: 1.05rem;"><strong><i class="bi bi-clock"></i> <span data-i18n-history="timestamp">समय | Timestamp</span>:</strong> {{ log_item.timestamp_ist.strftime('%Y-%m-%d %H:%M:%S %Z') if log_item.timestamp_ist else (log_item.timestamp.strftime('%Y-%m-%d %H:%M:%S UTC') if log_item.timestamp else 'N/A') }}</li>
                                 </ul>
                                 <div class="mb-3">
-                                    <strong style="font-size: 1.1rem;"><i class="bi bi-file-earmark-text"></i> मूल पाठ | Original Text:</strong>
+                                    <strong style="font-size: 1.1rem;"><i class="bi bi-file-earmark-text"></i> <span data-i18n-history="originalText">मूल पाठ | Original Text</span>:</strong>
                                     <div class="result-box-small mt-2">{{ log_item.original_text or 'N/A' }}</div>
                                 </div>
                                 <div class="mb-3">
-                                    <strong style="font-size: 1.1rem;"><i class="bi bi-translate"></i> अनुवादित पाठ | Translated Text ({{ NLLB_TO_FRIENDLY_NAME.get(log_item.target_language, log_item.target_language) }}):</strong>
+                                    <strong style="font-size: 1.1rem;"><i class="bi bi-translate"></i> <span data-i18n-history="translatedText">अनुवादित पाठ | Translated Text</span> ({{ NLLB_TO_FRIENDLY_NAME.get(log_item.target_language, log_item.target_language) }}):</strong>
                                     <div class="result-box-small mt-2" id="logTranslationText{{ loop.index }}"><span id="logTranslationTextContent{{ loop.index }}">{{ log_item.translated_text or 'N/A' }}</span></div>
                                     {% set log_nllb_code = log_item.target_language %}
                                     {% set log_tts_code_val = MASTER_TTS_CONFIG.get(log_nllb_code) %}
                                     {% if log_item.translated_text and log_tts_code_val %}
                                         <div class="d-flex flex-column align-items-center mt-3">
                                             <button type="button" class="btn btn-outline-success btn-sm mb-2" id="ttsListenBtnLog{{ loop.index }}" onclick="playTTSLogEntry('{{ loop.index }}')" style="border-radius: 50px; padding: 0.5rem 1.5rem;">
-                                                <i class="bi bi-volume-up"></i> सुनें | Listen
+                                                <i class="bi bi-volume-up"></i> <span data-i18n-history="listen">सुनें | Listen</span>
                                             </button>
                                             <div id="customAudioControlsWrapperLog{{ loop.index }}" class="custom-audio-controls-wrapper d-none">
                                                 <button type="button" class="player-skip-btn" onclick="skipAudio('ttsAudioLog{{ loop.index }}', -window.ttsSkipInterval)" title="Skip Backward">
@@ -353,7 +353,7 @@
                                 </div>
                                 {% if log_item.error_message %}
                                 <div class="mb-2">
-                                    <strong class="text-danger" style="font-size: 1.1rem;"><i class="bi bi-exclamation-triangle"></i> त्रुटि | Error:</strong>
+                                    <strong class="text-danger" style="font-size: 1.1rem;"><i class="bi bi-exclamation-triangle"></i> <span data-i18n-history="error">त्रुटि | Error</span>:</strong>
                                     <div class="bg-danger-subtle border border-danger-subtle text-danger-emphasis rounded p-2 mt-2" style="font-size: 1rem;">{{ log_item.error_message }}</div>
                                 </div>
                                 {% endif %}
@@ -1016,23 +1016,18 @@
         }
 
         function formatBilingualText(primary, secondary) {
-            if (!secondary || secondary === primary) {
-                return primary;
-            }
-            return `<span class="bilingual-primary">${primary}</span>` +
-                `<span class="bilingual-sep">/</span>` +
-                `<span class="bilingual-secondary">${secondary}</span>`;
+            // Only show the primary (selected) language, no redundant English
+            return primary;
         }
 
         function getBilingualText(keyPath, currentLang) {
             const currentTranslations = uiTranslations[currentLang];
-            const englishTranslations = uiTranslations['en'];
             const primary = getTranslationByKey(currentTranslations, keyPath);
-            const secondary = currentLang === 'en' ? null : getTranslationByKey(englishTranslations, keyPath);
             if (!primary) {
                 return null;
             }
-            return formatBilingualText(primary, secondary);
+            // Only return the primary language, no secondary English text
+            return formatBilingualText(primary, null);
         }
 
         // ==================== LANGUAGE SWITCHER FUNCTION ====================
@@ -1528,6 +1523,9 @@
     <!-- Toast Notification Container -->
     <div class="toast-container" id="toastContainer"></div>
 
+    <!-- Panel Backdrop Overlay -->
+    <div id="panel-backdrop" onclick="closeSchemesPanel()"></div>
+
     <!-- Sliding Schemes Panel -->
     <div id="schemes-panel">
         <div class="panel-header">
@@ -1581,8 +1579,8 @@
             const viewAllBtn = document.getElementById('viewAllText');
             if (viewAllBtn) {
                 const primary = viewAllTexts[currentLang] || viewAllTexts['en'];
-                const secondary = currentLang === 'en' ? null : viewAllTexts['en'];
-                viewAllBtn.innerHTML = formatBilingualText(primary, secondary);
+                // Only show the selected language, no bilingual format
+                viewAllBtn.innerHTML = primary;
             }
         }
 
@@ -1722,14 +1720,15 @@
                 }
             };
             const primaryTemplate = messages[key]?.[currentLang] || messages[key]?.['en'] || '';
-            const secondaryTemplate = currentLang === 'en' ? '' : (messages[key]?.['en'] || '');
+            // Don't return secondary text to avoid redundant English
             const applyTokens = (template) => Object.keys(tokens).reduce((acc, tokenKey) => {
                 return acc.replaceAll(`{${tokenKey}}`, tokens[tokenKey]);
             }, template);
 
+            // Only return primary language, no secondary English
             return {
                 primary: applyTokens(primaryTemplate),
-                secondary: secondaryTemplate ? applyTokens(secondaryTemplate) : ''
+                secondary: ''
             };
         }
         
@@ -1787,6 +1786,7 @@
             try {
                 const panel = document.getElementById('schemes-panel');
                 const mainContainer = document.getElementById('mainContentContainer');
+                const backdrop = document.getElementById('panel-backdrop');
                 
                 console.log('[openSchemesPanel] Panel element:', panel);
                 console.log('[openSchemesPanel] Container element:', mainContainer);
@@ -1801,6 +1801,9 @@
                 console.log('[openSchemesPanel] Adding open classes...');
                 panel.classList.add('open');
                 mainContainer.classList.add('panel-open');
+                if (backdrop) {
+                    backdrop.classList.add('show');
+                }
                 console.log('[openSchemesPanel] Classes added successfully');
                 
                 console.log('[openSchemesPanel] Calling loadAllSchemes...');
@@ -1839,10 +1842,14 @@
         function closeSchemesPanel() {
             const panel = document.getElementById('schemes-panel');
             const mainContainer = document.getElementById('mainContentContainer');
+            const backdrop = document.getElementById('panel-backdrop');
             
             panel.classList.remove('open');
             if (mainContainer) {
                 mainContainer.classList.remove('panel-open');
+            }
+            if (backdrop) {
+                backdrop.classList.remove('show');
             }
         }
 
@@ -2442,22 +2449,30 @@
             activityHeaders.forEach(header => {
                 if (historyTranslations.activityHeader[currentLang]) {
                     const primary = historyTranslations.activityHeader[currentLang];
-                    const secondary = currentLang === 'en' ? null : historyTranslations.activityHeader.en;
-                    header.innerHTML = formatBilingualText(primary, secondary);
+                    // Only show the selected language
+                    header.innerHTML = primary;
                 }
             });
 
-            // Update badge texts in history
-            document.querySelectorAll('.accordion-button .badge').forEach(badge => {
-                const text = badge.textContent.trim();
-                if (text.includes('Success') || text.includes('सफल')) {
+            // Update all history labels with data-i18n-history attribute (except badges)
+            document.querySelectorAll('[data-i18n-history]:not(.badge)').forEach(element => {
+                const key = element.getAttribute('data-i18n-history');
+                const translation = historyTranslations[key]?.[currentLang];
+                
+                if (translation) {
+                    element.textContent = translation;
+                }
+            });
+
+            // Update badge texts in history based on CSS class (not text content)
+            document.querySelectorAll('.accordion-button .badge[data-i18n-history="badge"]').forEach(badge => {
+                // Check the CSS class to determine if it's success or failed
+                if (badge.classList.contains('bg-success')) {
                     const primary = historyTranslations.success[currentLang] || 'Success';
-                    const secondary = currentLang === 'en' ? null : historyTranslations.success.en;
-                    badge.innerHTML = formatBilingualText(primary, secondary);
-                } else if (text.includes('Failed') || text.includes('विफल')) {
+                    badge.textContent = primary;
+                } else if (badge.classList.contains('bg-danger')) {
                     const primary = historyTranslations.failed[currentLang] || 'Failed';
-                    const secondary = currentLang === 'en' ? null : historyTranslations.failed.en;
-                    badge.innerHTML = formatBilingualText(primary, secondary);
+                    badge.textContent = primary;
                 }
             });
         }
