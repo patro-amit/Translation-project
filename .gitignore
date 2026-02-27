@@ -1,5 +1,10 @@
 venv310/
 models/facebook/nllb-200-distilled-600M/pytorch_model.bin
+models/facebook/nllb-200-distilled-600M/.locks/
+models/facebook/nllb-200-distilled-600M/models--facebook--nllb-200-distilled-600M/
+models/facebook/nllb-200-distilled-600M/README.md
+models/facebook/nllb-200-distilled-600M/.gitattributes
+.DS_Store
 *.crdownload
 *.dic
 *.db
