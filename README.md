@@ -1,16 +1,4 @@
-# Multilingual Translation Platform - PPT Content
-
-## Title and Academic Details
-
-- **Institution:** SRM Institute of Science & Technology, Deemed to be University u/s 3 of UGC Act, 1956
-- **School/Department:** School of Computing, Department of Networking and Communications
-- **Project Code:** 21CSP401L – Major Project / 21CSP402L + 21CSP403L – Major Project + Internship
-- **Project Title:** Multilingual Translation Platform with Speech, OCR, and Government Scheme Integration
-- **Guide:** Dr. Subha K. J (Assistant Professor, Department of NWC)
-- **Batch ID:** 21
-- **Students:**
-
----
+# Multilingual Translation Platform
 
 ## Abstract
 
