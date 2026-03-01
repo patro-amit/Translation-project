@@ -212,7 +212,12 @@ def index_route():
             flash("Failed to save translation log to database.", "secondary")
 
     recent_logs = TranslationLog.query.order_by(TranslationLog.timestamp.desc()).limit(10).all()
-    # Removed ZoneInfo conversion for logs to keep focus on the primary issue
+    from zoneinfo import ZoneInfo
+    for log in recent_logs:
+        if getattr(log, 'timestamp', None):
+            log.timestamp_ist = log.timestamp.replace(tzinfo=ZoneInfo('UTC')).astimezone(ZoneInfo('Asia/Kolkata'))
+        else:
+            log.timestamp_ist = None
 
     selected_nllb_for_main_result = utils.SUPPORTED_LANGUAGES.get(selected_target_friendly_name)
     if selected_nllb_for_main_result:

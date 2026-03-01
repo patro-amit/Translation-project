@@ -398,19 +398,21 @@
                         aria-labelledby="heading{{ loop.index }}" data-bs-parent="#activityLogAccordion">
                         <div class="accordion-body">
                             <ul class="list-unstyled mb-3">
-                                <li style="font-size: 1.05rem;"><strong><i class="bi bi-clock"></i> समय |
-                                        Timestamp:</strong> {{ log_item.timestamp_ist.strftime('%Y-%m-%d %H:%M:%S %Z')
+                                <li style="font-size: 1.05rem;"><strong><i class="bi bi-clock"></i> <span
+                                            class="history-label-timestamp">समय | Timestamp</span>:
+                                    </strong> {{ log_item.timestamp_ist.strftime('%Y-%m-%d %H:%M:%S IST')
                                     if log_item.timestamp_ist else (log_item.timestamp.strftime('%Y-%m-%d %H:%M:%S UTC')
                                     if log_item.timestamp else 'N/A') }}</li>
                             </ul>
                             <div class="mb-3">
-                                <strong style="font-size: 1.1rem;"><i class="bi bi-file-earmark-text"></i> मूल पाठ |
-                                    Original Text:</strong>
+                                <strong style="font-size: 1.1rem;"><i class="bi bi-file-earmark-text"></i> <span
+                                        class="history-label-original">मूल पाठ | Original Text</span>:</strong>
                                 <div class="result-box-small mt-2">{{ log_item.original_text or 'N/A' }}</div>
                             </div>
                             <div class="mb-3">
-                                <strong style="font-size: 1.1rem;"><i class="bi bi-translate"></i> अनुवादित पाठ |
-                                    Translated Text ({{ NLLB_TO_FRIENDLY_NAME.get(log_item.target_language,
+                                <strong style="font-size: 1.1rem;"><i class="bi bi-translate"></i> <span
+                                        class="history-label-translated">अनुवादित पाठ | Translated Text</span> ({{
+                                    NLLB_TO_FRIENDLY_NAME.get(log_item.target_language,
                                     log_item.target_language) }}):</strong>
                                 <div class="result-box-small mt-2" id="logTranslationText{{ loop.index }}"><span
                                         id="logTranslationTextContent{{ loop.index }}">{{ log_item.translated_text or
@@ -2222,6 +2224,16 @@
                 } else if (text.includes('Failed') || text.includes('विफल')) {
                     badge.textContent = historyTranslations.failed[currentLang] || 'Failed';
                 }
+            });
+
+            document.querySelectorAll('.history-label-timestamp').forEach(el => {
+                if (historyTranslations.timestamp[currentLang]) el.textContent = historyTranslations.timestamp[currentLang];
+            });
+            document.querySelectorAll('.history-label-original').forEach(el => {
+                if (historyTranslations.originalText[currentLang]) el.textContent = historyTranslations.originalText[currentLang];
+            });
+            document.querySelectorAll('.history-label-translated').forEach(el => {
+                if (historyTranslations.translatedText[currentLang]) el.textContent = historyTranslations.translatedText[currentLang];
             });
         }
     </script>

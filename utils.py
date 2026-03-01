@@ -96,7 +96,7 @@ def perform_ocr(image_path, lang_code='en'):
             text = " ".join(str(item) for item in result)
         else:
             text = str(result)
-        logging.debug(f"OCR Raw Text: {text[:100]}...")
+        logging.debug(f"OCR Raw Text: {str(text)[:100]}...")
     except Exception as ocr_err:
         logging.error(f"EasyOCR readtext failed: {ocr_err}")
         text = ""
@@ -179,14 +179,15 @@ def get_translation_pipeline(source_lang_code, target_lang_code):
                 tokenizer = TOKENIZERS[model_name_or_path]
 
                 # Monkey-patch transformers to bypass PyTorch 2.6 CVE block for legacy .bin models
-                import transformers.utils.import_utils
+                import transformers.utils.import_utils  # type: ignore
                 if hasattr(transformers.utils.import_utils, "check_torch_load_is_safe"):
                     transformers.utils.import_utils.check_torch_load_is_safe = lambda: None
 
                 logging.info(f"Loading model: {model_name_or_path}")
                 model = AutoModelForSeq2SeqLM.from_pretrained(
                     model_name_or_path, 
-                    use_safetensors=False
+                    use_safetensors=False,
+                    device_map={"": "cpu"}
                 )
                 logging.info("Model loaded.")
 
@@ -198,7 +199,7 @@ def get_translation_pipeline(source_lang_code, target_lang_code):
                     src_lang=source_lang_code,
                     tgt_lang=target_lang_code,
                     max_length=512,
-                    device=-1 # Force CPU fallback regardless of accelerate logic
+                    # device=-1 # Force CPU fallback regardless of accelerate logic
                 )
                 TRANSLATION_PIPELINES[pipe_key] = translator
                 logging.info(f"Pipeline created and cached for {pipe_key}.")
