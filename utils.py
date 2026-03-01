@@ -162,13 +162,19 @@ def get_translation_pipeline(source_lang_code, target_lang_code):
         for attempt in range(retries):
             try:
                 local_model_dir = os.path.join("models", "facebook", "nllb-200-distilled-600M")
+                
+                # Verify that the directory actually contains the heavy model files
+                # Otherwise, it might just be the Git-tracked JSON config files
+                has_weights = (os.path.exists(os.path.join(local_model_dir, "pytorch_model.bin")) or 
+                               os.path.exists(os.path.join(local_model_dir, "model.safetensors")))
 
-                if os.path.isdir(local_model_dir):
+                if os.path.isdir(local_model_dir) and has_weights:
                     model_name_or_path = local_model_dir
-                    logging.info(f"Found local model directory: {model_name_or_path}")
+                    logging.info(f"Found local model directory with weights: {model_name_or_path}")
                 else:
+                    # Fallback to Hugging Face Hub (this allows cloud deployments to auto-download it)
                     model_name_or_path = "facebook/nllb-200-distilled-600M"
-                    logging.info(f"Local model not found, using Hugging Face model: {model_name_or_path}")
+                    logging.info(f"Local model weights not found, using Hugging Face Hub: {model_name_or_path}")
 
                 if model_name_or_path not in TOKENIZERS:
                      logging.info(f"Loading tokenizer for: {model_name_or_path}")
@@ -215,20 +221,12 @@ def get_translation_pipeline(source_lang_code, target_lang_code):
 def translate_text(text, source_lang_short, target_lang_friendly_name):
     """
     Translates text using NLLB model.
-    Args:
-        text (str): Text to translate.
-        source_lang_short (str): Short language code ('en', 'hi').
-        target_lang_friendly_name (str): Friendly target language name ('Hindi', 'Tamil').
-    Returns:
-        tuple: (translated_text, error_message)
-               translated_text is None if error occurs.
-               error_message is None if successful.
     """
     if not text:
         return None, "No text provided for translation."
 
     if source_lang_short == "auto":
-        detected_lang = detect_language(text)
+        detected_lang = detect_language(text if isinstance(text, str) else text[0])
         source_lang_short = detected_lang if detected_lang != "unknown" else "en"
 
     nllb_source_code = NLLB_SOURCE_LANG_CODES.get(source_lang_short)
@@ -241,7 +239,7 @@ def translate_text(text, source_lang_short, target_lang_friendly_name):
     if not nllb_target_code:
         return None, f"Target language name '{target_lang_friendly_name}' not mapped to NLLB code."
 
-    logging.debug(f"Translation request: {nllb_source_code} -> {nllb_target_code}, Text: '{text[:50]}...'")
+    logging.debug(f"Translation request: {nllb_source_code} -> {nllb_target_code}")
 
     try:
         translator = get_translation_pipeline(nllb_source_code, nllb_target_code)
@@ -249,14 +247,19 @@ def translate_text(text, source_lang_short, target_lang_friendly_name):
             raise Exception(f"Translator pipeline for {nllb_source_code} -> {nllb_target_code} is not available.")
 
         logging.debug("Calling translator pipeline...")
+        # Check if batch
+        is_batch = isinstance(text, list)
+        
         results = translator(text)
-        if not results or not isinstance(results, list) or not results[0].get('translation_text'):
-             logging.warning("Translator pipeline returned empty or invalid results:", results)
+        if not results:
              raise Exception("Translation pipeline returned empty or invalid result format.")
 
-        translated_text = results[0]['translation_text']
-        logging.debug(f"Translation successful: '{translated_text[:100]}...'")
-        return translated_text, None
+        if is_batch:
+            translated_texts = [r['translation_text'] for r in results]
+            return translated_texts, None
+        else:
+            translated_text = results[0]['translation_text']
+            return translated_text, None
 
     except Exception as e:
         logging.error(f"Error during translation ({nllb_source_code} -> {nllb_target_code}): {e}")
