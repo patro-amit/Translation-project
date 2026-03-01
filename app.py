@@ -1,5 +1,6 @@
 # app.py
 from flask import Flask, render_template, request, redirect, url_for, flash, send_file, jsonify
+from flask_cors import CORS
 from werkzeug.utils import secure_filename
 import os
 import utils # Import our helper functions
@@ -19,6 +20,7 @@ ALLOWED_EXTENSIONS_IMG = {'png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'}
 ALLOWED_EXTENSIONS_AUDIO = {'mp3', 'wav', 'ogg', 'flac', 'm4a'}
 
 app = Flask(__name__, instance_path=os.path.abspath(INSTANCE_FOLDER))
+CORS(app) # Enable CORS for all routes so the browser extension can communicate
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY') or secrets.token_hex(32)
@@ -346,6 +348,42 @@ def instant_translate_route():
                 'target_lang': target_friendly_name,
                 'tts_supported': tts_code is not None,
                 'tts_code': tts_code
+            })
+        else:
+            return jsonify({'success': False, 'error': 'Translation returned empty result'}), 500
+            
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/api/translate/batch', methods=['POST'])
+def batch_translate_route():
+    """Batch translation API for extension content scripts"""
+    data = request.get_json()
+    texts = data.get('texts', [])
+    source_lang_short = data.get('source_lang', 'en')
+    target_friendly_name = data.get('target_lang', 'Hindi')
+    
+    if not texts or not isinstance(texts, list):
+        return jsonify({'success': False, 'error': 'No texts array provided'}), 400
+    if len(texts) == 0:
+        return jsonify({'success': True, 'translated_texts': []})
+    
+    try:
+        translation_results, trans_error = utils.translate_text(
+            texts,
+            source_lang_short,
+            target_friendly_name
+        )
+        
+        if trans_error:
+            return jsonify({'success': False, 'error': trans_error}), 500
+        
+        if translation_results is not None:
+            return jsonify({
+                'success': True,
+                'translated_texts': translation_results,
+                'source_lang': source_lang_short,
+                'target_lang': target_friendly_name
             })
         else:
             return jsonify({'success': False, 'error': 'Translation returned empty result'}), 500
