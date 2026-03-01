@@ -9,3 +9,5 @@ models/facebook/nllb-200-distilled-600M/.gitattributes
 *.dic
 *.db
 *.dylib
+fresh_venv/
+venv310_manual/
