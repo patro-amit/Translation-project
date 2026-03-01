@@ -1,531 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>किसान योजना अनुवादक | Farmer Scheme Translator - Indian Language Portal</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <!-- Google Fonts for Indian Languages -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600;700&family=Noto+Sans:wght@400;500;600;700&display=swap"
-        rel="stylesheet">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <!-- Favicons -->
-    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" sizes="any">
-    <link rel="icon" href="{{ url_for('static', filename='bi-chat-dots.svg') }}" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
-    <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
-</head>
-
-<body>
-
-    <!-- Navbar with Indian Tricolor Theme -->
-    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="/">
-                <i class="bi bi-flower3 me-2" style="font-size: 1.8rem;"></i>
-                <span data-i18n="navbar.title">🌾 किसान योजना अनुवादक | Farmer Portal</span>
-                <small
-                    style="color: #00ff00; font-size: 0.7rem; background: rgba(0,255,0,0.1); padding: 2px 6px; border-radius: 3px; margin-left: 8px;">V2.0-CLICKABLE</small>
-            </a>
-            <div class="ms-auto">
-                <div class="dropdown">
-                    <button class="btn btn-light dropdown-toggle" type="button" id="languageSwitcher"
-                        data-bs-toggle="dropdown" aria-expanded="false"
-                        style="border-radius: 50px; padding: 0.5rem 1.2rem; font-weight: 600;">
-                        <i class="bi bi-globe2"></i> <span id="currentLanguageName">English</span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageSwitcher"
-                        style="max-height: 400px; overflow-y: auto;">
-                        <li><a class="dropdown-item" href="#" onclick="changeUILanguage('en'); return false;">🇬🇧
-                                English</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="changeUILanguage('hi'); return false;">🇮🇳 हिंदी
-                                (Hindi)</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="changeUILanguage('bn'); return false;">🇮🇳 বাংলা
-                                (Bengali)</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="changeUILanguage('ta'); return false;">🇮🇳 தமிழ்
-                                (Tamil)</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="changeUILanguage('te'); return false;">🇮🇳
-                                తెలుగు (Telugu)</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="changeUILanguage('mr'); return false;">🇮🇳 मराठी
-                                (Marathi)</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="changeUILanguage('gu'); return false;">🇮🇳
-                                ગુજરાતી (Gujarati)</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="changeUILanguage('kn'); return false;">🇮🇳 ಕನ್ನಡ
-                                (Kannada)</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="changeUILanguage('ml'); return false;">🇮🇳
-                                മലയാളം (Malayalam)</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="changeUILanguage('pa'); return false;">🇮🇳
-                                ਪੰਜਾਬੀ (Punjabi)</a></li>
-                        <li><a class="dropdown-item" href="#" onclick="changeUILanguage('or'); return false;">🇮🇳 ଓଡ଼ିଆ
-                                (Odia)</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container mt-4 mb-5 main-container" id="mainContentContainer">
-
-        <!-- Hero Introduction with Cultural Elements -->
-        <div class="text-center mb-5 py-4">
-            <h1 class="mb-3">
-                <i class="bi bi-translate farming-icon"></i>
-                <span data-i18n="hero.title">सरकारी योजना अनुवादक</span>
-                <i class="bi bi-sunrise farming-icon"></i>
-            </h1>
-            <h2 class="mb-4" style="color: #FF9933; font-size: 1.8rem;" data-i18n="hero.subtitle">Government Farming
-                Scheme Translator</h2>
-            <p class="lead high-contrast-text" style="font-size: 1.3rem; max-width: 900px; margin: 0 auto;">
-                <span data-i18n="hero.description1">किसानों के लिए सरकारी योजनाओं को अपनी भाषा में समझें।</span> <br>
-            </p>
-        </div>
-
-        <!-- Farming Scheme Quick Access Section -->
-        <div class="row mb-5">
-            <div class="col-md-12">
-                <div class="card shadow-sm">
-                    <div class="card-header text-center">
-                        <h3 class="mb-0"><i class="bi bi-bank2"></i> <span data-i18n="schemes.header">लोकप्रिय सरकारी
-                                योजनाएं | Popular Government Schemes</span></h3>
-                    </div>
-                    <div class="card-body p-4">
-                        <div class="row g-3" id="daily-schemes-container">
-                            <!-- Dynamic schemes will be loaded here -->
-                            <div class="col-md-4">
-                                <div class="scheme-quick-link" onclick="openSchemesPanelFromCard('pm-kisan')"
-                                    style="cursor: pointer;">
-                                    <i class="bi bi-cash-coin scheme-icon"></i>
-                                    <strong style="font-size: 1.1rem;">PM-KISAN</strong><br>
-                                    <small class="high-contrast-text"><span data-i18n="schemes.pmkisan">प्रधानमंत्री
-                                            किसान सम्मान निधि<br>₹6000/year direct benefit</span></small>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="scheme-quick-link" onclick="openSchemesPanelFromCard('pmfby')"
-                                    style="cursor: pointer;">
-                                    <i class="bi bi-shield-check scheme-icon"></i>
-                                    <strong style="font-size: 1.1rem;">PMFBY</strong><br>
-                                    <small class="high-contrast-text"><span data-i18n="schemes.pmfby">फसल बीमा
-                                            योजना<br>Crop Insurance Scheme</span></small>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="scheme-quick-link" onclick="openSchemesPanelFromCard('kcc')"
-                                    style="cursor: pointer;">
-                                    <i class="bi bi-credit-card-2-front scheme-icon"></i>
-                                    <strong style="font-size: 1.1rem;">KCC</strong><br>
-                                    <small class="high-contrast-text"><span data-i18n="schemes.kcc">किसान क्रेडिट
-                                            कार्ड<br>Easy Credit for Farmers</span></small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="text-center mt-4">
-                            <button class="btn-view-all pulse-animation" onclick="openSchemesPanel()" type="button">
-                                <i class="bi bi-grid-3x3-gap"></i> <span data-i18n="schemes.viewAll">View All 20 Schemes
-                                    | सभी 20 योजनाएं देखें</span>
-                            </button>
-                        </div>
-                        <div class="text-center mt-3">
-                            <small class="text-muted" style="font-size: 1rem;">
-                                <i class="bi bi-info-circle"></i> <span data-i18n="schemes.info">Select scheme details
-                                    above and translate to your language below</span>
-                            </small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Flash Messages -->
-        <div class="row justify-content-center">
-            <div class="col-md-10 col-lg-8">
-                {% with messages = get_flashed_messages(with_categories=true) %}
-                {% if messages %}
-                {% for category, message in messages %}
-                <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-                {% endfor %}
-                {% endif %}
-                {% endwith %}
-            </div>
-        </div>
-
-        <!-- Main Form Card with Enhanced Design -->
-        <div class="card shadow-sm mb-5">
-            <div class="card-header text-center py-3">
-                <h2 class="mb-0" style="color: white;"><i class="bi bi-gear-fill"></i> <span
-                        data-i18n="form.header">अनुवाद शुरू करें | Start Translation</span></h2>
-            </div>
-            <div class="card-body p-lg-5 p-4" style="background: linear-gradient(135deg, #FFF 0%, #FFF8E7 100%);">
-                <form method="POST" enctype="multipart/form-data">
-                    <div class="row g-4">
-                        <!-- Input Type -->
-                        <div class="col-md-6">
-                            <label for="input_type" class="form-label fw-medium">
-                                <i class="bi bi-input-cursor-text"></i> <span data-i18n="form.inputType">इनपुट प्रकार
-                                    चुनें | Choose Input Type:</span>
-                            </label>
-                            <!-- prettier-ignore-start -->
-                            <select class="form-select form-select-lg" id="input_type" name="input_type"
-                                onchange="toggleInputFields()">
-                                <option value="text" {% if request.form.get('input_type', 'text' )=='text' %}selected{%
-                                    endif %} data-i18n="form.textInput">✍️ Text Input (टेक्स्ट इनपुट)</option>
-                                <option value="image" {% if request.form.get('input_type')=='image' %}selected{% endif
-                                    %} data-i18n="form.imageInput">🖼️ Image Upload - OCR (छवि अपलोड)</option>
-                                <option value="audio" {% if request.form.get('input_type')=='audio' %}selected{% endif
-                                    %} data-i18n="form.audioInput">🎤 Audio Upload - STT (ऑडियो अपलोड)</option>
-                            </select>
-                            <!-- prettier-ignore-end -->
-                        </div>
-
-                        <!-- Target Language -->
-                        <div class="col-md-6">
-                            <label for="target_language" class="form-label fw-medium">
-                                <i class="bi bi-globe2"></i> <span data-i18n="form.targetLanguage">लक्ष्य भाषा चुनें |
-                                    Select Target Language:</span>
-                            </label>
-                            <select class="form-select form-select-lg" id="target_language" name="target_language">
-                                {% for lang_name_key, nllb_code_val in utils_supported_languages.items() %}
-                                <option value="{{ lang_name_key }}" {% if lang_name_key==selected_target_lang
-                                    %}selected{% endif %}>{{ lang_name_key }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-
-                        <!-- Text Input -->
-                        <div class="col-12" id="text_input_div">
-                            <label for="text_input" class="form-label fw-medium">
-                                <i class="bi bi-pencil-square"></i> <span data-i18n="form.enterText">अंग्रेजी या हिंदी
-                                    टेक्स्ट दर्ज करें | Enter English or Hindi Text:</span>
-                            </label>
-                            <textarea class="form-control" id="text_input" name="text_input" rows="6"
-                                data-i18n-placeholder="form.textPlaceholder"
-                                placeholder="Type or paste scheme details, information, or any text here... | यहाँ योजना विवरण, जानकारी या कोई टेक्स्ट टाइप या पेस्ट करें...">{{ request.form['text_input'] if 'text_input' in request.form else original_text }}</textarea>
-                            <small class="text-muted mt-2 d-block" style="font-size: 1rem;">
-                                <i class="bi bi-lightbulb"></i> <span data-i18n="form.tip">Tip: Copy scheme details from
-                                    government websites and paste here for translation</span>
-                            </small>
-                        </div>
-
-                        <!-- File Input -->
-                        <div class="col-12 file-input-hidden" id="file_input_div">
-                            <label for="file" class="form-label fw-medium">
-                                <i class="bi bi-cloud-upload"></i> <span data-i18n="form.uploadFile">फ़ाइल अपलोड करें |
-                                    Upload File:</span>
-                            </label>
-                            <input class="form-control form-control-lg" type="file" id="file" name="file">
-                            <small id="fileHelp" class="form-text text-muted" style="font-size: 1rem;"></small>
-                        </div>
-
-                        <!-- Submit Button -->
-                        <div class="col-12 text-center mt-5">
-                            <button type="submit" class="btn btn-primary btn-lg px-5 py-3">
-                                <i class="bi bi-arrow-repeat"></i> <span data-i18n="form.translateButton">अनुवाद करें |
-                                    Translate Now</span>
-                            </button>
-                        </div>
-                    </div>
-                </form>
-                <!-- Loading Indicator with Cultural Design -->
-                <div id="loadingIndicator" class="text-center mt-4 loading-indicator-hidden">
-                    <div class="spinner-border" role="status"
-                        style="border-color: #FF9933; border-right-color: transparent; width: 4rem; height: 4rem;">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
-                    <p class="text-muted mt-3" style="font-size: 1.2rem; font-weight: 600;">
-                        <i class="bi bi-hourglass-split"></i> <span data-i18n="loading.message">प्रसंस्करण जारी है |
-                            Processing, please wait...</span>
-                    </p>
-                </div>
-            </div>
-        </div>
-
-
-        <!-- Results Section with Enhanced Visibility -->
-        {% if original_text or translation_result or (error and not original_text and not translation_result) %}
-        <div class="mt-5 pt-4">
-            <div class="cultural-border"></div>
-            <h2 class="text-center mb-5">
-                <i class="bi bi-file-earmark-text"></i> <span data-i18n="results.header">अनुवाद परिणाम | Translation
-                    Results</span>
-            </h2>
-            {% if error and not original_text and not translation_result %}
-            <div class="row justify-content-center">
-                <div class="col-md-10 col-lg-8">
-                    <div class="alert alert-danger" style="font-size: 1.1rem;">
-                        <i class="bi bi-exclamation-triangle-fill"></i> {{ error }}
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-
-            <div class="row g-4 justify-content-center">
-                <!-- Original Text Box -->
-                {% if original_text %}
-                <div class="col-lg-6">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-header">
-                            <i class="bi bi-file-text"></i> <strong><span data-i18n="results.originalText">मूल पाठ |
-                                    Original Text</span></strong>
-                            {% if detected_lang %}<span class="badge bg-secondary ms-2">{{ detected_lang|title
-                                }}</span>{% endif %}
-                        </div>
-                        <div class="card-body result-box">
-                            {{ original_text }}
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- Translation Result Box -->
-                {% if translation_result %}
-                <div class="col-lg-6">
-                    <div class="card h-100 shadow-sm">
-                        <div class="card-header">
-                            <i class="bi bi-translate"></i> <strong><span data-i18n="results.translation">अनुवाद |
-                                    Translation</span></strong>
-                            <span class="badge bg-success ms-2">{{ selected_target_lang }}</span>
-                        </div>
-                        <div class="card-body result-box" id="mainTranslationResultBox">
-                            <span id="mainTranslationText">{{ translation_result }}</span>
-                        </div>
-                        <div class="card-footer text-center">
-                            {% if main_result_tts_supported %}
-                            <div class="d-flex flex-column align-items-center">
-                                <button type="button" class="btn btn-success btn-lg mb-3" id="ttsListenBtnMain"
-                                    onclick="playTTSMain()" style="border-radius: 50px; padding: 0.75rem 2rem;">
-                                    <i class="bi bi-volume-up"></i> <span data-i18n="results.listen">सुनें |
-                                        Listen</span>
-                                </button>
-                                <div id="customAudioControlsWrapperMain" class="custom-audio-controls-wrapper d-none">
-                                    <button type="button" class="player-skip-btn"
-                                        onclick="skipAudio('ttsAudioMain', -window.ttsSkipInterval)"
-                                        title="Skip Backward">
-                                        <span class="skip-interval-label-adjacent">5</span><i
-                                            class="bi bi-arrow-counterclockwise"></i>
-                                    </button>
-                                    <audio id="ttsAudioMain" controls></audio>
-                                    <button type="button" class="player-skip-btn"
-                                        onclick="skipAudio('ttsAudioMain', window.ttsSkipInterval)"
-                                        title="Skip Forward">
-                                        <span class="skip-interval-label-adjacent">5</span><i
-                                            class="bi bi-arrow-clockwise"></i>
-                                    </button>
-                                    <div class="dropdown">
-                                        <button class="btn dropdown-toggle player-skip-btn" type="button"
-                                            id="skipIntervalDropdownMain" data-bs-toggle="dropdown"
-                                            aria-expanded="false" title="Skip Interval Settings">
-                                            <i class="bi bi-three-dots-vertical"></i>
-                                        </button>
-                                        <ul class="dropdown-menu dropdown-menu-end"
-                                            aria-labelledby="skipIntervalDropdownMain">
-                                            <li><a class="dropdown-item" href="#"
-                                                    onclick="setSkipInterval(5, 'Main'); return false;">Skip 5s</a></li>
-                                            <li><a class="dropdown-item" href="#"
-                                                    onclick="setSkipInterval(10, 'Main'); return false;">Skip 10s</a>
-                                            </li>
-                                            <li><a class="dropdown-item" href="#"
-                                                    onclick="setSkipInterval(15, 'Main'); return false;">Skip 15s</a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                            <form id="ttsFormDataMain" class="d-none">
-                                <input type="hidden" name="text" id="ttsTextMain" value="{{ translation_result }}">
-                                <input type="hidden" name="lang" id="ttsLangMain" value="{{ main_result_tts_code }}">
-                            </form>
-                            {% else %}
-                            {% if translation_result %}
-                            <small class="text-muted" style="font-size: 1rem;">
-                                <i class="bi bi-speaker-fill"></i> Text-to-speech not available for {{
-                                selected_target_lang }}.
-                            </small>
-                            {% endif %}
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-        {% endif %}
-
-
-        <!-- Recent Translations Activity Log -->
-        <div class="mt-5 pt-5">
-            <div class="cultural-border mb-4"></div>
-            <h3 class="text-center mb-5">
-                <i class="bi bi-clock-history"></i> <span data-i18n="activity.header">गतिविधि लॉग | Activity Log</span>
-            </h3>
-            {% if recent_logs %}
-            <div class="accordion shadow-sm mx-auto activity-log-container" id="activityLogAccordion">
-                {% for log_item in recent_logs %}
-                <div class="accordion-item">
-                    <h2 class="accordion-header" id="heading{{ loop.index }}">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
-                            data-bs-target="#collapse{{ loop.index }}" aria-expanded="false"
-                            aria-controls="collapse{{ loop.index }}">
-                            <span class="badge {{ 'bg-success' if log_item.translated_text else 'bg-danger' }} me-3">{{
-                                'सफल | Success' if log_item.translated_text else 'विफल | Failed' }}</span>
-                            <span class="fw-normal me-2"><i
-                                    class="bi bi-{{ 'file-text' if log_item.input_type == 'text' else ('image' if log_item.input_type == 'ocr' else 'mic') }}"></i>
-                                {{ log_item.input_type|title }}</span>
-                            <span class="text-primary fw-bold">{{ NLLB_TO_FRIENDLY_NAME.get(log_item.source_language,
-                                log_item.source_language)|upper }}</span>
-                            <i class="bi bi-arrow-right-short mx-2" style="font-size: 1.5rem; color: #FF9933;"></i>
-                            <span class="text-success fw-bold">{{ NLLB_TO_FRIENDLY_NAME.get(log_item.target_language,
-                                log_item.target_language) }}</span>
-                            <span class="ms-auto text-muted small" style="font-size: 0.95rem;">
-                                <i class="bi bi-calendar3"></i> {{ log_item.timestamp_ist.strftime('%b %d, %H:%M') if
-                                log_item.timestamp_ist else (log_item.timestamp.strftime('%b %d, %H:%M UTC') if
-                                log_item.timestamp else '') }}
-                            </span>
-                        </button>
-                    </h2>
-                    <div id="collapse{{ loop.index }}" class="accordion-collapse collapse"
-                        aria-labelledby="heading{{ loop.index }}" data-bs-parent="#activityLogAccordion">
-                        <div class="accordion-body">
-                            <ul class="list-unstyled mb-3">
-                                <li style="font-size: 1.05rem;"><strong><i class="bi bi-clock"></i> समय |
-                                        Timestamp:</strong> {{ log_item.timestamp_ist.strftime('%Y-%m-%d %H:%M:%S %Z')
-                                    if log_item.timestamp_ist else (log_item.timestamp.strftime('%Y-%m-%d %H:%M:%S UTC')
-                                    if log_item.timestamp else 'N/A') }}</li>
-                            </ul>
-                            <div class="mb-3">
-                                <strong style="font-size: 1.1rem;"><i class="bi bi-file-earmark-text"></i> मूल पाठ |
-                                    Original Text:</strong>
-                                <div class="result-box-small mt-2">{{ log_item.original_text or 'N/A' }}</div>
-                            </div>
-                            <div class="mb-3">
-                                <strong style="font-size: 1.1rem;"><i class="bi bi-translate"></i> अनुवादित पाठ |
-                                    Translated Text ({{ NLLB_TO_FRIENDLY_NAME.get(log_item.target_language,
-                                    log_item.target_language) }}):</strong>
-                                <div class="result-box-small mt-2" id="logTranslationText{{ loop.index }}"><span
-                                        id="logTranslationTextContent{{ loop.index }}">{{ log_item.translated_text or
-                                        'N/A' }}</span></div>
-                                {% set log_nllb_code = log_item.target_language %}
-                                {% set log_tts_code_val = MASTER_TTS_CONFIG.get(log_nllb_code) %}
-                                {% if log_item.translated_text and log_tts_code_val %}
-                                <div class="d-flex flex-column align-items-center mt-3">
-                                    <button type="button" class="btn btn-outline-success btn-sm mb-2"
-                                        id="ttsListenBtnLog{{ loop.index }}"
-                                        onclick="playTTSLogEntry('{{ loop.index }}')"
-                                        style="border-radius: 50px; padding: 0.5rem 1.5rem;">
-                                        <i class="bi bi-volume-up"></i> सुनें | Listen
-                                    </button>
-                                    <div id="customAudioControlsWrapperLog{{ loop.index }}"
-                                        class="custom-audio-controls-wrapper d-none">
-                                        <button type="button" class="player-skip-btn"
-                                            onclick="skipAudio('ttsAudioLog{{ loop.index }}', -window.ttsSkipInterval)"
-                                            title="Skip Backward">
-                                            <span class="skip-interval-label-adjacent">5</span><i
-                                                class="bi bi-arrow-counterclockwise"></i>
-                                        </button>
-                                        <audio id="ttsAudioLog{{ loop.index }}" controls></audio>
-                                        <button type="button" class="player-skip-btn"
-                                            onclick="skipAudio('ttsAudioLog{{ loop.index }}', window.ttsSkipInterval)"
-                                            title="Skip Forward">
-                                            <span class="skip-interval-label-adjacent">5</span><i
-                                                class="bi bi-arrow-clockwise"></i>
-                                        </button>
-                                        <div class="dropdown">
-                                            <button class="btn dropdown-toggle player-skip-btn" type="button"
-                                                id="skipIntervalDropdownLog{{ loop.index }}" data-bs-toggle="dropdown"
-                                                aria-expanded="false" title="Skip Interval Settings">
-                                                <i class="bi bi-three-dots-vertical"></i>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-end"
-                                                aria-labelledby="skipIntervalDropdownLog{{ loop.index }}">
-                                                <li><a class="dropdown-item" href="#"
-                                                        onclick="setSkipInterval(5, 'Log{{loop.index}}'); return false;">Skip
-                                                        5s</a></li>
-                                                <li><a class="dropdown-item" href="#"
-                                                        onclick="setSkipInterval(10, 'Log{{loop.index}}'); return false;">Skip
-                                                        10s</a></li>
-                                                <li><a class="dropdown-item" href="#"
-                                                        onclick="setSkipInterval(15, 'Log{{loop.index}}'); return false;">Skip
-                                                        15s</a></li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                                <form id="ttsFormDataLog{{ loop.index }}" class="d-none">
-                                    <input type="hidden" id="ttsTextLog{{ loop.index }}"
-                                        value="{{ log_item.translated_text if log_item.translated_text is not none else '' }}">
-                                    <input type="hidden" id="ttsLangLog{{ loop.index }}" value="{{ log_tts_code_val }}">
-                                </form>
-                                {% elif log_item.translated_text %}
-                                <small class="d-block text-muted mt-2 text-center" style="font-size: 0.95rem;">
-                                    <i class="bi bi-speaker-fill"></i> TTS not available for this language.
-                                </small>
-                                {% endif %}
-                            </div>
-                            {% if log_item.error_message %}
-                            <div class="mb-2">
-                                <strong class="text-danger" style="font-size: 1.1rem;"><i
-                                        class="bi bi-exclamation-triangle"></i> त्रुटि | Error:</strong>
-                                <div class="bg-danger-subtle border border-danger-subtle text-danger-emphasis rounded p-2 mt-2"
-                                    style="font-size: 1rem;">{{ log_item.error_message }}</div>
-                            </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            </div>
-            {% else %}
-            <p class="text-center text-muted" style="font-size: 1.2rem; padding: 2rem;">
-                <i class="bi bi-inbox"></i> <span data-i18n="activity.noActivity">अभी तक कोई अनुवाद गतिविधि नहीं | No
-                    recent translation activity logged.</span>
-            </p>
-            {% endif %}
-        </div>
-
-    </div> <!-- /container -->
-
-    <!-- Footer with Indian Cultural Theme -->
-    <footer class="text-center py-4 mt-5">
-        <div class="container">
-            <div class="mb-3">
-                <i class="bi bi-flower1" style="font-size: 2rem; color: white; margin: 0 0.5rem;"></i>
-                <i class="bi bi-flower2" style="font-size: 2rem; color: white; margin: 0 0.5rem;"></i>
-                <i class="bi bi-flower3" style="font-size: 2rem; color: white; margin: 0 0.5rem;"></i>
-            </div>
-            <p class="mb-2" style="font-size: 1.2rem; font-weight: 600;">
-                <span data-i18n="footer.tagline">🌾 सेवा भाव से किसानों के लिए | Serving Farmers with Dedication
-                    🌾</span>
-            </p>
-            <p class="mb-0" style="font-size: 1rem;">
-                <span data-i18n="footer.copyright">© {{ current_year }} किसान योजना अनुवादक | Farmer Scheme Translator
-                    Portal</span>
-            </p>
-            <p class="mb-0 mt-2" style="font-size: 0.95rem; opacity: 0.9;">
-                <i class="bi bi-heart-fill"></i> <span data-i18n="footer.madewith">Made with care for Indian farmers and
-                    communities</span>
-            </p>
-        </div>
-    </footer>
-
-
-    <!-- Bootstrap JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
-        integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
-        crossorigin="anonymous"></script>
-
-    <!-- Custom JS -->
-    <script>
         console.log('🚀 JavaScript V2.0 Loading - Clickable schemes enabled');
         console.log('Timestamp:', new Date().toISOString());
 
@@ -1424,36 +896,6 @@
                 });
             }
         });
-    </script>
-
-    <!-- Loading Overlay for Non-Blocking Operations -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner"></div>
-    </div>
-
-    <!-- Toast Notification Container -->
-    <div class="toast-container" id="toastContainer"></div>
-
-    <!-- Sliding Schemes Panel -->
-    <div id="schemes-panel">
-        <div class="panel-header">
-            <button class="panel-close" onclick="closeSchemesPanel()" aria-label="Close panel">×</button>
-            <h3 class="mb-0"><i class="bi bi-bank2"></i> All Government Schemes</h3>
-            <p class="mb-0 small">सभी सरकारी योजनाएं</p>
-        </div>
-        <div class="panel-content" id="all-schemes-container">
-            <!-- Dynamic schemes will be loaded here -->
-            <div class="text-center py-5">
-                <div class="spinner-border" style="color: var(--saffron);" role="status">
-                    <span class="visually-hidden">Loading...</span>
-                </div>
-                <p class="mt-3">Loading schemes...</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Enhanced JavaScript for NEW Features -->
-    <script>
         // Device ID Management for History Tracking
         function getDeviceId() {
             let deviceId = localStorage.getItem('deviceId');
@@ -1672,13 +1114,29 @@
             const container = document.getElementById('all-schemes-container');
             const currentLang = localStorage.getItem('uiLanguage') || 'en';
 
-            const schemesHTML = schemes.map(scheme => `
+            // Show loading state
+            container.innerHTML = `
+                <div class="text-center py-3">
+                    <div class="spinner-border spinner-border-sm" style="color: var(--saffron);" role="status"></div>
+                    <p class="mt-2 small">Loading schemes...</p>
+                </div>
+            `;
+
+            // Translate schemes if not English
+            let translatedSchemes = [];
+            if (currentLang !== 'en') {
+                translatedSchemes = await translateAllSchemes(schemes, currentLang);
+            } else {
+                translatedSchemes = schemes;
+            }
+
+            const schemesHTML = translatedSchemes.map(scheme => `
                 <div class="scheme-card-full" data-scheme-id="${scheme.id}">
                     <div class="d-flex align-items-start">
                         <i class="bi bi-${scheme.icon} scheme-icon"></i>
                         <div class="flex-grow-1">
-                            <div class="scheme-title" id="scheme-title-${scheme.id}">${scheme.name} - ${scheme.fullName}</div>
-                            <div class="scheme-summary" id="scheme-text-${scheme.id}">${scheme.summary}</div>
+                            <div class="scheme-title">${scheme.name} - ${scheme.displayFullName || scheme.fullName}</div>
+                            <div class="scheme-summary" id="scheme-text-${scheme.id}">${scheme.displaySummary || scheme.summary}</div>
                             <span class="scheme-badge">${scheme.category}</span>
                             
                             <div class="scheme-actions">
@@ -1694,19 +1152,14 @@
                 </div>
             `).join('');
 
-            // Render instantly!
             container.innerHTML = schemesHTML;
-
-            // Trigger async translation if needed
-            if (currentLang !== 'en') {
-                translateAllSchemesAsync(schemes, currentLang);
-            }
         }
 
         // Instant Scheme Translation
+        let translatedSchemes = {}; // Store translated versions
         let allSchemesTranslated = {}; // Cache for all translated schemes
 
-        async function translateAllSchemesAsync(schemes, targetLang) {
+        async function translateAllSchemes(schemes, targetLang) {
             const targetLangMap = {
                 'en': 'Hindi',
                 'hi': 'Hindi',
@@ -1725,44 +1178,26 @@
             // Check cache
             const cacheKey = `all_${targetLanguage}`;
             if (allSchemesTranslated[cacheKey]) {
-                const results = allSchemesTranslated[cacheKey];
-                for (const scheme of results) {
-                    const titleEl = document.getElementById(`scheme-title-${scheme.id}`);
-                    const summaryEl = document.getElementById(`scheme-text-${scheme.id}`);
-                    if (titleEl) titleEl.innerText = scheme.displayFullName;
-                    if (summaryEl) summaryEl.innerText = scheme.displaySummary;
-                }
-                return;
+                return allSchemesTranslated[cacheKey];
             }
 
             const translatedResults = [];
 
             for (const scheme of schemes) {
                 try {
-                    // add a loading spinner
-                    const titleEl = document.getElementById(`scheme-title-${scheme.id}`);
-                    const summaryEl = document.getElementById(`scheme-text-${scheme.id}`);
-
-                    if (titleEl) {
-                        const spinner = document.createElement('span');
-                        spinner.className = 'spinner-border spinner-border-sm ms-2';
-                        spinner.style.width = '0.8rem';
-                        spinner.style.height = '0.8rem';
-                        spinner.id = `spinner-${scheme.id}`;
-                        titleEl.appendChild(spinner);
-                    }
-
-                    const fullNamePromise = fetch('/api/translate/instant', {
+                    // Translate full name and summary
+                    const fullNameResponse = await fetch('/api/translate/instant', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
-                            text: scheme.name + " - " + scheme.fullName,
+                            text: scheme.fullName,
                             source_lang: 'en',
                             target_lang: targetLanguage
                         })
-                    }).then(res => res.json());
+                    });
+                    const fullNameData = await fullNameResponse.json();
 
-                    const summaryPromise = fetch('/api/translate/instant', {
+                    const summaryResponse = await fetch('/api/translate/instant', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -1770,32 +1205,23 @@
                             source_lang: 'en',
                             target_lang: targetLanguage
                         })
-                    }).then(res => res.json());
-
-                    const [fullNameData, summaryData] = await Promise.all([fullNamePromise, summaryPromise]);
-
-                    const displayFullName = fullNameData.success ? fullNameData.translated_text : (scheme.name + " - " + scheme.fullName);
-                    const displaySummary = summaryData.success ? summaryData.translated_text : scheme.summary;
-
-                    if (titleEl) titleEl.innerText = displayFullName;
-                    if (summaryEl) summaryEl.innerText = displaySummary;
+                    });
+                    const summaryData = await summaryResponse.json();
 
                     translatedResults.push({
                         ...scheme,
-                        displayFullName: displayFullName,
-                        displaySummary: displaySummary
+                        displayFullName: fullNameData.success ? fullNameData.translated_text : scheme.fullName,
+                        displaySummary: summaryData.success ? summaryData.translated_text : scheme.summary
                     });
                 } catch (error) {
                     console.error(`Translation error for ${scheme.id}:`, error);
-                    const titleEl = document.getElementById(`scheme-title-${scheme.id}`);
-                    const spinnerEl = document.getElementById(`spinner-${scheme.id}`);
-                    if (spinnerEl) spinnerEl.remove();
                     translatedResults.push(scheme);
                 }
             }
 
             // Cache results
             allSchemesTranslated[cacheKey] = translatedResults;
+            return translatedResults;
         }
 
         async function translateSchemeText(schemeId, event) {
@@ -2224,8 +1650,3 @@
                 }
             });
         }
-    </script>
-
-</body>
-
-</html>
